@@ -50,3 +50,11 @@ ENV/
 
 # Local transcript benchmark workspace
 python-best-practices-workspace/
+
+# Local agent/tool state
+.omo/
+.open-mem/
+
+# open-mem: Auto-generated folder context files.
+# Uncomment to exclude from version control (recommended for large projects):
+# **/AGENTS.md

@@ -153,7 +153,8 @@ improvements.
 - [x] Produce source-guidance qualitative review for user review.
 - [x] Run transcript-based with-skill vs baseline using the `skill-creator`/fallback transcript pattern.
 - [x] Launch or produce transcript benchmark results for user review.
-- [ ] Strengthen non-trigger behavior and benchmark assertions, then rerun affected prompts.
+- [x] Strengthen non-trigger behavior and benchmark assertions.
+- [x] Rerun affected non-trigger prompts successfully with Codex backend.
 - Add ai-project-governance as a later mature-repo eval after the controlled cases establish baseline behavior.
 
 **Iteration loop:** fix based on feedback, rerun, repeat. Iteration 1 results are recorded in
@@ -181,18 +182,34 @@ without obvious over-triggering.
 
 ---
 
-### Phase 4 — Polish & Publish
+### Phase 4 — Polish, Ship & Publish
 
-**Goal:** Ready for local use or hub publishing.
+**Goal:** Ship a user-ready local skill, with optional packaging or hub publishing only after explicit approval.
 
-- Package or publish only after Phase 2 evals and Phase 3 trigger optimization are complete.
-- A local installed Hermes mirror may exist under `~/.hermes/skills/software-development/python-best-practices` for
-  runtime testing; treat `skill/` as the source of truth and sync with `scripts/run_phase2_checks.py --sync-installed`.
-- Optional: package with `package_skill.py` for sharing.
-- Optional: contribute to Hermes skill hub.
+Shipping model:
 
-**Output:** Installed or packaged skill. **Verification:** `hermes skills list | grep python-best-practices` and a
-fresh-session trigger check.
+- `skill/` is the directory-as-boundary runtime payload: everything inside it is eligible to ship; repository-only assets
+  such as `README.md`, `plan.md`, `todos.md`, `research/`, `references/`, `evals/`, `tests/`, `.github/`, and workspace
+  outputs stay in the source checkout.
+- The local installed Hermes mirror at `~/.hermes/skills/software-development/python-best-practices` is a test/runtime
+  mirror, not source of truth. Sync only from `skill/` with `scripts/run_phase2_checks.py --sync-installed`.
+- Packaging/publishing uses an explicit human-authorized side-effect boundary: do not package, publish, contribute to the
+  hub, push tags, or sync to other Hermes profiles from routine validation.
+
+Tasks:
+
+1. Refresh source-vs-mirror drift with `python3 scripts/run_phase2_checks.py --sync-installed` and rerun the check.
+2. Verify source-only CI parity with `python3 scripts/run_phase2_checks.py --skip-installed`.
+3. Verify the installed skill is discoverable (`hermes skills list | grep python-best-practices`) and loads in a fresh
+   session.
+4. Run at least one fresh-session trigger check and one should-not-trigger near miss after Phase 3 description tuning.
+5. Produce a concise user handoff: what the skill does, install/runtime boundary, verification evidence, known limits,
+   and exact next command for the user.
+6. Optional, only after explicit approval: package with `package_skill.py` or contribute to Hermes skill hub.
+
+**Output:** User-ready local skill handoff, or an explicitly approved package/publish artifact.
+**Verification:** Full local gate, source-only gate, installed mirror sync check, fresh-session trigger/near-miss evidence,
+and confirmation that repository-only files are absent from the runtime payload.
 
 ---
 
@@ -211,6 +228,7 @@ fresh-session trigger check.
 | 9   | Google-style docstrings as default, not mandate               | Useful general default; NumPy/Sphinx styles remain valid in some projects                                                        | Google Python Style Guide, ecosystem caveats in strategy report |
 | 10  | ai-project-governance as later mature dogfood                 | High-signal stress test but too complex for the first eval                                                                       | Strategy recommendation from 2026-06-03 session                 |
 | 11  | `.gitignore` guidance uses maintained templates as checklists | GitHub and gitignore.org/Toptal templates are useful baselines, but repo-specific ignores and lockfile policy must be preserved. | `research/python-gitignore-templates.md`                        |
+| 12  | `skill/` is the user-shipping boundary                        | Industry packaging research favors simple directory/manifest boundaries over sprawling allowlist plus exclusion policy.           | `/home/sand/projects/ai-project-governance/research/packaging-strategies.md` |
 
 ## Deferred Decisions
 

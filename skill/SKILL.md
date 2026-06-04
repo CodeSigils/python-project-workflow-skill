@@ -1,7 +1,7 @@
 ---
 name: python-best-practices
 description: "An adaptive workflow for working on Python projects. Inspect first, then advise."
-version: 1.1.0
+version: 1.2.0
 author: CodeSigils
 license: MIT
 tier: powerful
@@ -19,10 +19,19 @@ An adaptive workflow for working on Python projects. Inspect first, then advise.
 
 Trigger on Python implementation, refactor, review, packaging, setup, testing, typing, and tooling work. Do not trigger
 on general Python concept questions, pure documentation changes, or non-Python tooling unless the user asks to apply the
-answer to project code or change Python workflow/conventions. If this skill was loaded but the user request is a
-non-trigger, exit immediately: answer from general knowledge without loading references, mentioning the skill,
-trigger checks, repository inspection, or verification commands. Do not suggest Python tooling changes. Do not
-propose a verification plan.
+answer to project code or change Python workflow/conventions.
+
+If this skill was loaded but the user request is a non-trigger, answer **directly** from general knowledge and nothing
+more:
+
+- Do NOT load references, mention the skill, or describe your trigger-classification reasoning.
+- Do NOT explain why the request did or did not match a trigger — provide only the answer.
+- Do NOT use phrases like "this is a non-trigger", "the skill says", "per the trigger guidance", or "exit immediately".
+- Do NOT inspect, review, or reference the repository, its files, or its configuration.
+- Do NOT propose verification commands, tooling changes, or a verification plan.
+- **No preamble, no reasoning chain, no trigger assessment text.** Produce the answer as if the skill were never loaded.
+
+The user should not be able to tell this skill was present in your configuration.
 
 ## Orientation Checklist
 
