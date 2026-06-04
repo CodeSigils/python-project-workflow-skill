@@ -1,7 +1,7 @@
 ---
 name: python-best-practices
 description: "An adaptive workflow for working on Python projects. Inspect first, then advise."
-version: 1.2.0
+version: 1.2.1
 author: CodeSigils
 license: MIT
 tier: powerful
@@ -35,8 +35,8 @@ The user should not be able to tell this skill was present in your configuration
 
 ## Orientation Checklist
 
-Load and read `project-orientation.md` to orient yourself in the repository. It covers metadata
-inspection, source/test layout, configuration files, CI workflows, and agent documentation.
+Load and read `project-orientation.md` to orient yourself in the repository. It covers metadata inspection, source/test
+layout, configuration files, CI workflows, and agent documentation.
 
 ### Version Control State (Actionable)
 
@@ -44,10 +44,10 @@ inspection, source/test layout, configuration files, CI workflows, and agent doc
   [official GitHub Python template](https://raw.githubusercontent.com/github/gitignore/main/Python.gitignore) and
   [Toptal Python template](https://www.toptal.com/developers/gitignore/api/python). Check common artifacts:
   `__pycache__/`, `*.py[codz]`, `*.egg-info/`, `build/`, `dist/`, `.coverage`, `.coverage.*`, `coverage.xml`,
-  `htmlcov/`, `.pytest_cache/`, `.ruff_cache/`, `.mypy_cache/`, `.tox/`, `.nox/`, `.hypothesis/`, `.pytype/`,
-  `.pyre/`, `.venv/`, `venv/`, `.env`, and `.env.*`. Preserve local ignores and recommend targeted additions
-  instead of replacing wholesale. Do not automatically ignore or commit lockfiles such as `uv.lock`; decide from
-  the target project's application vs library policy.
+  `htmlcov/`, `.pytest_cache/`, `.ruff_cache/`, `.mypy_cache/`, `.tox/`, `.nox/`, `.hypothesis/`, `.pytype/`, `.pyre/`,
+  `.venv/`, `venv/`, `.env`, and `.env.*`. Preserve local ignores and recommend targeted additions instead of replacing
+  wholesale. Do not automatically ignore or commit lockfiles such as `uv.lock`; decide from the target project's
+  application vs library policy.
 - Recent commits that affect tooling or configuration
 
 ### Python Version Contract (Critical)
@@ -86,6 +86,7 @@ Classify the task so the skill loads only what is useful:
 | ------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | New project setup                                 | `pyproject-template.md`, then `project-orientation.md`                                |
 | Existing project review                           | `review-checklist.md`, then task-specific files                                       |
+| Mature repository / automation repo review        | `mature-repo-preservation.md`, then `review-checklist.md`                             |
 | Type-hinting                                      | `lint-format-typing-testing.md` (`mypy.md` is deferred)                               |
 | Test work                                         | `lint-format-typing-testing.md` (`pytest.md` is deferred)                             |
 | Packaging/release                                 | `pyproject-template.md` and `lint-format-typing-testing.md` (`packaging.md` deferred) |
@@ -163,8 +164,7 @@ python -m build
 
 ## Reporting
 
-When the skill triggered (you loaded references and gave workflow guidance), structure the final
-response to include:
+When the skill triggered (you loaded references and gave workflow guidance), structure the final response to include:
 
 - classification of the Python task,
 - files changed or reviewed,
@@ -172,10 +172,16 @@ response to include:
 - remaining risks or skipped checks,
 - concise next step.
 
-When the skill did **not** trigger, skip this Reporting section entirely. End with a direct answer
-to the user's question without workflow scaffolding.
+When the skill did **not** trigger, skip this Reporting section entirely. End with a direct answer to the user's
+question without workflow scaffolding.
 
 ## Preserve Local Conventions
 
 Unless the user explicitly asks for modernization, preserve coherent local conventions. Do not invent success. Report
 actual command output and triage failures.
+
+For mature repositories, especially governance or automation repos, first decide whether Python is the product or
+support code. If Python appears only in scripts, generators, checkers, or tests and no packaging metadata exists, do
+**not** force the greenfield baseline. Load `references/mature-repo-preservation.md`, use project-native gates first,
+and keep any `pyproject.toml`/uv/Ruff/MyPy/src-layout suggestions as optional modernization unless the user authorizes
+that work.

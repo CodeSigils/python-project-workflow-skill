@@ -22,7 +22,7 @@ recommending change.
 | Active phase              | Phase 2 — Test & Iterate                                                                     |
 | Runtime skill source      | `skill/`                                                                                     |
 | Installed mirror          | `/home/sand/.hermes/skills/software-development/python-best-practices`                       |
-| Runtime skill version     | `1.2.0` in `skill/SKILL.md`                                                                  |
+| Runtime skill version     | `1.2.1` in `skill/SKILL.md`                                                                  |
 | Latest local gate         | `python3 scripts/run_phase2_checks.py` passes for source plus installed mirror               |
 | Latest benchmark evidence | `python-best-practices-workspace/codex-nontrigger-20260604-r2/benchmark.json`                |
 | Latest dogfood evidence   | `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`                              |
@@ -50,6 +50,7 @@ Runtime files:
 - `skill/references/pyproject-template.md`
 - `skill/references/lint-format-typing-testing.md`
 - `skill/references/review-checklist.md`
+- `skill/references/mature-repo-preservation.md`
 
 Repository-only files such as `README.md`, `plan.md`, `todos.md`, `research/`, `references/`, `evals/`, `tests/`,
 `.github/`, and `python-best-practices-workspace/` are development, evaluation, or evidence assets. Do not describe them
@@ -177,5 +178,6 @@ python-best-practices-skill/
         ├── project-orientation.md
         ├── pyproject-template.md
         ├── lint-format-typing-testing.md
-        └── review-checklist.md
+        ├── review-checklist.md
+        └── mature-repo-preservation.md
 ```

@@ -32,5 +32,6 @@ The best ecosystems do not try to encode every best practice in one giant prompt
 That maps well to a Hermes skill: keep `SKILL.md` concise as a router and operating contract, then link to focused
 reference files for project orientation, pyproject templates, lint/format/type/test workflows, and review checklists.
 
-The mature-repo dogfood strategy is to use `/home/sand/projects/ai-project-governance` later, after controlled evals, as
-a preservation-first review target rather than as the first test case.
+The mature-repo dogfood strategy used `/home/sand/projects/ai-project-governance` after controlled evals as a
+preservation-first review target rather than as the first test case. The report is recorded in
+`evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`.
