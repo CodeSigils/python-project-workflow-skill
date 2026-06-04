@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "description": "Phase 2 controlled prompts for python-best-practices skill evaluation.",
+  "evals": [
+    {
+      "name": "greenfield-setup",
+      "fixture": "evals/fixtures/greenfield-empty",
+      "prompt": "I'm starting a new Python CLI project. Set me up with the right structure, config, and tooling.",
+      "should_trigger": true,
+      "expected_references": [
+        "pyproject-template.md",
+        "project-orientation.md"
+      ],
+      "must_include": [
+        "inspect",
+        "uv",
+        "ruff",
+        "mypy",
+        "pytest",
+        "pyproject.toml",
+        "src/",
+        "verification"
+      ],
+      "must_not_include": [
+        "overwrite existing",
+        "force migrate"
+      ]
+    },
+    {
+      "name": "existing-file-review",
+      "fixture": "evals/fixtures/existing-buggy",
+      "prompt": "Review bad_code.py and tell me what's wrong with it.",
+      "should_trigger": true,
+      "expected_references": [
+        "review-checklist.md"
+      ],
+      "must_include": [
+        "mutable default",
+        "division",
+        "resource",
+        "wildcard",
+        "verification"
+      ],
+      "must_not_include": [
+        "rewrite the whole project",
+        "switch to uv without asking"
+      ]
+    },
+    {
+      "name": "incremental-typing-testing",
+      "fixture": "evals/fixtures/existing-buggy",
+      "prompt": "I need to add type hints and expand the existing test suite for bad_code.py. Walk me through it.",
+      "should_trigger": true,
+      "expected_references": [
+        "lint-format-typing-testing.md"
+      ],
+      "must_include": [
+        "inspect",
+        "incremental",
+        "pytest",
+        "mypy",
+        "type hints",
+        "tests",
+        "existing tests"
+      ],
+      "must_not_include": [
+        "strict mypy all at once",
+        "unverified"
+      ]
+    },
+    {
+      "name": "existing-project-preservation",
+      "fixture": "evals/fixtures/existing-preserve",
+      "prompt": "Review this existing Python project and provide advice that respects its current tooling and conventions.",
+      "should_trigger": true,
+      "expected_references": [
+        "project-orientation.md",
+        "review-checklist.md"
+      ],
+      "must_include": [
+        "pyproject.toml",
+        "setup.cfg",
+        "preserve",
+        "black",
+        "flake8",
+        "pytest"
+      ],
+      "must_not_include": [
+        "replace flake8",
+        "force src layout",
+        "force uv"
+      ]
+    },
+    {
+      "name": "non-python-doc-only",
+      "fixture": "evals/fixtures/existing-preserve",
+      "prompt": "Update the README with installation instructions.",
+      "should_trigger": false,
+      "expected_references": [],
+      "must_include": [],
+      "must_not_include": [
+        "python-best-practices",
+        "ruff",
+        "mypy"
+      ]
+    },
+    {
+      "name": "generic-python-question",
+      "fixture": "evals/fixtures/greenfield-empty",
+      "prompt": "What's the difference between lists and tuples in Python?",
+      "should_trigger": false,
+      "expected_references": [],
+      "must_include": [],
+      "must_not_include": [
+        "inspect repository",
+        "verification commands"
+      ]
+    }
+  ]
+}
