@@ -5,7 +5,7 @@ references:
 
 - `research/` captures evidence, comparisons, snapshots, and design rationale.
 - `references/` holds distilled planning guidance and source indexes.
-- `skill/` holds the runtime Hermes skill draft and focused runtime references.
+- `skill/` holds the canonical runtime Hermes skill payload and focused runtime references.
 
 ## Files
 

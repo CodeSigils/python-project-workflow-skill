@@ -16,7 +16,7 @@ name = "your-package"
 version = "0.1.0"
 description = "A short description of your package."
 readme = "README.md"
-requires-python = ">=3.10"  # or >=3.11 for applications, >=3.9 for broad library support
+requires-python = ">=3.10"  # or >=3.12 for controlled applications; preserve ecosystem floors
 authors = [
     {name = "Your Name", email = "you@example.com"}
 ]

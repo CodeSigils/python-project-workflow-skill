@@ -49,8 +49,8 @@
 
 - [ ] Generate trigger eval set (20 queries, mix of should-trigger and should-not-trigger)
 - [ ] Include near misses so the skill does not over-trigger on generic Python or non-Python work
-- [ ] Run description optimizer
-- [ ] Apply best description to frontmatter
+- [ ] Select or implement the description-optimization workflow/tooling for this repo
+- [ ] Run the chosen optimization workflow and apply the selected description to frontmatter
 
 ## Phase 4 — Polish, Ship & Publish
 

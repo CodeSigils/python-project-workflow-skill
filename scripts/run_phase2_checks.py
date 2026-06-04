@@ -95,6 +95,11 @@ def read_json_checked(path: Path) -> dict[str, Any]:
     return data
 
 
+def contains_markdown_phrase(text: str, phrase: str) -> bool:
+    """Return whether phrase appears, allowing Markdown formatter line wrapping."""
+    return " ".join(phrase.split()) in " ".join(text.split())
+
+
 def check_skill() -> None:
     text = read_text_checked(SKILL)
     if not text.startswith("---\n"):
@@ -197,13 +202,13 @@ def check_shipping_phase() -> None:
         "confirmation that repository-only files are absent from the runtime payload",
     ]
     for phrase in required_plan_phrases:
-        if phrase not in plan:
+        if not contains_markdown_phrase(plan, phrase):
             fail(
                 f"plan.md is missing required shipping-phase phrase: {phrase}",
                 hint="Keep Phase 4 as an explicit user-shipping/publishing phase with runtime-boundary verification.",
             )
     readme = read_text_checked(ROOT / "README.md")
-    if "Shipping boundary: `skill/` is the runtime payload and source of truth" not in readme:
+    if not contains_markdown_phrase(readme, "Shipping boundary: `skill/` is the runtime payload and source of truth"):
         fail(
             "README.md is missing the shipping boundary summary",
             hint="README.md must tell humans that skill/ is the runtime payload and the installed mirror is only a test copy.",
@@ -394,6 +399,8 @@ def run_pytest_smoke() -> None:
 
 def sync_installed_mirror() -> None:
     try:
+        if INSTALLED.exists():
+            shutil.rmtree(INSTALLED)
         INSTALLED.mkdir(parents=True, exist_ok=True)
         (INSTALLED / "references").mkdir(exist_ok=True)
         shutil.copy2(SKILL, INSTALLED / "SKILL.md")
@@ -419,6 +426,14 @@ def check_installed_mirror() -> None:
         fail(
             "installed SKILL.md differs from source skill/SKILL.md",
             hint="Run python3 scripts/run_phase2_checks.py --sync-installed, then rerun the check.",
+        )
+    allowed_files = {Path("SKILL.md")} | {Path("references") / name for name in REQUIRED_REFS}
+    actual_files = {path.relative_to(INSTALLED) for path in INSTALLED.rglob("*") if path.is_file()}
+    extra_files = sorted(actual_files - allowed_files)
+    if extra_files:
+        fail(
+            f"installed mirror has file(s) outside source runtime payload: {[str(path) for path in extra_files]}",
+            hint="Run python3 scripts/run_phase2_checks.py --sync-installed to replace the mirror with the canonical skill/ payload.",
         )
     for name in REQUIRED_REFS:
         src = REF_DIR / name

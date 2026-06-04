@@ -194,6 +194,33 @@ def test_installed_mirror_mismatch_reports_sync_hint(tmp_path: Path) -> None:
     assert "HINT: Run python3 scripts/run_phase2_checks.py --sync-installed" in result.stderr
 
 
+def test_installed_mirror_extra_file_reports_sync_hint(tmp_path: Path) -> None:
+    repo = make_minimal_repo(tmp_path)
+    mirror = repo / ".installed-skill-mirror"
+    shutil.copytree(repo / "skill", mirror)
+    (mirror / "references" / "stale-runtime-only.md").write_text("not in source skill/", encoding="utf-8")
+
+    result = run_checker(repo)
+
+    assert result.returncode == 1
+    assert "installed mirror has file(s) outside source runtime payload" in result.stderr
+    assert "references/stale-runtime-only.md" in result.stderr
+    assert "replace the mirror with the canonical skill/ payload" in result.stderr
+
+
+def test_sync_installed_replaces_extra_mirror_files(tmp_path: Path) -> None:
+    repo = make_minimal_repo(tmp_path)
+    mirror = repo / ".installed-skill-mirror"
+    shutil.copytree(repo / "skill", mirror)
+    stale_file = mirror / "references" / "stale-runtime-only.md"
+    stale_file.write_text("not in source skill/", encoding="utf-8")
+
+    result = run_checker(repo, "--sync-installed")
+
+    assert result.returncode == 0
+    assert not stale_file.exists()
+
+
 def test_missing_agent_shipping_guard_reports_hint(tmp_path: Path) -> None:
     repo = make_minimal_repo(tmp_path)
     agents = (repo / "AGENTS.md").read_text(encoding="utf-8")
@@ -230,3 +257,21 @@ def test_missing_phase4_shipping_boundary_reports_hint(tmp_path: Path) -> None:
     assert result.returncode == 1
     assert "plan.md is missing required shipping-phase phrase" in result.stderr
     assert "explicit user-shipping/publishing phase" in result.stderr
+
+
+def test_shipping_boundary_check_accepts_markdown_wrapped_phrase(tmp_path: Path) -> None:
+    repo = make_minimal_repo(tmp_path)
+    (repo / "plan.md").write_text(
+        "\n".join([
+            "### Phase 4 — Polish, Ship & Publish",
+            "`skill/` is the directory-as-boundary runtime payload.",
+            "Produce a concise user handoff.",
+            "confirmation that repository-only files are absent from the runtime",
+            "payload.",
+        ]),
+        encoding="utf-8",
+    )
+
+    result = run_checker(repo, "--skip-installed")
+
+    assert result.returncode == 0

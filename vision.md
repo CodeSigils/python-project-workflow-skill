@@ -63,18 +63,23 @@ repository:
 
 ## Longer-term Aspirations (deferred)
 
-These are not part of Phase 1. Revisit after evals show real need:
+These are not part of the current Phase 2 stabilization and shipping path. Revisit after evals show real need:
 
-1. **Auto-migration**: take a legacy Python project and suggest a staged upgrade path for typing, Ruff, packaging, or test structure.
+1. **Auto-migration**: take a legacy Python project and suggest a staged upgrade path for typing, Ruff, packaging, or
+   test structure.
 2. **Per-framework variants**: Django, Flask, FastAPI, and Typer guidance separated into branch references or subskills.
-3. **Scientific Python variants**: NumPy/SciPy, notebooks, conda/pixi/mamba, JAX/PyTorch, and data-heavy testing patterns.
+3. **Scientific Python variants**: NumPy/SciPy, notebooks, conda/pixi/mamba, JAX/PyTorch, and data-heavy testing
+   patterns.
 4. **Python version strategy**: guidance on Python 3.9 vs 3.10 vs 3.11 vs 3.12+ syntax and compatibility.
 5. **Security scanning**: integrate bandit, pip-audit, safety, dependency review, or secret scanning guidance.
 6. **CI template generation**: generate `.github/workflows/ci.yml` with Ruff, mypy, pytest, and build checks.
 7. **Docker best practices**: Python Dockerfile optimization, slim images, multi-stage builds, and uv cache layers.
-8. **Cross-platform considerations**: explicit guidance on pathlib usage, line endings, executable permissions, and virtual environment activation differences across Windows/macOS/Linux.
-9. **Version maintenance strategy**: establish process for reviewing and updating version recommendations in templates to prevent stale information.
-10. **Code extraction and analysis**: integrate AST-based code analysis for suggesting refactorings, identifying anti-patterns, and extracting metadata for project understanding.
+8. **Cross-platform considerations**: explicit guidance on pathlib usage, line endings, executable permissions, and
+   virtual environment activation differences across Windows/macOS/Linux.
+9. **Version maintenance strategy**: establish process for reviewing and updating version recommendations in templates
+   to prevent stale information.
+10. **Code extraction and analysis**: integrate AST-based code analysis for suggesting refactorings, identifying
+    anti-patterns, and extracting metadata for project understanding.
 11. **Published as an official Hermes skill**: installable via `hermes skills install`.
 
 ## Brand (future revisit)
