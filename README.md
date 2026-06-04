@@ -18,8 +18,8 @@ recommending change.
 ## Project Status
 
 **Phase 2: Test & Iterate.** Phase 0 research was corrected and revalidated on 2026-06-04, Phase 1 skill draft is
-complete, and controlled Phase 2 eval prompts, fixtures, and structural validation exist. Qualitative with-skill vs
-baseline review remains the main Phase 2 work.
+complete, controlled Phase 2 eval prompts, fixtures, and structural validation exist, and source-guidance qualitative
+review has started. Transcript-based with-skill vs baseline review remains the main Phase 2 work.
 
 The current implementation includes:
 
@@ -31,13 +31,8 @@ The current implementation includes:
 
 ## Research Integration
 
-The skill can suggest **Scrapling** for deeper web research, but Scrapling is optional and should not be described as
-already installed in a target user's environment:
-
-- If the Scrapling Hermes skill is available in the active environment, an agent may use it to fetch up-to-date
-  information from PyPI, documentation sites, and other web sources.
-- If Scrapling is not available, the agent should tell the user that installing or loading the Scrapling skill could
-  help with deeper web research, then continue with another verified source when possible.
+When deeper web research would help, the skill may suggest installing or loading the **Scrapling** Hermes skill. If the
+user does not want to install/load that skill, continue with another verified source when possible.
 
 ## Additional Documentation
 
@@ -48,10 +43,11 @@ already installed in a target user's environment:
 - `tests/test_run_phase2_checks.py` - Regression tests for validation-script negative paths
 - `.github/workflows/ci.yml` - Portable source-only validation for GitHub Actions
 - `evals/evals.json` - Controlled Phase 2 eval prompts
+- `evals/phase2-qualitative-review-2026-06-04.md` - Source-guidance qualitative review and iteration notes
 - `research/tooling-version-snapshot-2026-06-04.md` - Live GitHub/PyPI snapshot for Phase 0 revalidation
 - `research/code-extraction/best-practices.md` - Code extraction and analysis best practices
 
-Next steps: run qualitative with-skill vs baseline eval review, then refine based on feedback.
+Next steps: run transcript-based with-skill vs baseline eval review, then refine based on feedback.
 
 See [`plan.md`](./plan.md) for the phased implementation plan. See [`vision.md`](./vision.md) for the long-term
 direction. See [`todos.md`](./todos.md) for active task tracking. See

@@ -8,7 +8,7 @@ tier: powerful
 metadata:
   hermes:
     tags: [python, best-practices, code-quality, tooling, verification]
-    related_skills: [scrapling, codebase-inspection, requesting-code-review]
+    related_skills: [codebase-inspection, requesting-code-review]
 ---
 
 # Python Best Practices Skill
@@ -18,7 +18,8 @@ An adaptive workflow for working on Python projects. Inspect first, then advise.
 ## When to Use This Skill
 
 Trigger on Python implementation, refactor, review, packaging, setup, testing, typing, and tooling work. Do not trigger
-on pure documentation changes or non-Python tooling unless they affect Python conventions.
+on general Python concept questions, pure documentation changes, or non-Python tooling unless the user asks to apply the
+answer to project code or change Python workflow/conventions.
 
 ## Orientation Checklist
 
@@ -70,10 +71,9 @@ Before giving advice, inspect the repository to understand its current state and
   `.aider*`
 - `README.md`, `CONTRIBUTING.md`, `DEVELOPMENT.md`
 - Documentation directories: `docs/`, `doc/`, `documentation/`
-- **Web Research (Optional)**: When current package/tool facts matter, use verified sources. If the Scrapling Hermes
-  skill is already available in the active environment, it can help fetch PyPI, documentation, and other web sources. If
-  it is not available, do not imply it is installed; tell the user that installing/loading the Scrapling skill could
-  help with deeper web research, then continue with another verified source if possible.
+- **Web Research (Optional)**: When current package/tool facts matter, use verified sources. If deeper web research
+  would help, suggest installing or loading the Scrapling Hermes skill. If the user does not want to install/load that
+  skill, continue with another verified source when possible.
 
 ### Version Control State
 

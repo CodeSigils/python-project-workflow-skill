@@ -111,6 +111,10 @@ After inspection, classify the project:
 - **Specialized domains** (scientific, embedded, enterprise): Respect domain-specific constraints (e.g.,
   conda/pixi/mamba, older Python LTS).
 
+Do not force `src/` layout, uv, Ruff, strict MyPy, or another greenfield convention onto a coherent existing project.
+Recommend those as optional migrations only when the user asks for modernization or the inspection shows clear toolchain
+fragmentation.
+
 ## Modern Baseline (Preferred for Greenfield or Incoherent Projects)
 
 ```text

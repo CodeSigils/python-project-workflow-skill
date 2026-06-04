@@ -3,7 +3,7 @@
 ## Phase 0 — Planning & Research (complete; revalidated 2026-06-04)
 
 - [x] Create project skeleton (README, plan, vision, todos, refs)
-- [x] Document optional Scrapling web-research support without assuming it is installed
+- [x] Document optional Scrapling web-research support only as a suggestion to install/load the skill
 - [x] Search HQ skill index for existing Python skill (none found)
 - [x] Research authoritative Python best practices sources
 - [x] Create research/ folder with cross-ecosystem agent-instruction comparison
@@ -37,8 +37,9 @@
 - [x] Add validation-script regression tests for actionable error output
 - [x] Add portable GitHub Actions source-validation workflow
 - [x] Add `CONTRIBUTING.md` with the local development loop
-- [ ] Run with/without skill comparison using the `skill-creator` pattern
-- [ ] Create or export an eval review so the human can review test cases
+- [x] Run source-guidance qualitative review and document iteration notes
+- [ ] Run transcript-based with/without skill comparison using the `skill-creator` pattern
+- [ ] Create or export transcript benchmark results so the human can review test cases
 - [ ] Iterate based on feedback
 - [ ] Later dogfood on `/home/sand/projects/ai-project-governance` as a mature-repo review target, not first eval
 

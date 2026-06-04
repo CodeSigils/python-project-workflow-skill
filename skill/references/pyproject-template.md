@@ -49,6 +49,22 @@ dev = [
 # your-cli = "your_package.__main__:main"
 ```
 
+## CLI Greenfield Minimum
+
+For a new CLI project, include a small importable package plus a console-script entry point. Keep the first CLI thin:
+parse arguments, call testable functions, return an exit code, and put business logic outside the argument parser.
+
+Suggested minimum:
+
+```text
+src/your_package/__init__.py
+src/your_package/__main__.py
+tests/test_cli.py
+```
+
+Use `argparse` from the standard library unless the user asks for richer ergonomics or the project already uses Click or
+Typer. Add at least one CLI smoke test that invokes the entry point or `python -m your_package`.
+
 ## Source Layout Recommendation
 
 Use the `src/` layout to avoid accidental imports from the source tree and to isolate the package.
