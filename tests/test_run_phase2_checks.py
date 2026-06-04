@@ -22,6 +22,7 @@ REQUIRED_REFS = [
     "pyproject-template.md",
     "lint-format-typing-testing.md",
     "review-checklist.md",
+    "mature-repo-preservation.md",
 ]
 REQUIRED_EVALS = [
     "greenfield-setup",
@@ -32,13 +33,14 @@ REQUIRED_EVALS = [
     "generic-python-question",
     "typo-in-docstring",
     "shell-script-question",
+    "mature-automation-repo-preservation",
 ]
 
 
 def make_minimal_repo(tmp_path: Path) -> Path:
     repo = tmp_path / "repo"
     (repo / "skill" / "references").mkdir(parents=True)
-    for fixture_name in ["sample", "existing-buggy", "existing-preserve"]:
+    for fixture_name in ["sample", "existing-buggy", "existing-preserve", "mature-automation-repo"]:
         (repo / "evals" / "fixtures" / fixture_name / "tests").mkdir(parents=True)
         (repo / "evals" / "fixtures" / fixture_name / "tests" / "test_sample.py").write_text(
             "def test_sample():\n    assert True\n",
@@ -54,7 +56,13 @@ def make_minimal_repo(tmp_path: Path) -> Path:
 
     # Triggering evals (first 4) need should_trigger=True + expected_references + must_include
     # Non-trigger evals (last 4) need should_trigger=False, empty refs/includes
-    trigger_names = set(REQUIRED_EVALS[:4])
+    trigger_names = {
+        "greenfield-setup",
+        "existing-file-review",
+        "incremental-typing-testing",
+        "existing-project-preservation",
+        "mature-automation-repo-preservation",
+    }
     evals = []
     for name in REQUIRED_EVALS:
         if name in trigger_names:
@@ -219,6 +227,29 @@ def test_sync_installed_replaces_extra_mirror_files(tmp_path: Path) -> None:
 
     assert result.returncode == 0
     assert not stale_file.exists()
+
+
+def test_sync_installed_copies_mature_repo_reference(tmp_path: Path) -> None:
+    repo = make_minimal_repo(tmp_path)
+    mirror = repo / ".installed-skill-mirror"
+
+    result = run_checker(repo, "--sync-installed")
+
+    assert result.returncode == 0
+    assert (mirror / "references" / "mature-repo-preservation.md").exists()
+
+
+def test_missing_mature_repo_eval_reports_required_eval(tmp_path: Path) -> None:
+    repo = make_minimal_repo(tmp_path)
+    data = json.loads((repo / "evals" / "evals.json").read_text(encoding="utf-8"))
+    data["evals"] = [item for item in data["evals"] if item["name"] != "mature-automation-repo-preservation"]
+    (repo / "evals" / "evals.json").write_text(json.dumps(data), encoding="utf-8")
+
+    result = run_checker(repo, "--skip-installed")
+
+    assert result.returncode == 1
+    assert "missing required evals" in result.stderr
+    assert "mature-automation-repo-preservation" in result.stderr
 
 
 def test_missing_agent_shipping_guard_reports_hint(tmp_path: Path) -> None:

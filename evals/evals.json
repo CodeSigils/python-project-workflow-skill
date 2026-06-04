@@ -154,6 +154,31 @@
         "python tooling",
         "python-best-practices"
       ]
+    },
+    {
+      "name": "mature-automation-repo-preservation",
+      "fixture": "evals/fixtures/mature-automation-repo",
+      "prompt": "Review this mature automation repository as an existing Python-supporting project. Inspect its conventions first, preserve its native gate, and recommend only safe incremental Python improvements without migrating the project structure or tooling.",
+      "should_trigger": true,
+      "expected_references": [
+        "mature-repo-preservation.md",
+        "project-orientation.md",
+        "review-checklist.md"
+      ],
+      "must_include": [
+        "AGENTS.md",
+        "preserve",
+        "native gate",
+        "bash scripts/check-consistency.sh",
+        "python3 -m pytest tests -q",
+        "optional modernization"
+      ],
+      "must_not_include": [
+        "force uv",
+        "force src layout",
+        "replace the native gate",
+        "convert to a package"
+      ]
     }
   ]
 }

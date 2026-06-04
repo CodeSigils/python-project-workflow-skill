@@ -8,7 +8,8 @@ source under `skill/`; the installed Hermes mirror is only a local runtime copy 
 ## Current Status
 
 Phase 2 controlled eval assets, fixtures, structural checks, source-guidance review, benchmark runner, Codex non-trigger
-rerun evidence, mature-repo dogfood evidence, and runtime mature-repo preservation guidance exist. Phase 3 description
+rerun evidence, portable mature-automation JSON eval coverage, mature-repo dogfood evidence, and runtime mature-repo
+preservation guidance exist. Phase 3 description
 optimization and Phase 4 user shipping/publishing readiness remain future work unless the user explicitly authorizes
 them.
 
@@ -107,7 +108,7 @@ verifies structural readiness and fixture smoke tests; it does not claim the qua
 
 - `skill/SKILL.md`: runtime router and operating contract.
 - `skill/references/`: runtime reference files loaded by agents.
-- `evals/evals.json`: controlled Phase 2 eval prompts and expectations.
+- `evals/evals.json`: controlled Phase 2 eval prompts and expectations, including the portable mature-automation case.
 - `evals/fixtures/`: disposable fixture projects for controlled evals.
 - `scripts/run_phase2_checks.py`: local readiness gate and exact mirror/repo guard checker.
 - `README.md`, `plan.md`, `todos.md`: human-facing status and roadmap.

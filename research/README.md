@@ -34,4 +34,6 @@ reference files for project orientation, pyproject templates, lint/format/type/t
 
 The mature-repo dogfood strategy used `/home/sand/projects/ai-project-governance` after controlled evals as a
 preservation-first review target rather than as the first test case. The report is recorded in
-`evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`.
+`evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`. The portable JSON eval suite now also includes a
+fixture-based mature-automation preservation case so the same behavior is covered by source-only checks without
+requiring that external repository path.

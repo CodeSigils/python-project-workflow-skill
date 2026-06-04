@@ -32,6 +32,7 @@ REQUIRED_REFS = {
     "pyproject-template.md",
     "lint-format-typing-testing.md",
     "review-checklist.md",
+    "mature-repo-preservation.md",
 }
 REQUIRED_EVALS = {
     "greenfield-setup",
@@ -42,10 +43,12 @@ REQUIRED_EVALS = {
     "generic-python-question",
     "typo-in-docstring",
     "shell-script-question",
+    "mature-automation-repo-preservation",
 }
 PYTEST_FIXTURES = {
     "evals/fixtures/existing-buggy",
     "evals/fixtures/existing-preserve",
+    "evals/fixtures/mature-automation-repo",
 }
 LIVE_STATUS_DOCS = {
     "README.md",
@@ -301,8 +304,8 @@ def check_evals() -> list[dict[str, Any]]:
     if data.get("schema_version") != 1:
         fail("evals/evals.json schema_version must be 1")
     evals = data.get("evals")
-    if not isinstance(evals, list) or len(evals) < len(REQUIRED_EVALS):
-        fail(f"evals/evals.json must contain at least {len(REQUIRED_EVALS)} evals")
+    if not isinstance(evals, list):
+        fail("evals/evals.json field 'evals' must be a list")
 
     names: set[str] = set()
     ref_names = {p.name for p in REF_DIR.glob("*.md")}
