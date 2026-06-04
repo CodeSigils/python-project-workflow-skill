@@ -30,6 +30,8 @@ REQUIRED_EVALS = [
     "existing-project-preservation",
     "non-python-doc-only",
     "generic-python-question",
+    "typo-in-docstring",
+    "shell-script-question",
 ]
 
 
@@ -50,19 +52,60 @@ def make_minimal_repo(tmp_path: Path) -> Path:
     for name in REQUIRED_REFS:
         (repo / "skill" / "references" / name).write_text(reference_body, encoding="utf-8")
 
-    evals = [
-        {
-            "name": name,
-            "fixture": "evals/fixtures/sample",
-            "prompt": f"Prompt for {name}",
-            "should_trigger": True,
-            "expected_references": ["project-orientation.md"],
-            "must_include": ["inspect"],
-            "must_not_include": [],
-        }
-        for name in REQUIRED_EVALS
-    ]
+    # Triggering evals (first 4) need should_trigger=True + expected_references + must_include
+    # Non-trigger evals (last 4) need should_trigger=False, empty refs/includes
+    trigger_names = set(REQUIRED_EVALS[:4])
+    evals = []
+    for name in REQUIRED_EVALS:
+        if name in trigger_names:
+            evals.append({
+                "name": name,
+                "fixture": "evals/fixtures/sample",
+                "prompt": f"Prompt for {name}",
+                "should_trigger": True,
+                "expected_references": ["project-orientation.md"],
+                "must_include": ["inspect"],
+                "must_not_include": [],
+            })
+        else:
+            evals.append({
+                "name": name,
+                "fixture": "evals/fixtures/sample",
+                "prompt": f"Prompt for {name}",
+                "should_trigger": False,
+                "expected_references": [],
+                "must_include": [],
+                "must_not_include": ["python-best-practices"],
+            })
     (repo / "evals" / "evals.json").write_text(json.dumps({"schema_version": 1, "evals": evals}), encoding="utf-8")
+    (repo / "AGENTS.md").write_text(
+        "\n".join([
+            "# Agent contract",
+            "**Last verified:** 2026-06-04",
+            "## Orientation Contract — BLOCKING",
+            "## Source, Mirror, and Shipping Policy — BLOCKING",
+            "Treat `skill/` as the canonical runtime payload.",
+            "Do not publish, package, install elsewhere, sync to another Hermes profile, push, tag, or release.",
+            "## Phase and User-Shipping Guard — BLOCKING",
+            "## Drift and Stale Information Contract — BLOCKING",
+            "## Generated State Guard — BLOCKING",
+        ]),
+        encoding="utf-8",
+    )
+    (repo / "README.md").write_text(
+        "Shipping boundary: `skill/` is the runtime payload and source of truth.\n",
+        encoding="utf-8",
+    )
+    (repo / "plan.md").write_text(
+        "\n".join([
+            "### Phase 4 — Polish, Ship & Publish",
+            "`skill/` is the directory-as-boundary runtime payload.",
+            "Produce a concise user handoff.",
+            "confirmation that repository-only files are absent from the runtime payload.",
+        ]),
+        encoding="utf-8",
+    )
+    (repo / "todos.md").write_text("# TODOs\n", encoding="utf-8")
     return repo
 
 
@@ -113,6 +156,20 @@ def test_missing_reference_reports_recovery_hint(tmp_path: Path) -> None:
     assert "HINT: Create the missing files under skill/references/" in result.stderr
 
 
+def test_eval_prompt_referencing_missing_fixture_symbol_reports_hint(tmp_path: Path) -> None:
+    repo = make_minimal_repo(tmp_path)
+    data = json.loads((repo / "evals" / "evals.json").read_text(encoding="utf-8"))
+    data["evals"][0]["prompt"] = "Please fix `missing_symbol` in this fixture."
+    (repo / "evals" / "evals.json").write_text(json.dumps(data), encoding="utf-8")
+
+    result = run_checker(repo, "--skip-installed")
+
+    assert result.returncode == 1
+    assert "prompt references fixture symbol(s) not found" in result.stderr
+    assert "missing_symbol" in result.stderr
+    assert "HINT: Update the prompt or fixture" in result.stderr
+
+
 def test_removed_implementation_summary_reports_live_status_hint(tmp_path: Path) -> None:
     repo = make_minimal_repo(tmp_path)
     (repo / "IMPLEMENTATION_SUMMARY.md").write_text("stale status snapshot", encoding="utf-8")
@@ -135,3 +192,41 @@ def test_installed_mirror_mismatch_reports_sync_hint(tmp_path: Path) -> None:
     assert result.returncode == 1
     assert "installed mirror reference differs: review-checklist.md" in result.stderr
     assert "HINT: Run python3 scripts/run_phase2_checks.py --sync-installed" in result.stderr
+
+
+def test_missing_agent_shipping_guard_reports_hint(tmp_path: Path) -> None:
+    repo = make_minimal_repo(tmp_path)
+    agents = (repo / "AGENTS.md").read_text(encoding="utf-8")
+    (repo / "AGENTS.md").write_text(
+        agents.replace("## Source, Mirror, and Shipping Policy — BLOCKING", "## Source Policy"),
+        encoding="utf-8",
+    )
+
+    result = run_checker(repo, "--skip-installed")
+
+    assert result.returncode == 1
+    assert "AGENTS.md is missing required repo guard phrase" in result.stderr
+    assert "Restore the source/mirror/shipping" in result.stderr
+
+
+def test_generated_agent_state_marker_reports_hint(tmp_path: Path) -> None:
+    repo = make_minimal_repo(tmp_path)
+    with (repo / "AGENTS.md").open("a", encoding="utf-8") as file:
+        file.write("\n<!-- open-mem-context -->\n")
+
+    result = run_checker(repo, "--skip-installed")
+
+    assert result.returncode == 1
+    assert "AGENTS.md contains generated/session-state marker" in result.stderr
+    assert "Remove transient agent state" in result.stderr
+
+
+def test_missing_phase4_shipping_boundary_reports_hint(tmp_path: Path) -> None:
+    repo = make_minimal_repo(tmp_path)
+    (repo / "plan.md").write_text("### Phase 4 — Polish & Publish\n", encoding="utf-8")
+
+    result = run_checker(repo, "--skip-installed")
+
+    assert result.returncode == 1
+    assert "plan.md is missing required shipping-phase phrase" in result.stderr
+    assert "explicit user-shipping/publishing phase" in result.stderr

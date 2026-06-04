@@ -7,14 +7,14 @@ writes a benchmark.json summary suitable for review.
 
 Backends:
   opencode (default)   — invokes `opencode run --model <model> <prompt>`
-  hermes               — uses hermes delegate_task with --provider
+  codex                — invokes `codex exec` in a read-only sandbox
 
 Usage:
-  # Default: opencode backend with the default model
+  # Default: OpenCode backend with the default model
   python3 scripts/run_benchmark.py
 
-  # Hermes delegation backend
-  python3 scripts/run_benchmark.py --delegate --provider openrouter
+  # Codex backend with the default Codex model
+  python3 scripts/run_benchmark.py --backend codex
 
   # Custom model
   python3 scripts/run_benchmark.py --model anthropic/claude-sonnet-4
@@ -28,8 +28,8 @@ Usage:
   # Run a single eval
   python3 scripts/run_benchmark.py --filter greenfield-setup
 
-  # Use a custom Hermes API endpoint
-  python3 scripts/run_benchmark.py --delegate --hermes-url http://localhost:8080
+  # Show the non-trigger Codex rerun commands without executing them
+  python3 scripts/run_benchmark.py --dry-run --trigger-filter non-trigger --backend codex
 """
 
 from __future__ import annotations
@@ -55,6 +55,9 @@ SKILL_FILE = ROOT / "skill" / "SKILL.md"
 REF_DIR = ROOT / "skill" / "references"
 EVALS_FILE = ROOT / "evals" / "evals.json"
 DEFAULT_OUTPUT_DIR = ROOT / "python-best-practices-workspace"
+RESPONSE_FILENAME = "response.md"
+RAW_STDOUT_FILENAME = "raw-output.txt"
+RAW_STDERR_FILENAME = "stderr.txt"
 
 
 # ---------------------------------------------------------------------------
@@ -84,6 +87,17 @@ def prompt_for(eval_item: dict, idx: int, cfg: str, skill_file: Path, ref_dir: P
     Structure matches what the iteration-1 grader expects.
     """
     prompt = eval_item["prompt"]
+    should_trigger = bool(eval_item.get("should_trigger"))
+    verification_instruction = (
+        "- Include concise verification guidance when appropriate."
+        if should_trigger
+        else "- For non-trigger prompts, answer only the user's direct question; do not add tooling, inspection, or verification guidance unless explicitly requested."
+    )
+    inspect_instruction = (
+        "- Inspect the target project directory if the prompt is project-specific."
+        if should_trigger
+        else "- Do not perform or describe repository inspection unless the user explicitly asks for a review."
+    )
 
     base = textwrap.dedent(f"""\
     You are producing one transcript benchmark output for the python-best-practices skill project.
@@ -92,10 +106,10 @@ def prompt_for(eval_item: dict, idx: int, cfg: str, skill_file: Path, ref_dir: P
     {prompt}
 
     Instructions:
-    - Inspect the target project directory if the prompt is project-specific.
+    {inspect_instruction}
     - Do not modify files. Produce the final user-facing answer only.
     - Save nothing yourself; your stdout will be captured.
-    - Include concise verification guidance when appropriate.
+    {verification_instruction}
     """)
 
     if cfg == "with_skill":
@@ -130,8 +144,11 @@ def run_opencode(
     input_dir: Path,
     *,
     timeout: int = 300,
-) -> tuple[str, str, int, float]:
-    """Run a single opencode invocation. Returns (cleaned_output, raw_output, returncode, duration_s)."""
+) -> tuple[str, str, str, int, float]:
+    """Run a single opencode invocation.
+
+    Returns (cleaned_output, raw_stdout, raw_stderr, returncode, duration_s).
+    """
     start = time.time()
     proc = subprocess.run(
         ["opencode", "run", "--model", model, prompt],
@@ -147,7 +164,55 @@ def run_opencode(
     cleaned = clean_opencode_output(raw_output)
     if proc.returncode != 0 and not cleaned.strip():
         cleaned = f"RUN ERROR (exit {proc.returncode})\n\nSTDERR:\n{proc.stderr}\n"
-    return cleaned, raw_output, proc.returncode, duration
+    return cleaned, raw_output, proc.stderr, proc.returncode, duration
+
+
+def run_codex(
+    prompt: str,
+    model: str,
+    input_dir: Path,
+    output_dir: Path,
+    *,
+    timeout: int = 300,
+) -> tuple[str, str, str, int, float]:
+    """Run a single Codex invocation.
+
+    Codex writes progress metadata to stderr. --output-last-message gives us
+    a cleaner final answer for grading while stdout/stderr are still archived.
+    """
+    output_last = output_dir / "codex.last-message.txt"
+    start = time.time()
+    proc = subprocess.run(
+        [
+            "codex",
+            "--sandbox",
+            "read-only",
+            "-a",
+            "never",
+            "--model",
+            model,
+            "exec",
+            "--skip-git-repo-check",
+            "--output-last-message",
+            str(output_last),
+            "-",
+        ],
+        input=prompt,
+        cwd=input_dir,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        timeout=timeout,
+        check=False,
+    )
+    duration = time.time() - start
+    raw_output = proc.stdout
+    cleaned = raw_output
+    if output_last.exists():
+        cleaned = output_last.read_text(encoding="utf-8")
+    if proc.returncode != 0 and not cleaned.strip():
+        cleaned = f"RUN ERROR (exit {proc.returncode})\n\nSTDERR:\n{proc.stderr}\n"
+    return cleaned, raw_output, proc.stderr, proc.returncode, duration
 
 
 # ---------------------------------------------------------------------------
@@ -204,6 +269,130 @@ def compute_summary(expectations: list[dict]) -> dict:
     }
 
 
+def check_filesystem_changes(original: Path, working: Path) -> list[dict]:
+    """Detect files created, deleted, or modified by the agent.
+
+    Compares the original fixture directory against the working copy the agent
+    ran in. Tool-generated artifacts are ignored. Returns expectation dicts
+    only for unexpected changes; no changes means an empty list.
+    """
+    if not original.exists() or not working.exists():
+        return []
+
+    expectations: list[dict] = []
+    excluded_names = {
+        ".omo",
+        ".open-mem",
+        "opencode.raw.txt",
+        "opencode.stderr.txt",
+        RAW_STDOUT_FILENAME,
+        RAW_STDERR_FILENAME,
+    }
+
+    def is_excluded(path: Path) -> bool:
+        return any(part in excluded_names for part in path.parts)
+
+    def add_failure(text: str, evidence: str) -> None:
+        expectations.append({"text": text, "passed": False, "evidence": evidence})
+
+    original_files = {
+        path.relative_to(original)
+        for path in original.rglob("*")
+        if path.is_file() and not is_excluded(path.relative_to(original))
+    }
+    working_files = {
+        path.relative_to(working)
+        for path in working.rglob("*")
+        if path.is_file() and not is_excluded(path.relative_to(working))
+    }
+
+    for rel_path in sorted(original_files - working_files):
+        add_failure(
+            f"Agent did not delete fixture file: {rel_path.as_posix()}",
+            f"Fixture file missing from working directory: {rel_path.as_posix()}",
+        )
+
+    for rel_path in sorted(working_files - original_files):
+        add_failure(
+            f"Agent did not create unexpected file: {rel_path.as_posix()}",
+            f"Unexpected file created in working directory: {rel_path.as_posix()}",
+        )
+
+    for rel_path in sorted(original_files & working_files):
+        if not (original / rel_path).read_bytes() == (working / rel_path).read_bytes():
+            add_failure(
+                f"Agent did not modify fixture file: {rel_path.as_posix()}",
+                f"File differs between fixture and working copy: {rel_path.as_posix()}",
+            )
+
+    return expectations
+
+
+DEGENERATE_PATTERNS = [
+    "waiting for context",
+    "context-gathering",
+    "i need to see",
+    "let me examine",
+    "let me look at",
+    "let me check",
+    "let me run",
+    "i'll run",
+    "i will run",
+    "i should inspect",
+    "before i answer",
+    "i need to gather",
+    "analyzing the",
+    "let me first",
+    "fetching context",
+]
+
+
+def check_degenerate_output(response: str) -> list[dict]:
+    """Detect signs the agent got stuck in a meta-loop.
+
+    Returns expectation dicts for patterns that indicate the model is
+    describing its internal process instead of producing a final answer.
+    Only flags patterns that appear BEFORE any substantive response.
+    """
+    if not response or len(response.strip()) < 50:
+        return []
+
+    expectations: list[dict] = []
+    lines = response.splitlines()
+    # Analyze first 20% of the response for degenerate patterns
+    sample_lines = lines[:max(5, len(lines) // 5)]
+    sample_text = "\n".join(sample_lines).lower()
+
+    for pattern in DEGENERATE_PATTERNS:
+        if pattern in sample_text:
+            expectations.append({
+                "text": f"Response does not start with degenerate meta-loop: \"{pattern}\"",
+                "passed": False,
+                "evidence": f"Pattern '{pattern}' found in first {len(sample_lines)} lines of response",
+            })
+
+    # Check for runs where the model just echoes the instruction
+    if "WITH-SKILL CONFIGURATION" in response or "BASELINE CONFIGURATION" in response:
+        expectations.append({
+            "text": "Response does not echo the benchmark instruction verbatim",
+            "passed": False,
+            "evidence": "Response still contains benchmark configuration header text",
+        })
+
+    return expectations
+
+
+def check_run_status(returncode: int) -> list[dict]:
+    """Fail grading when the benchmarked command did not complete cleanly."""
+    if returncode == 0:
+        return []
+    return [{
+        "text": "Agent run completed without command error or timeout",
+        "passed": False,
+        "evidence": f"Benchmark command returned exit code {returncode}",
+    }]
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -219,12 +408,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Output directory for benchmark results (default: %(default)s)",
     )
     parser.add_argument(
-        "--model", default=os.environ.get("PBP_EVAL_MODEL", "opencode/big-pickle"),
-        help="Model identifier for opencode backend (or PBP_EVAL_MODEL env var)",
+        "--backend", choices=("opencode", "codex"), default=os.environ.get("PBP_EVAL_BACKEND", "opencode"),
+        help="Agent backend to run (default: %(default)s, or PBP_EVAL_BACKEND env var)",
+    )
+    parser.add_argument(
+        "--model", default=os.environ.get("PBP_EVAL_MODEL"),
+        help="Model identifier for the selected backend (or PBP_EVAL_MODEL env var)",
     )
     parser.add_argument(
         "--delegate", action="store_true",
-        help="Use Hermes delegate_task backend instead of opencode CLI",
+        help="Use Hermes delegate_task backend instead of the selected CLI backend",
     )
     parser.add_argument(
         "--provider", default=None,
@@ -233,6 +426,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--filter", default=None,
         help="Run only evals whose name contains this substring",
+    )
+    parser.add_argument(
+        "--trigger-filter", choices=("all", "trigger", "non-trigger"), default="all",
+        help="Run all evals, only triggering evals, or only non-triggering evals (default: %(default)s)",
     )
     parser.add_argument(
         "--timeout", type=int, default=300,
@@ -253,6 +450,8 @@ def build_output_dir(base: Path, label: str | None) -> Path:
     """Determine the output directory, auto-incrementing if needed."""
     if label:
         return base / label
+    if not base.exists():
+        return base / "iteration-1"
     existing = sorted(
         (d for d in base.iterdir() if d.name.startswith("iteration-") and d.is_dir()),
         reverse=True,
@@ -269,6 +468,8 @@ def build_output_dir(base: Path, label: str | None) -> Path:
 
 def main() -> int:
     args = parse_args()
+    if args.model is None:
+        args.model = "gpt-5.5" if args.backend == "codex" else "opencode/big-pickle"
 
     if not SKILL_FILE.exists():
         print(f"ERROR: skill file not found: {SKILL_FILE}", file=sys.stderr)
@@ -283,17 +484,25 @@ def main() -> int:
         print("ERROR: no evals found in evals.json", file=sys.stderr)
         return 1
 
+    if args.trigger_filter == "trigger":
+        evals = [e for e in evals if e.get("should_trigger") is True]
+    elif args.trigger_filter == "non-trigger":
+        evals = [e for e in evals if e.get("should_trigger") is False]
+
     if args.filter:
         evals = [e for e in evals if args.filter.lower() in e["name"].lower()]
         if not evals:
             print(f"ERROR: no evals match filter: {args.filter}", file=sys.stderr)
             return 1
+    if not evals:
+        print(f"ERROR: no evals match trigger filter: {args.trigger_filter}", file=sys.stderr)
+        return 1
 
     output_dir = build_output_dir(args.output_dir, args.iteration_label)
     if args.dry_run:
         print(f"[dry-run] Would output to: {output_dir}")
         print(f"[dry-run] Model: {args.model}")
-        print(f"[dry-run] Backend: {'hermes delegate' if args.delegate else 'opencode'}")
+        print(f"[dry-run] Backend: {'hermes delegate' if args.delegate else args.backend}")
         print(f"[dry-run] Evals to run: {[e['name'] for e in evals]}")
         print("[dry-run] Configurations: with_skill, without_skill")
         return 0
@@ -319,6 +528,8 @@ def main() -> int:
             input_dir = edir / "input"
             output_dir_cfg = edir / "outputs"
 
+            if edir.exists():
+                shutil.rmtree(edir)
             input_dir.mkdir(parents=True, exist_ok=True)
             output_dir_cfg.mkdir(parents=True, exist_ok=True)
 
@@ -344,50 +555,65 @@ def main() -> int:
                 print("SKIP (hermes delegate backend needs hermes_python_client)")
                 cleaned = "HERMES DELEGATE BACKEND NOT IMPLEMENTED"
                 raw_output = cleaned
+                raw_stderr = ""
                 returncode = -1
                 duration = 0.0
             else:
                 try:
-                    cleaned, raw_output, returncode, duration = run_opencode(
-                        prompt_text, args.model, input_dir, timeout=args.timeout,
-                    )
+                    if args.backend == "codex":
+                        cleaned, raw_output, raw_stderr, returncode, duration = run_codex(
+                            prompt_text, args.model, input_dir, output_dir_cfg, timeout=args.timeout,
+                        )
+                    else:
+                        cleaned, raw_output, raw_stderr, returncode, duration = run_opencode(
+                            prompt_text, args.model, input_dir, timeout=args.timeout,
+                        )
                     print(f"exit={returncode} duration={duration:.1f}s")
                 except subprocess.TimeoutExpired:
                     print(f"TIMEOUT ({args.timeout}s)")
                     cleaned = f"TIMEOUT after {args.timeout}s"
                     raw_output = cleaned
+                    raw_stderr = ""
                     returncode = -1
                     duration = float(args.timeout)
 
             # Write outputs
-            response_file = output_dir_cfg / "response.md"
-            raw_file = output_dir_cfg / "opencode.raw.txt"
-            err_file = output_dir_cfg / "opencode.stderr.txt"
+            response_file = output_dir_cfg / RESPONSE_FILENAME
+            raw_file = output_dir_cfg / RAW_STDOUT_FILENAME
+            err_file = output_dir_cfg / RAW_STDERR_FILENAME
             timing_file = edir / "timing.json"
 
             response_file.write_text(cleaned, encoding="utf-8")
             raw_file.write_text(raw_output, encoding="utf-8")
-            err_file.write_text("", encoding="utf-8")
+            err_file.write_text(raw_stderr, encoding="utf-8")
             timing_file.write_text(json.dumps({
                 "model": args.model,
                 "returncode": returncode,
                 "duration_seconds": round(duration, 3),
                 "stdout_bytes": len(raw_output.encode()),
-                "stderr_bytes": 0,
+                "stderr_bytes": len(raw_stderr.encode()),
                 "tokens": None,
             }, indent=2), encoding="utf-8")
 
-            # Grade
+            # Grade: text assertions + filesystem + degenerate checks
             expectations = grade_output(cleaned, assertions)
-            summary = compute_summary(expectations)
+            fs_expectations = check_filesystem_changes(fixture_abs, input_dir)
+            degenerate_expectations = check_degenerate_output(cleaned)
+            status_expectations = check_run_status(returncode)
+            all_expectations = expectations + status_expectations + fs_expectations + degenerate_expectations
+            summary = compute_summary(all_expectations)
             grading_file = edir / "grading.json"
             grading_file.write_text(json.dumps({
                 "eval_id": idx,
                 "eval_name": name,
                 "configuration": cfg,
-                "expectations": expectations,
+                "expectations": all_expectations,
                 "summary": summary,
-                "grader_note": "Substring checks with narrow synonym handling; analyst pass should review false positives/negatives.",
+                "grader_note": (
+                    "Substring checks with narrow synonym handling; analyst pass should review "
+                    "false positives/negatives. Command-status, filesystem-change, "
+                    "and degenerate-output checks are also included."
+                ),
             }, indent=2), encoding="utf-8")
 
             aggregate_timestamps[cfg].append(duration)
@@ -432,7 +658,7 @@ def main() -> int:
             "skill_name": "python-best-practices",
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "model": args.model,
-            "note": f"Generated by scripts/run_benchmark.py (backend: {'hermes' if args.delegate else 'opencode'})",
+            "note": f"Generated by scripts/run_benchmark.py (backend: {'hermes' if args.delegate else args.backend})",
         },
         "runs": runs_data,
         "run_summary": {

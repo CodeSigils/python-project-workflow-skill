@@ -40,7 +40,8 @@
 - [x] Run source-guidance qualitative review and document iteration notes
 - [x] Run transcript-based with/without skill comparison using the `skill-creator`/fallback transcript pattern
 - [x] Create or export transcript benchmark results so the human can review test cases
-- [ ] Strengthen non-trigger behavior and benchmark assertions, then rerun affected prompts
+- [x] Strengthen non-trigger behavior and benchmark assertions
+- [x] Rerun affected non-trigger prompts successfully with Codex backend
 - [ ] Iterate based on feedback
 - [ ] Later dogfood on `/home/sand/projects/ai-project-governance` as a mature-repo review target, not first eval
 
@@ -51,9 +52,12 @@
 - [ ] Run description optimizer
 - [ ] Apply best description to frontmatter
 
-## Phase 4 — Polish & Publish
+## Phase 4 — Polish, Ship & Publish
 
-- [ ] Package as .skill file
+- [ ] Treat `skill/` as the directory-as-boundary runtime payload
 - [x] Maintain local installed mirror for runtime testing
-- [ ] Verify in a fresh session
-- [ ] Optional: contribute to Hermes skill hub
+- [ ] Run source-only and installed-mirror readiness gates
+- [ ] Verify in a fresh session with one trigger and one near-miss prompt
+- [ ] Produce user handoff with verification evidence and known limits
+- [ ] Optional after explicit approval: package as .skill file
+- [ ] Optional after explicit approval: contribute to Hermes skill hub

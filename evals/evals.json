@@ -99,11 +99,13 @@
       "expected_references": [],
       "must_include": [],
       "must_not_include": [
-        "python-best-practices",
+        "python-best-practices skill",
         "ruff",
         "mypy",
-        "pip install",
-        "code review"
+        "code review",
+        "skill scaffolding",
+        "skill triggered",
+        "trigger assessment"
       ]
     },
     {
@@ -118,6 +120,39 @@
         "verification commands",
         "ruff",
         "pytest"
+      ]
+    },
+    {
+      "name": "typo-in-docstring",
+      "fixture": "evals/fixtures/existing-preserve",
+      "prompt": "I noticed a typo in the docstring for `greet` — can you fix it?",
+      "should_trigger": false,
+      "expected_references": [],
+      "must_include": [],
+      "must_not_include": [
+        "ruff",
+        "mypy",
+        "pytest",
+        "uv sync",
+        "inspect",
+        "verification commands",
+        "python-best-practices"
+      ]
+    },
+    {
+      "name": "shell-script-question",
+      "fixture": "evals/fixtures/greenfield-empty",
+      "prompt": "How do I write a for loop over files in bash?",
+      "should_trigger": false,
+      "expected_references": [],
+      "must_include": [],
+      "must_not_include": [
+        "ruff",
+        "mypy",
+        "pytest",
+        "verify",
+        "python tooling",
+        "python-best-practices"
       ]
     }
   ]

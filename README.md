@@ -18,9 +18,9 @@ recommending change.
 ## Project Status
 
 **Phase 2: Test & Iterate.** Phase 0 research was corrected and revalidated on 2026-06-04, Phase 1 skill draft is
-complete, controlled Phase 2 eval prompts, fixtures, structural validation, source-guidance qualitative review, and a
-first transcript-based with-skill vs baseline benchmark now exist. The main remaining Phase 2 work is tightening the
-non-trigger behavior and benchmark assertions, then rerunning the affected prompts.
+complete, and controlled Phase 2 eval prompts, fixtures, structural validation, source-guidance qualitative review,
+benchmark runner, and Codex non-trigger rerun evidence now exist. The main remaining Phase 2 work is user qualitative
+review/feedback and the later mature-repo dogfood pass.
 
 The current implementation includes:
 
@@ -40,8 +40,10 @@ user does not want to install/load that skill, continue with another verified so
 - `VERSIONS.md` - Tracks the rationale behind version choices in templates and recommendations
 - `CONTRIBUTING.md` - Local development loop, validation commands, and CI expectations
 - `AGENTS.md` - Agent instructions for this skill source checkout
-- `scripts/run_phase2_checks.py` - Phase 2 structural, fixture, and installed-mirror validation
+- `scripts/run_phase2_checks.py` - Phase 2 structural, fixture, repo-guard, and installed-mirror validation
+- `scripts/run_benchmark.py` - Controlled eval benchmark runner with OpenCode and Codex backend support
 - `tests/test_run_phase2_checks.py` - Regression tests for validation-script negative paths
+- `tests/test_run_benchmark.py` - Regression tests for benchmark grading/output behavior
 - `.github/workflows/ci.yml` - Portable source-only validation for GitHub Actions
 - `evals/evals.json` - Controlled Phase 2 eval prompts
 - `evals/phase2-qualitative-review-2026-06-04.md` - Source-guidance qualitative review and iteration notes
@@ -49,8 +51,15 @@ user does not want to install/load that skill, continue with another verified so
 - `research/tooling-version-snapshot-2026-06-04.md` - Live GitHub/PyPI snapshot for Phase 0 revalidation
 - `research/code-extraction/best-practices.md` - Code extraction and analysis best practices
 
-Next steps: strengthen non-trigger guidance and eval assertions, rerun the non-trigger prompts, then rerun the full
-transcript suite.
+The tightening has been applied (early-exit guard, eval assertion upgrades, collapsed Orientation Checklist,
+promoted benchmark runner, Codex backend support, command-status/filesystem-change grading, fixture-symbol validation,
+repo guard checks, and explicit user-shipping boundary guidance). The latest Codex non-trigger benchmark passed in both
+configurations for all four non-trigger prompts:
+`python-best-practices-workspace/codex-nontrigger-20260604-r2/benchmark.json`.
+
+Shipping boundary: `skill/` is the runtime payload and source of truth. The installed Hermes mirror is a local testing
+copy. Packaging, hub contribution, cross-profile sync, push, tag, or release remain explicit user-authorized side
+effects, not routine validation steps.
 
 See [`plan.md`](./plan.md) for the phased implementation plan. See [`vision.md`](./vision.md) for the long-term
 direction. See [`todos.md`](./todos.md) for active task tracking. See
@@ -87,9 +96,11 @@ python-best-practices-skill/
 ├── vision.md          # Long-term vision / deferred ideas
 ├── todos.md           # Current task tracking
 ├── VERSIONS.md        # Version choices rationale
-├── scripts/           # Local validation scripts
+├── scripts/           # Local validation and benchmark scripts
+│   ├── run_benchmark.py
 │   └── run_phase2_checks.py
-├── tests/             # Regression tests for validation scripts
+├── tests/             # Regression tests for validation and benchmark scripts
+│   ├── test_run_benchmark.py
 │   └── test_run_phase2_checks.py
 ├── evals/             # Controlled Phase 2 eval prompts and fixtures
 │   ├── evals.json
