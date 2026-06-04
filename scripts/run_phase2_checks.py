@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import filecmp
 import json
+import os
 import py_compile
 import re
 import shutil
@@ -20,10 +21,12 @@ from json import JSONDecodeError
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(os.environ.get("PBP_SKILL_ROOT", DEFAULT_ROOT)).resolve()
 SKILL = ROOT / "skill" / "SKILL.md"
 REF_DIR = ROOT / "skill" / "references"
-INSTALLED = Path.home() / ".hermes" / "skills" / "software-development" / "python-best-practices"
+DEFAULT_INSTALLED = Path.home() / ".hermes" / "skills" / "software-development" / "python-best-practices"
+INSTALLED = Path(os.environ.get("PBP_SKILL_INSTALLED", DEFAULT_INSTALLED)).resolve()
 REQUIRED_REFS = {
     "project-orientation.md",
     "pyproject-template.md",
