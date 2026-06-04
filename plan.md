@@ -108,9 +108,10 @@ formatting/structure checks; manual review of trigger scope and reference routin
 ### Phase 2 — Test & Iterate (current)
 
 **Current status:** controlled eval prompts, fixtures, structural readiness checks, a source-guidance qualitative
-review, a first transcript benchmark, benchmark-runner guards, and Codex non-trigger rerun evidence exist. The benchmark
-exposed a high-signal non-trigger weakness; the current skill and eval assertions now require docs-only or generic
-concept prompts to be answered directly without exposing skill or trigger-classification machinery.
+review, a first transcript benchmark, benchmark-runner guards, Codex non-trigger rerun evidence, and mature-repo dogfood
+evidence exist. The benchmark exposed a high-signal non-trigger weakness; the current skill and eval assertions now
+require docs-only or generic concept prompts to be answered directly without exposing skill or trigger-classification
+machinery.
 
 **Goal:** Validate that the skill improves agent behavior on realistic Python tasks without overfitting or causing
 unsafe migrations.
@@ -155,10 +156,11 @@ improvements.
 - [x] Launch or produce transcript benchmark results for user review.
 - [x] Strengthen non-trigger behavior and benchmark assertions.
 - [x] Rerun affected non-trigger prompts successfully with Codex backend.
-- Add ai-project-governance as a later mature-repo eval after the controlled cases establish baseline behavior.
+- [x] Add ai-project-governance as a mature-repo eval after the controlled cases establish baseline behavior.
 
 **Iteration loop:** fix based on feedback, rerun, repeat. Iteration 1 results are recorded in
-`evals/transcript-benchmark-iteration-1-2026-06-04.md`; raw local transcripts live in the ignored
+`evals/transcript-benchmark-iteration-1-2026-06-04.md`; mature-repo dogfood is recorded in
+`evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`; raw local transcripts live in the ignored
 `python-best-practices-workspace/` directory.
 
 **Output:** Iterated skill revisions, benchmark results, and dogfood findings. **Verification:** User says "ship it"

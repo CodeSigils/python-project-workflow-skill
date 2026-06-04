@@ -7,9 +7,9 @@ source under `skill/`; the installed Hermes mirror is only a local runtime copy 
 
 ## Current Status
 
-Phase 2 controlled eval assets, fixtures, structural checks, source-guidance review, benchmark runner, and Codex
-non-trigger rerun evidence exist. Phase 3 description optimization and Phase 4 user shipping/publishing readiness remain
-future work unless the user explicitly authorizes them.
+Phase 2 controlled eval assets, fixtures, structural checks, source-guidance review, benchmark runner, Codex non-trigger
+rerun evidence, and mature-repo dogfood evidence exist. Phase 3 description optimization and Phase 4 user
+shipping/publishing readiness remain future work unless the user explicitly authorizes them.
 
 ## Orientation Contract — BLOCKING
 
