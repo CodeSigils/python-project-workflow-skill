@@ -126,7 +126,8 @@ unsafe migrations.
 
 **High-complexity dogfood target:**
 
-Use `/home/sand/projects/ai-project-governance` later as a mature-repo dogfood target, not as the first eval.
+Completed against `/home/sand/projects/ai-project-governance` after controlled evals established baseline behavior.
+Evidence is recorded in `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`.
 
 Purpose:
 
@@ -135,7 +136,7 @@ Purpose:
 - Verify it avoids forcing greenfield `uv` / `src/` / strict-mypy migration onto an established governance repository.
 - Produce a review/advice report first; do not make broad edits without explicit authorization.
 
-**Suggested prompt:**
+**Prompt pattern used:**
 
 ```text
 Use the python-best-practices skill to review /home/sand/projects/ai-project-governance as an existing mature Python

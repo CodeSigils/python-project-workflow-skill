@@ -50,10 +50,10 @@ The skill responds by:
 
 ## Dogfood Strategy
 
-`/home/sand/projects/ai-project-governance` is a valuable mature-repo dogfood target, but not the first eval target.
+`/home/sand/projects/ai-project-governance` was used after controlled Phase 2 evals as a mature-repo dogfood target. The
+report is recorded in `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`.
 
-Use it after controlled Phase 2 evals to test whether the skill can survive a complex governance-heavy Python
-repository:
+The target tests whether the skill can survive a complex governance-heavy Python repository:
 
 - respect mature `AGENTS.md` instructions,
 - discover `bash scripts/check-consistency.sh` as the canonical gate,
