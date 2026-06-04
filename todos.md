@@ -42,8 +42,8 @@
 - [x] Create or export transcript benchmark results so the human can review test cases
 - [x] Strengthen non-trigger behavior and benchmark assertions
 - [x] Rerun affected non-trigger prompts successfully with Codex backend
+- [x] Dogfood on `/home/sand/projects/ai-project-governance` as a mature-repo review target
 - [ ] Iterate based on feedback
-- [ ] Later dogfood on `/home/sand/projects/ai-project-governance` as a mature-repo review target, not first eval
 
 ## Phase 3 — Description Optimization
 

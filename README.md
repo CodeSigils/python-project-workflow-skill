@@ -17,15 +17,16 @@ recommending change.
 
 ## Status at a glance
 
-| Area                      | Current state                                                                                                     |
-| :------------------------ | :---------------------------------------------------------------------------------------------------------------- |
-| Active phase              | Phase 2 — Test & Iterate                                                                                          |
-| Runtime skill source      | `skill/`                                                                                                          |
-| Installed mirror          | `/home/sand/.hermes/skills/software-development/python-best-practices`                                            |
-| Runtime skill version     | `1.2.0` in `skill/SKILL.md`                                                                                       |
-| Latest local gate         | `python3 scripts/run_phase2_checks.py` passes for source plus installed mirror                                    |
-| Latest benchmark evidence | `python-best-practices-workspace/codex-nontrigger-20260604-r2/benchmark.json`                                     |
-| Not yet complete          | Phase 2 user qualitative approval, mature-repo dogfood, Phase 3 trigger-description optimization, Phase 4 handoff |
+| Area                      | Current state                                                                                |
+| :------------------------ | :------------------------------------------------------------------------------------------- |
+| Active phase              | Phase 2 — Test & Iterate                                                                     |
+| Runtime skill source      | `skill/`                                                                                     |
+| Installed mirror          | `/home/sand/.hermes/skills/software-development/python-best-practices`                       |
+| Runtime skill version     | `1.2.0` in `skill/SKILL.md`                                                                  |
+| Latest local gate         | `python3 scripts/run_phase2_checks.py` passes for source plus installed mirror               |
+| Latest benchmark evidence | `python-best-practices-workspace/codex-nontrigger-20260604-r2/benchmark.json`                |
+| Latest dogfood evidence   | `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`                              |
+| Not yet complete          | Phase 2 user qualitative approval, Phase 3 trigger-description optimization, Phase 4 handoff |
 
 Phase 0 research was corrected and revalidated on 2026-06-04, Phase 1 skill drafting is complete, and Phase 2 controlled
 eval assets now exist. The latest Codex non-trigger rerun has 8 runs and a 1.0 mean pass rate for both `with_skill` and
@@ -126,6 +127,7 @@ user does not want to install/load that skill, continue with another verified so
 - `evals/evals.json` — controlled Phase 2 eval prompts
 - `evals/phase2-qualitative-review-2026-06-04.md` — source-guidance qualitative review and iteration notes
 - `evals/transcript-benchmark-iteration-1-2026-06-04.md` — first transcript benchmark summary and findings
+- `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md` — preservation-first mature-repo dogfood report
 - `research/tooling-version-snapshot-2026-06-04.md` — live GitHub/PyPI snapshot for Phase 0 revalidation
 - `research/code-extraction/best-practices.md` — code extraction and analysis best practices
 - `references/README.md` — authoritative source index
