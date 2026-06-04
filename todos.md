@@ -38,8 +38,9 @@
 - [x] Add portable GitHub Actions source-validation workflow
 - [x] Add `CONTRIBUTING.md` with the local development loop
 - [x] Run source-guidance qualitative review and document iteration notes
-- [ ] Run transcript-based with/without skill comparison using the `skill-creator` pattern
-- [ ] Create or export transcript benchmark results so the human can review test cases
+- [x] Run transcript-based with/without skill comparison using the `skill-creator`/fallback transcript pattern
+- [x] Create or export transcript benchmark results so the human can review test cases
+- [ ] Strengthen non-trigger behavior and benchmark assertions, then rerun affected prompts
 - [ ] Iterate based on feedback
 - [ ] Later dogfood on `/home/sand/projects/ai-project-governance` as a mature-repo review target, not first eval
 

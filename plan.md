@@ -107,8 +107,10 @@ formatting/structure checks; manual review of trigger scope and reference routin
 
 ### Phase 2 — Test & Iterate (current)
 
-**Current status:** controlled eval prompts, fixtures, structural readiness checks, and a source-guidance qualitative
-review exist. The remaining work is transcript-based with-skill vs baseline review and iteration.
+**Current status:** controlled eval prompts, fixtures, structural readiness checks, a source-guidance qualitative review,
+and a first transcript benchmark exist. The benchmark exposed a high-signal non-trigger weakness: when the skill is
+loaded for docs-only or generic concept prompts, responses may still mention skill/trigger machinery instead of silently
+answering normally.
 
 **Goal:** Validate that the skill improves agent behavior on realistic Python tasks without overfitting or causing
 unsafe migrations.
@@ -149,11 +151,14 @@ improvements.
 - [x] Add portable GitHub Actions source-validation workflow.
 - [x] Add human-facing `CONTRIBUTING.md` local development loop.
 - [x] Produce source-guidance qualitative review for user review.
-- [ ] Run transcript-based with-skill vs baseline using the `skill-creator` subagent pattern.
-- [ ] Launch or produce transcript benchmark results for user review.
+- [x] Run transcript-based with-skill vs baseline using the `skill-creator`/fallback transcript pattern.
+- [x] Launch or produce transcript benchmark results for user review.
+- [ ] Strengthen non-trigger behavior and benchmark assertions, then rerun affected prompts.
 - Add ai-project-governance as a later mature-repo eval after the controlled cases establish baseline behavior.
 
-**Iteration loop:** fix based on feedback, rerun, repeat.
+**Iteration loop:** fix based on feedback, rerun, repeat. Iteration 1 results are recorded in
+`evals/transcript-benchmark-iteration-1-2026-06-04.md`; raw local transcripts live in the ignored
+`python-best-practices-workspace/` directory.
 
 **Output:** Iterated skill revisions, benchmark results, and dogfood findings. **Verification:** User says "ship it"
 after qualitative review and benchmark evidence.

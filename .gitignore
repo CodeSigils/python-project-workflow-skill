@@ -47,3 +47,6 @@ ENV/
 
 # Local editor/OS files
 .DS_Store
+
+# Local transcript benchmark workspace
+python-best-practices-workspace/
