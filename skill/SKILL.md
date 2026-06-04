@@ -19,7 +19,9 @@ An adaptive workflow for working on Python projects. Inspect first, then advise.
 
 Trigger on Python implementation, refactor, review, packaging, setup, testing, typing, and tooling work. Do not trigger
 on general Python concept questions, pure documentation changes, or non-Python tooling unless the user asks to apply the
-answer to project code or change Python workflow/conventions.
+answer to project code or change Python workflow/conventions. If this skill was loaded but the user request is a
+non-trigger, answer normally without mentioning the skill, trigger checks, repository inspection, or verification
+commands.
 
 ## Orientation Checklist
 
