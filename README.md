@@ -84,7 +84,6 @@ python-best-practices-skill/
 ├── CONTRIBUTING.md    # Local development and validation workflow
 ├── .gitignore         # Generated cache/build artifact ignores
 ├── .github/workflows/ # Portable CI validation
-├── IMPLEMENTATION_SUMMARY.md  # Summary of implemented changes
 ├── plan.md            # Phased implementation plan
 ├── vision.md          # Long-term vision / deferred ideas
 ├── todos.md           # Current task tracking

@@ -45,6 +45,11 @@ PYTEST_FIXTURES = {
     "evals/fixtures/existing-buggy",
     "evals/fixtures/existing-preserve",
 }
+LIVE_STATUS_DOCS = {
+    "README.md",
+    "plan.md",
+    "todos.md",
+}
 
 
 def rel(path: Path) -> str:
@@ -128,6 +133,22 @@ def check_references() -> None:
         size = path.stat().st_size
         if size < 500:
             fail(f"reference file looks too small: {rel(path)} ({size} bytes)")
+
+
+def check_status_sources() -> None:
+    removed_summary = ROOT / "IMPLEMENTATION_SUMMARY.md"
+    if removed_summary.exists():
+        fail(
+            "IMPLEMENTATION_SUMMARY.md should not exist",
+            hint="Keep live status in README.md, plan.md, and todos.md; use git history for completed-change records.",
+        )
+    for name in LIVE_STATUS_DOCS:
+        path = ROOT / name
+        if path.exists() and "IMPLEMENTATION_SUMMARY.md" in read_text_checked(path):
+            fail(
+                f"stale IMPLEMENTATION_SUMMARY.md reference remains in {name}",
+                hint="Remove the reference and keep current status in README.md, plan.md, and todos.md.",
+            )
 
 
 def require_list(item: dict[str, Any], key: str, name: str) -> list[str]:
@@ -278,6 +299,7 @@ def main() -> int:
 
     check_skill()
     check_references()
+    check_status_sources()
     evals = check_evals()
     check_fixture_python_files(evals)
     run_pytest_smoke()

@@ -65,4 +65,6 @@ Keep live status in these files:
 - `plan.md` — phase plan and decision summary
 - `todos.md` — active task checklist
 
-Keep `IMPLEMENTATION_SUMMARY.md` historical. Do not turn it into the current status page.
+Do not add one-off implementation summaries as live status documents. Keep live status in `README.md`, `plan.md`, and
+`todos.md`; use git history for completed-change records. `scripts/run_phase2_checks.py` enforces that removed summary
+files and references to them do not return.

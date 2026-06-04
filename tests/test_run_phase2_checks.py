@@ -113,6 +113,17 @@ def test_missing_reference_reports_recovery_hint(tmp_path: Path) -> None:
     assert "HINT: Create the missing files under skill/references/" in result.stderr
 
 
+def test_removed_implementation_summary_reports_live_status_hint(tmp_path: Path) -> None:
+    repo = make_minimal_repo(tmp_path)
+    (repo / "IMPLEMENTATION_SUMMARY.md").write_text("stale status snapshot", encoding="utf-8")
+
+    result = run_checker(repo, "--skip-installed")
+
+    assert result.returncode == 1
+    assert "IMPLEMENTATION_SUMMARY.md should not exist" in result.stderr
+    assert "Keep live status in README.md, plan.md, and todos.md" in result.stderr
+
+
 def test_installed_mirror_mismatch_reports_sync_hint(tmp_path: Path) -> None:
     repo = make_minimal_repo(tmp_path)
     mirror = repo / ".installed-skill-mirror"
