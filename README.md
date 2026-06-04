@@ -42,8 +42,11 @@ already installed in a target user's environment:
 ## Additional Documentation
 
 - `VERSIONS.md` - Tracks the rationale behind version choices in templates and recommendations
+- `CONTRIBUTING.md` - Local development loop, validation commands, and CI expectations
 - `AGENTS.md` - Agent instructions for this skill source checkout
 - `scripts/run_phase2_checks.py` - Phase 2 structural, fixture, and installed-mirror validation
+- `tests/test_run_phase2_checks.py` - Regression tests for validation-script negative paths
+- `.github/workflows/ci.yml` - Portable source-only validation for GitHub Actions
 - `evals/evals.json` - Controlled Phase 2 eval prompts
 - `research/tooling-version-snapshot-2026-06-04.md` - Live GitHub/PyPI snapshot for Phase 0 revalidation
 - `research/code-extraction/best-practices.md` - Code extraction and analysis best practices
@@ -78,7 +81,9 @@ Core rules:
 python-best-practices-skill/
 ├── README.md          # Project overview (this file)
 ├── AGENTS.md          # Agent instructions for this source checkout
+├── CONTRIBUTING.md    # Local development and validation workflow
 ├── .gitignore         # Generated cache/build artifact ignores
+├── .github/workflows/ # Portable CI validation
 ├── IMPLEMENTATION_SUMMARY.md  # Summary of implemented changes
 ├── plan.md            # Phased implementation plan
 ├── vision.md          # Long-term vision / deferred ideas
@@ -86,6 +91,8 @@ python-best-practices-skill/
 ├── VERSIONS.md        # Version choices rationale
 ├── scripts/           # Local validation scripts
 │   └── run_phase2_checks.py
+├── tests/             # Regression tests for validation scripts
+│   └── test_run_phase2_checks.py
 ├── evals/             # Controlled Phase 2 eval prompts and fixtures
 │   ├── evals.json
 │   └── fixtures/

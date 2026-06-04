@@ -14,6 +14,7 @@ python3 scripts/run_phase2_checks.py
 Run fixture tests directly when editing eval fixtures:
 
 ```bash
+python3 -m pytest tests -q
 (
   cd evals/fixtures/existing-buggy && python3 -m pytest -q
 )
@@ -58,7 +59,8 @@ Before reporting Phase 2 work complete, run:
 ```bash
 python3 scripts/run_phase2_checks.py --sync-installed
 python3 scripts/run_phase2_checks.py
-python3 -m compileall -q scripts evals/fixtures
+python3 -m pytest tests -q
+python3 -m compileall -q scripts evals/fixtures tests
 (
   cd evals/fixtures/existing-buggy && python3 -m pytest -q
 )
@@ -76,6 +78,9 @@ uvx ruff check evals/fixtures/existing-buggy || true
 
 The buggy fixture is intentionally lint-dirty; its pytest suite should still collect and pass so agents can run tests
 while reviewing the deliberately sloppy code.
+
+For CI or portable source-only validation, use `python3 scripts/run_phase2_checks.py --skip-installed`; CI runners do
+not have the local Hermes installed-skill mirror.
 
 ## Version Policy
 

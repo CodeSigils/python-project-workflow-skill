@@ -145,6 +145,9 @@ improvements.
 
 - [x] Create `evals/evals.json` with controlled prompts.
 - [x] Add fixture smoke checks in `scripts/run_phase2_checks.py`.
+- [x] Add validation-script regression tests for actionable negative-path errors.
+- [x] Add portable GitHub Actions source-validation workflow.
+- [x] Add human-facing `CONTRIBUTING.md` local development loop.
 - [ ] Run with-skill vs baseline using the `skill-creator` subagent pattern.
 - [ ] Launch or produce an eval review for user review.
 - Add ai-project-governance as a later mature-repo eval after the controlled cases establish baseline behavior.
