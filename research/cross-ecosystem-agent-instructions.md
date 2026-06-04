@@ -18,10 +18,9 @@ practices, and what should this Hermes skill borrow?
 | AGENTS.md convention      | https://agents.md/                                                                                              | Repo-local instruction files for coding agents.                            |
 | OpenAI Codex repo example | https://raw.githubusercontent.com/openai/codex/main/AGENTS.md                                                   | Concrete AGENTS.md with project-specific commands and conventions.         |
 
-Network note: the URLs above were checked with HTTP requests on 2026-06-03. Scrapling was considered for future deeper
-scraping, but this research pass did not require it. The Python `scrapling` package/CLI was not used; this pass used
-direct HTTP checks plus ecosystem documentation. In reusable guidance, agents should present Scrapling as an optional
-skill the user can install or load, not as a dependency that is already present.
+Network note: the URLs above were checked with HTTP requests on 2026-06-03. This research pass used direct HTTP checks
+plus ecosystem documentation. In reusable guidance, deeper scraping needs should be framed as a suggestion to install or
+load the Scrapling Hermes skill, not as a dependency or capability that is already present.
 
 ## Repeating patterns across strong ecosystems
 

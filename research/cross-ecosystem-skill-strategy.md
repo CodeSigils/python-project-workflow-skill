@@ -373,8 +373,7 @@ This keeps the skill reviewable and lets evals tell us what detail is actually m
 
 ## Research method note
 
-Scrapling support was considered as an optional future web-research aid. This pass did not require stealth or
-JavaScript-heavy scraping: official docs and public raw files were accessible through browser/search/HTTP-style tooling.
-For future deeper sampling of public rule files, agents should suggest installing or loading the Scrapling Hermes skill
-when it is not already available, or use Sourcegraph-style search to crawl candidate repositories and fetch raw
-instruction files systematically.
+This pass did not require stealth or JavaScript-heavy scraping: official docs and public raw files were accessible
+through browser/search/HTTP-style tooling. For future deeper sampling of public rule files, agents should suggest
+installing or loading the Scrapling Hermes skill. If the user does not want that, use Sourcegraph-style search to crawl
+candidate repositories and fetch raw instruction files systematically.

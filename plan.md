@@ -35,7 +35,7 @@ and propagate the research recommendations into planning, source references, and
 **Actions:**
 
 - [x] Create project skeleton
-- [x] Document optional Scrapling web-research support without assuming it is installed
+- [x] Document optional Scrapling web-research support only as a suggestion to install/load the skill
 - [x] Check HQ skill index — no existing Python best practices skill
 - [x] Research top Python best practices sources
 - [x] Research cross-ecosystem agent instruction patterns
@@ -107,8 +107,8 @@ formatting/structure checks; manual review of trigger scope and reference routin
 
 ### Phase 2 — Test & Iterate (current)
 
-**Current status:** controlled eval prompts, fixtures, and structural readiness checks exist. The remaining work is
-qualitative with-skill vs baseline review and iteration.
+**Current status:** controlled eval prompts, fixtures, structural readiness checks, and a source-guidance qualitative
+review exist. The remaining work is transcript-based with-skill vs baseline review and iteration.
 
 **Goal:** Validate that the skill improves agent behavior on realistic Python tasks without overfitting or causing
 unsafe migrations.
@@ -148,8 +148,9 @@ improvements.
 - [x] Add validation-script regression tests for actionable negative-path errors.
 - [x] Add portable GitHub Actions source-validation workflow.
 - [x] Add human-facing `CONTRIBUTING.md` local development loop.
-- [ ] Run with-skill vs baseline using the `skill-creator` subagent pattern.
-- [ ] Launch or produce an eval review for user review.
+- [x] Produce source-guidance qualitative review for user review.
+- [ ] Run transcript-based with-skill vs baseline using the `skill-creator` subagent pattern.
+- [ ] Launch or produce transcript benchmark results for user review.
 - Add ai-project-governance as a later mature-repo eval after the controlled cases establish baseline behavior.
 
 **Iteration loop:** fix based on feedback, rerun, repeat.

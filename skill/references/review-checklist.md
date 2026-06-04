@@ -6,6 +6,8 @@ A practical checklist for reviewing Python code and projects. Focus on correctne
 
 - [ ] No bare `except:` clauses — catch specific exceptions.
 - [ ] No mutable default arguments (e.g., `def foo(items=[]):`).
+- [ ] No late-binding closure bugs in loops; capture loop variables intentionally.
+- [ ] Empty inputs are handled before division, indexing, `min`/`max`, or aggregation assumptions.
 - [ ] Resources (files, sockets, etc.) are properly closed, preferably with context managers (`with`).
 - [ ] No `import *` — explicit imports are preferred.
 - [ ] No `eval()` or `exec()` unless absolutely necessary and input is trusted.
@@ -49,7 +51,8 @@ A practical checklist for reviewing Python code and projects. Focus on correctne
 - [ ] Dependencies are up-to-date and vetted for known vulnerabilities (use `pip-audit`, `safety`, or `dependabot`).
 - [ ] No unnecessary dependencies; each dependency justifies its cost.
 - [ ] Dependency licenses are compatible with the project's intended use.
-- [ ] Lockfile (`uv.lock`, `poetry.lock`, `requirements.txt`) is present and committed.
+- [ ] Lockfile policy is explicit and appropriate for the project type: usually committed for applications, more nuanced
+      for reusable libraries.
 - [ ] Vulnerability scanning is part of CI (if the project is public or handles sensitive data).
 - [ ] Consider using `pip-audit` or `safety` in CI to detect vulnerable dependencies.
 - [ ] Avoid pinned dependencies with known vulnerabilities — update to a safe version.
