@@ -93,6 +93,23 @@ Use `# type: ignore` comments sparingly and only with a ticket or comment explai
 - Use coverage tools to identify untested critical paths, but remember that 100% coverage is not the goal.
 - Property-based testing (e.g., with `hypothesis`) can be valuable for complex logic.
 
+### Characterization Tests (Approval Tests)
+
+When refactoring legacy code that has no existing tests, write **characterization tests** first to lock
+in existing behavior before making changes:
+
+1. Run the code against representative inputs and capture the output.
+2. Write a test that asserts the captured output (an "approval test" or "golden file" test).
+3. Refactor the code, then confirm the test still passes.
+4. If the refactoring is correct but changes behavior, update the golden file.
+
+Tools: `pytest-regressions` (data file approval), `syrupy` (snapshot testing),
+`pytest-approvaltests` (text-based approval). For new projects, `syrupy` is the lightest option;
+for existing projects, start with inline assertions or `pytest-regressions`.
+
+This technique prevents accidental behavior changes during refactoring and builds a test safety net
+gradually.
+
 ## Existing-Project Caveats
 
 - Do not reformat an entire codebase on a whim; it creates noisy history and obscures real changes. If reformatting is
