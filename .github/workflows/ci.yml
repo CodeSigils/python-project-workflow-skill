@@ -37,3 +37,6 @@ jobs:
 
       - name: Ruff check validation code
         run: python3 -m ruff check scripts tests
+
+      - name: Ruff check existing-preserve fixture
+        run: python3 -m ruff check evals/fixtures/existing-preserve

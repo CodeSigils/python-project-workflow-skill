@@ -87,16 +87,11 @@ A practical checklist for reviewing Python code and projects. Focus on correctne
 
 ## Project Maintenance
 
-- [ ] Issue tracker is used and triaged regularly.
-- [ ] Pull requests are reviewed before merging.
-- [ ] Releases are tagged and documented.
-- [ ] The project has a CONTRIBUTING.md guide.
-- [ ] Consider adding a `CODE_OF_CONDUCT.md`.
-- [ ] Security policy (SECURITY.md) is present if the project is public.
-- [ ] Dependabot or similar is enabled for automatic dependency updates.
+- [ ] Pull requests are reviewed and tested before merging.
+- [ ] Releases are tagged, documented, and published via CI/CD.
 - [ ] CI/CD pipeline is present and green on the default branch.
-- [ ] Release process is automated or well-documented.
-- [ ] Consider adding a `RELEASING.md` for maintainers.
+- [ ] Dependabot or similar is enabled for automatic dependency updates.
+- [ ] Security policy (SECURITY.md) is present if the project is public.
 
 ## How to Use This Checklist
 

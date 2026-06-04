@@ -1,7 +1,7 @@
 ---
 name: python-best-practices
 description: "An adaptive workflow for working on Python projects. Inspect first, then advise."
-version: 1.0.2
+version: 1.1.0
 author: CodeSigils
 license: MIT
 tier: powerful
@@ -20,77 +20,25 @@ An adaptive workflow for working on Python projects. Inspect first, then advise.
 Trigger on Python implementation, refactor, review, packaging, setup, testing, typing, and tooling work. Do not trigger
 on general Python concept questions, pure documentation changes, or non-Python tooling unless the user asks to apply the
 answer to project code or change Python workflow/conventions. If this skill was loaded but the user request is a
-non-trigger, answer normally without mentioning the skill, trigger checks, repository inspection, or verification
-commands.
+non-trigger, exit immediately: answer from general knowledge without loading references, mentioning the skill,
+trigger checks, repository inspection, or verification commands. Do not suggest Python tooling changes. Do not
+propose a verification plan.
 
 ## Orientation Checklist
 
-Before giving advice, inspect the repository to understand its current state and conventions.
+Load and read `project-orientation.md` to orient yourself in the repository. It covers metadata
+inspection, source/test layout, configuration files, CI workflows, and agent documentation.
 
-### Python Project Metadata
+### Version Control State (Actionable)
 
-- `pyproject.toml`:
-  - `[project].name`, `version`, `description`, `authors`
-  - `[project].requires-python` (declared Python compatibility)
-  - `[project].dependencies`, `optional-dependencies`
-  - `[build-system]` (build backend)
-  - Tool-specific sections: `[tool.ruff]`, `[tool.mypy]`, `[tool.pytest.ini_options]`, `[tool.hatch]`, etc.
-- `setup.py` / `setup.cfg` (if present)
-- `requirements*.txt`, `uv.lock`, `poetry.lock`, `Pipfile` (lockfiles)
-- `tox.ini`, `noxfile.py` (test automation)
-- `.pre-commit-config.yaml`
-
-### Source and Test Layout
-
-- Source layout:
-  - `src/<package>/` (recommended)
-  - Flat `<package>/` at project root
-  - Namespace packages
-- Test layout:
-  - `tests/` (recommended)
-  - `test/` (less common)
-  - Presence of `conftest.py`, fixtures
-- Scripts and CLI entry points: `scripts/`, `cli/`, or console_scripts in metadata
-
-### Configuration Files
-
-- Ruff: `ruff.toml`, `.ruff.toml`, `pyproject.toml` under `[tool.ruff]`
-- MyPy: `mypy.ini`, `.mypy.ini`, `pyproject.toml` under `[tool.mypy]`
-- Pytest: `pytest.ini`, `tox.ini`, `noxfile.py`, `pyproject.toml` under `[tool.pytest.ini_options]`
-- Formatting: `pyproject.toml` under `[tool.black]` or project-native formatter config
-- Import sorting: `isort.cfg`, `.isort.cfg`, `pyproject.toml` under `[tool.isort]`
-- Type checking stubs: `py.typed` marker
-
-### CI and Workflow
-
-- `.github/workflows/*.yml`, `.gitlab-ci.yml`, `Jenkinsfile`, etc.
-- Look for steps that run: `uv sync`, `pip install -e .[test]`, `tox`, `nox`, `pytest`, `ruff`, `mypy`, `build`,
-  `publish`
-
-### Agent and Developer Documentation
-
-- `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/*`, `.continue/rules/*`, `.github/copilot-instructions.md`, `CONVENTIONS.md`,
-  `.aider*`
-- `README.md`, `CONTRIBUTING.md`, `DEVELOPMENT.md`
-- Documentation directories: `docs/`, `doc/`, `documentation/`
-- **Web Research (Optional)**: When current package/tool facts matter, use verified sources. If deeper web research
-  would help, suggest installing or loading the Scrapling Hermes skill. If the user does not want to install/load that
-  skill, continue with another verified source when possible.
-
-### Version Control State
-
-- `.gitignore`:
-  - Inspect existing project-specific rules before suggesting changes.
-  - Compare against the official GitHub Python template first:
-    <https://raw.githubusercontent.com/github/gitignore/main/Python.gitignore>.
-  - Use the gitignore.org/Toptal generated Python template as a secondary checklist:
-    <https://www.toptal.com/developers/gitignore/api/python>.
-  - Check common Python-generated artifacts: `__pycache__/`, `*.py[codz]`, `*.egg-info/`, `build/`, `dist/`,
-    `.coverage`, `.coverage.*`, `coverage.xml`, `htmlcov/`, `.pytest_cache/`, `.ruff_cache/`, `.mypy_cache/`, `.tox/`,
-    `.nox/`, `.hypothesis/`, `.pytype/`, `.pyre/`, `.venv/`, `venv/`, `.env`, and `.env.*`.
-  - Preserve local ignores and recommend targeted additions instead of replacing the file wholesale.
-  - Do not automatically ignore or commit lockfiles such as `uv.lock`; decide from the target project's application vs
-    library policy.
+- `.gitignore`: inspect existing project-specific rules before suggesting changes. Compare against the
+  [official GitHub Python template](https://raw.githubusercontent.com/github/gitignore/main/Python.gitignore) and
+  [Toptal Python template](https://www.toptal.com/developers/gitignore/api/python). Check common artifacts:
+  `__pycache__/`, `*.py[codz]`, `*.egg-info/`, `build/`, `dist/`, `.coverage`, `.coverage.*`, `coverage.xml`,
+  `htmlcov/`, `.pytest_cache/`, `.ruff_cache/`, `.mypy_cache/`, `.tox/`, `.nox/`, `.hypothesis/`, `.pytype/`,
+  `.pyre/`, `.venv/`, `venv/`, `.env`, and `.env.*`. Preserve local ignores and recommend targeted additions
+  instead of replacing wholesale. Do not automatically ignore or commit lockfiles such as `uv.lock`; decide from
+  the target project's application vs library policy.
 - Recent commits that affect tooling or configuration
 
 ### Python Version Contract (Critical)
@@ -206,13 +154,17 @@ python -m build
 
 ## Reporting
 
-The final response should include:
+When the skill triggered (you loaded references and gave workflow guidance), structure the final
+response to include:
 
 - classification of the Python task,
 - files changed or reviewed,
 - verification commands and results,
 - remaining risks or skipped checks,
 - concise next step.
+
+When the skill did **not** trigger, skip this Reporting section entirely. End with a direct answer
+to the user's question without workflow scaffolding.
 
 ## Preserve Local Conventions
 

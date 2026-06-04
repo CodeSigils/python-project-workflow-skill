@@ -101,7 +101,9 @@
       "must_not_include": [
         "python-best-practices",
         "ruff",
-        "mypy"
+        "mypy",
+        "pip install",
+        "code review"
       ]
     },
     {
@@ -113,7 +115,9 @@
       "must_include": [],
       "must_not_include": [
         "inspect repository",
-        "verification commands"
+        "verification commands",
+        "ruff",
+        "pytest"
       ]
     }
   ]

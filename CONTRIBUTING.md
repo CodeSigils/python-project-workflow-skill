@@ -24,7 +24,7 @@ under `skill/`; the installed Hermes copy is only a local mirror for testing.
    python3 scripts/run_phase2_checks.py
    python3 -m pytest tests -q
    python3 -m compileall -q scripts evals/fixtures tests
-   uvx ruff check scripts tests
+   python3 -m ruff check scripts tests
    ```
 
 4. For portable checks that should not depend on a local Hermes installation, use:
