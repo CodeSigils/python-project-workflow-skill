@@ -17,23 +17,24 @@ recommending change.
 
 ## Status at a glance
 
-| Area                      | Current state                                                                                |
-| :------------------------ | :------------------------------------------------------------------------------------------- |
-| Active phase              | Phase 2 — Test & Iterate                                                                     |
-| Runtime skill source      | `skill/`                                                                                     |
-| Installed mirror          | `/home/sand/.hermes/skills/software-development/python-best-practices`                       |
-| Runtime skill version     | `1.2.1` in `skill/SKILL.md`                                                                  |
-| Latest local gate         | `python3 scripts/run_phase2_checks.py` passes for source plus installed mirror               |
-| Latest benchmark evidence | `python-best-practices-workspace/codex-nontrigger-20260604-r2/benchmark.json`                |
-| Latest dogfood evidence   | `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`                              |
-| Not yet complete          | Phase 2 user qualitative approval, Phase 3 trigger-description optimization, Phase 4 handoff |
+| Area                                  | Current state                                                                                                                 |
+| :------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------- |
+| Active phase                          | Phase 2 — Test & Iterate                                                                                                      |
+| Runtime skill source                  | `skill/`                                                                                                                      |
+| Installed mirror                      | `/home/sand/.hermes/skills/software-development/python-best-practices`                                                        |
+| Runtime skill version                 | `1.2.2` in `skill/SKILL.md`                                                                                                   |
+| Latest local gate                     | `python3 scripts/run_phase2_checks.py` passes for source plus installed mirror                                                |
+| Latest non-trigger benchmark evidence | `python-best-practices-workspace/codex-nontrigger-20260604-r2/benchmark.json`                                                 |
+| Latest dogfood evidence               | `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`                                                               |
+| Not yet complete                      | Expanded 9-eval benchmark rerun, Phase 2 user qualitative approval, Phase 3 trigger-description optimization, Phase 4 handoff |
 
 Phase 0 research was corrected and revalidated on 2026-06-04, Phase 1 skill drafting is complete, and Phase 2 controlled
 eval assets now exist. The latest Codex non-trigger rerun has 8 runs and a 1.0 mean pass rate for both `with_skill` and
 `without_skill`; it validates that near-miss prompts can be answered without exposing skill machinery.
 
-Phase 2 is still open until the user gives qualitative approval after reviewing benchmark and dogfood evidence. A
-passing local mirror is not a package, hub contribution, release, push, or user handoff.
+Phase 2 is still open until the expanded 9-eval suite is rerun and the user gives qualitative approval after reviewing
+benchmark and dogfood evidence. A passing local mirror is not a package, hub contribution, release, push, or user
+handoff.
 
 ## Runtime payload
 
@@ -125,7 +126,7 @@ user does not want to install/load that skill, continue with another verified so
 - `tests/test_run_phase2_checks.py` — validation-script regression tests
 - `tests/test_run_benchmark.py` — benchmark grading/output regression tests
 - `.github/workflows/ci.yml` — portable source-only validation for GitHub Actions
-- `evals/evals.json` — controlled Phase 2 eval prompts
+- `evals/evals.json` — 9 controlled Phase 2 eval prompts, including the portable mature-automation preservation fixture
 - `evals/phase2-qualitative-review-2026-06-04.md` — source-guidance qualitative review and iteration notes
 - `evals/transcript-benchmark-iteration-1-2026-06-04.md` — first transcript benchmark summary and findings
 - `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md` — preservation-first mature-repo dogfood report
@@ -157,7 +158,7 @@ python-best-practices-skill/
 │   ├── test_run_benchmark.py
 │   └── test_run_phase2_checks.py
 ├── evals/             # Controlled Phase 2 eval prompts and fixtures
-│   ├── evals.json
+│   ├── evals.json     # 9 controlled eval prompts
 │   └── fixtures/
 ├── research/          # Evidence, comparisons, and design rationale
 │   ├── README.md

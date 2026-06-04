@@ -2,9 +2,12 @@
 
 ## Scope
 
-This report records the first transcript-based with-skill vs baseline benchmark for the `python-best-practices` Hermes skill.
+This report records the first transcript-based with-skill vs baseline benchmark for the `python-best-practices` Hermes
+skill.
 
-The benchmark used the six controlled prompts in `evals/evals.json` and generated one `with_skill` and one `without_skill` transcript per prompt.
+The benchmark used the six controlled prompts that were in `evals/evals.json` at the time of the iteration-1 run and
+generated one `with_skill` and one `without_skill` transcript per prompt. The current `evals/evals.json` has since
+expanded beyond this historical run.
 
 ## Execution notes
 
@@ -18,11 +21,13 @@ The benchmark used the six controlled prompts in `evals/evals.json` and generate
   - `python-best-practices-workspace/iteration-1/review.html`
   - `python-best-practices-workspace/iteration-1/eval-*/{with_skill,without_skill}/outputs/response.md`
 
-The ignored workspace preserves raw evidence locally without committing model-generated transcript noise into the source repository.
+The ignored workspace preserves raw evidence locally without committing model-generated transcript noise into the source
+repository.
 
 ## Quantitative summary
 
-The current grader is assertion-oriented and intentionally simple. It checks expected inclusions/exclusions with limited synonym handling, so analyst review is still required for borderline cases.
+The current grader is assertion-oriented and intentionally simple. It checks expected inclusions/exclusions with limited
+synonym handling, so analyst review is still required for borderline cases.
 
 | Eval                          |   With skill |     Baseline | Delta |
 | ----------------------------- | -----------: | -----------: | ----: |
@@ -45,21 +50,29 @@ Mean pass rate:
 
 Severity: high for skill quality, not a repository blocker.
 
-In the `non-python-doc-only` and `generic-python-question` with-skill runs, the response correctly recognized the prompt as a non-trigger, but still mentioned the skill or trigger decision in the final answer. After a targeted rerun with strengthened guidance, the generic Python question improved, but the docs-only prompt still exposed skill/trigger machinery.
+In the `non-python-doc-only` and `generic-python-question` with-skill runs, the response correctly recognized the prompt
+as a non-trigger, but still mentioned the skill or trigger decision in the final answer. After a targeted rerun with
+strengthened guidance, the generic Python question improved, but the docs-only prompt still exposed skill/trigger
+machinery.
 
-This violates the intended user experience for non-trigger prompts: if the skill is loaded accidentally, it should silently step aside and answer normally.
+This violates the intended user experience for non-trigger prompts: if the skill is loaded accidentally, it should
+silently step aside and answer normally.
 
 Change applied in this session:
 
-- `skill/SKILL.md` now says that if the skill is loaded for a non-trigger request, the answer should be normal and should not mention the skill, trigger checks, repository inspection, or verification commands.
+- `skill/SKILL.md` now says that if the skill is loaded for a non-trigger request, the answer should be normal and
+  should not mention the skill, trigger checks, repository inspection, or verification commands.
 
 Remaining concern:
 
-- A targeted rerun improved but did not fully eliminate meta-language. The skill may need an even more prominent non-trigger rule near the response style section, or the benchmark harness may need a less artificial with-skill prompt that does not repeatedly say “skill under test.”
+- A targeted rerun improved but did not fully eliminate meta-language. The skill may need an even more prominent
+  non-trigger rule near the response style section, or the benchmark harness may need a less artificial with-skill
+  prompt that does not repeatedly say “skill under test.”
 
 ### Finding 2 — The baseline can already satisfy many fixture expectations
 
-The current fixture assertions are mostly best-practice keywords that a competent baseline model can hit without the skill. That makes the benchmark weak for measuring skill-specific improvement.
+The current fixture assertions are mostly best-practice keywords that a competent baseline model can hit without the
+skill. That makes the benchmark weak for measuring skill-specific improvement.
 
 Recommended next improvement:
 
@@ -72,7 +85,8 @@ Recommended next improvement:
 
 ### Finding 3 — The transcript harness is still local and ad hoc
 
-The complete run used a local ignored script in `python-best-practices-workspace/run_opencode_iteration.py`, not a committed reusable eval runner.
+The complete run used a local ignored script in `python-best-practices-workspace/run_opencode_iteration.py`, not a
+committed reusable eval runner.
 
 Recommended next improvement:
 
@@ -82,4 +96,5 @@ Recommended next improvement:
 
 ## Next recommendation
 
-The next best step is to strengthen the non-trigger guidance and benchmark assertions, then rerun only the non-trigger prompts before running the full suite again.
+The next best step is to strengthen the non-trigger guidance and benchmark assertions, then rerun only the non-trigger
+prompts before running the full suite again.

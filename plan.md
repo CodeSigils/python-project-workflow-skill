@@ -108,10 +108,11 @@ formatting/structure checks; manual review of trigger scope and reference routin
 ### Phase 2 — Test & Iterate (current)
 
 **Current status:** controlled eval prompts, fixtures, structural readiness checks, a source-guidance qualitative
-review, a first transcript benchmark, benchmark-runner guards, Codex non-trigger rerun evidence, and mature-repo dogfood
-evidence exist. The benchmark exposed a high-signal non-trigger weakness; the current skill and eval assertions now
-require docs-only or generic concept prompts to be answered directly without exposing skill or trigger-classification
-machinery.
+review, a first transcript benchmark, benchmark-runner guards, Codex non-trigger rerun evidence, a portable
+mature-automation JSON eval, and mature-repo dogfood evidence exist. The expanded 9-eval suite has not yet been rerun
+through the benchmark runner after adding the mature-automation case. The benchmark exposed a high-signal non-trigger
+weakness; the current skill and eval assertions now require docs-only or generic concept prompts to be answered directly
+without exposing skill or trigger-classification machinery.
 
 **Goal:** Validate that the skill improves agent behavior on realistic Python tasks without overfitting or causing
 unsafe migrations.
@@ -123,6 +124,8 @@ unsafe migrations.
 3. Incremental typing/testing: "I need to add type hints and a test suite to this module. Walk me through it."
 4. Existing-project preservation: give the agent a small existing Python project with established tooling and verify it
    preserves local conventions.
+5. Mature automation repository preservation: review a fixture where Python supports governance scripts/tests and verify
+   the response preserves the native shell gate instead of converting the repo into a packaged Python project.
 
 **High-complexity dogfood target:**
 
@@ -147,7 +150,7 @@ improvements.
 
 **Eval setup:**
 
-- [x] Create `evals/evals.json` with controlled prompts.
+- [x] Create `evals/evals.json` with controlled prompts, including a portable mature-automation preservation fixture.
 - [x] Add fixture smoke checks in `scripts/run_phase2_checks.py`.
 - [x] Add validation-script regression tests for actionable negative-path errors.
 - [x] Add portable GitHub Actions source-validation workflow.
@@ -157,7 +160,9 @@ improvements.
 - [x] Launch or produce transcript benchmark results for user review.
 - [x] Strengthen non-trigger behavior and benchmark assertions.
 - [x] Rerun affected non-trigger prompts successfully with Codex backend.
-- [x] Add ai-project-governance as a mature-repo eval after the controlled cases establish baseline behavior.
+- [x] Add portable mature-automation fixture coverage to `evals/evals.json` and `scripts/run_phase2_checks.py`.
+- [ ] Rerun the expanded 9-eval benchmark suite after adding the mature-automation case.
+- [x] Add ai-project-governance as a mature-repo dogfood report after the controlled cases establish baseline behavior.
 
 **Iteration loop:** fix based on feedback, rerun, repeat. Iteration 1 results are recorded in
 `evals/transcript-benchmark-iteration-1-2026-06-04.md`; mature-repo dogfood is recorded in

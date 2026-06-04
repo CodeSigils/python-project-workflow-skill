@@ -1,7 +1,7 @@
 ---
 name: python-best-practices
 description: "An adaptive workflow for working on Python projects. Inspect first, then advise."
-version: 1.2.1
+version: 1.2.2
 author: CodeSigils
 license: MIT
 tier: powerful
@@ -185,3 +185,7 @@ support code. If Python appears only in scripts, generators, checkers, or tests 
 **not** force the greenfield baseline. Load `references/mature-repo-preservation.md`, use project-native gates first,
 and keep any `pyproject.toml`/uv/Ruff/MyPy/src-layout suggestions as optional modernization unless the user authorizes
 that work.
+
+When a mature repository has canonical source plus installed/runtime/generated mirrors, treat source/runtime drift as a
+blocking review finding. Edit canonical source first, sync mirrors with the project-provided command, and run both
+source-only and mirror-aware gates before claiming the runtime behavior changed.
