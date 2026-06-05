@@ -7,6 +7,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "run_phase2_checks.py"
 
@@ -176,6 +178,32 @@ def test_eval_prompt_referencing_missing_fixture_symbol_reports_hint(tmp_path: P
     assert "prompt references fixture symbol(s) not found" in result.stderr
     assert "missing_symbol" in result.stderr
     assert "HINT: Update the prompt or fixture" in result.stderr
+
+
+@pytest.mark.parametrize(
+    ("mutation", "expected"),
+    [
+        (lambda item: item.update({"must_include_any": "not-a-list"}), "field 'must_include_any' must be a list"),
+        (
+            lambda item: item.update({"must_include_any": [{"terms": ["inspect"]}]}),
+            "must_include_any group #1 needs a non-empty string name",
+        ),
+        (
+            lambda item: item.update({"must_include_any": [{"name": "orientation", "terms": [""]}]}),
+            "must_include_any group 'orientation' has invalid terms",
+        ),
+    ],
+)
+def test_invalid_must_include_any_schema_reports_actionable_error(tmp_path: Path, mutation, expected: str) -> None:
+    repo = make_minimal_repo(tmp_path)
+    data = json.loads((repo / "evals" / "evals.json").read_text(encoding="utf-8"))
+    mutation(data["evals"][0])
+    (repo / "evals" / "evals.json").write_text(json.dumps(data), encoding="utf-8")
+
+    result = run_checker(repo, "--skip-installed")
+
+    assert result.returncode == 1
+    assert expected in result.stderr
 
 
 def test_removed_implementation_summary_reports_live_status_hint(tmp_path: Path) -> None:

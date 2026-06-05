@@ -223,9 +223,88 @@ def test_opencode_timeout_can_fall_back_to_codex(tmp_path: Path, monkeypatch) ->
     assert (run_dir / "outputs" / "response.md").read_text() == "fallback answer\n"
     timing = json.loads((run_dir / "timing.json").read_text())
     assert timing["duration_seconds"] == 9.5
+    assert timing["backend"] == "opencode"
+    assert timing["effective_backend"] == "codex"
+    assert timing["model"] == "opencode/big-pickle"
+    assert timing["effective_model"] == "fallback-model"
+    assert timing["fallback_reason"] == "opencode_timeout"
     stderr = (run_dir / "outputs" / "stderr.txt").read_text()
     assert "OpenCode timed out after 7s" in stderr
     assert "fallback_backend=codex fallback_model=fallback-model" in stderr
+    benchmark = json.loads((output_dir / "fallback" / "benchmark.json").read_text())
+    assert benchmark["metadata"]["backend"] == "opencode"
+    assert benchmark["metadata"]["model"] == "opencode/big-pickle"
+    assert benchmark["metadata"]["fallback_backend"] == "codex"
+    assert benchmark["metadata"]["fallback_model"] == "fallback-model"
+    assert benchmark["runs"][0]["result"]["effective_backend"] == "codex"
+    assert benchmark["runs"][0]["result"]["effective_model"] == "fallback-model"
+    assert benchmark["runs"][0]["result"]["fallback_reason"] == "opencode_timeout"
+
+
+def test_opencode_timeout_and_codex_fallback_timeout_are_recorded(tmp_path: Path, monkeypatch) -> None:
+    skill_file = tmp_path / "skill" / "SKILL.md"
+    ref_dir = tmp_path / "skill" / "references"
+    evals_file = tmp_path / "evals.json"
+    output_dir = tmp_path / "workspace"
+    skill_file.parent.mkdir()
+    ref_dir.mkdir()
+    skill_file.write_text("---\nname: test\n---\n", encoding="utf-8")
+    evals_file.write_text(
+        json.dumps({"evals": [{"name": "sample", "prompt": "Hi", "should_trigger": False}]}),
+        encoding="utf-8",
+    )
+
+    def fake_run_opencode(prompt, model, input_dir, *, timeout=300):
+        raise subprocess.TimeoutExpired(cmd="opencode", timeout=timeout)
+
+    def fake_run_codex(prompt, model, input_dir, output_dir_cfg, *, timeout=300):
+        raise subprocess.TimeoutExpired(cmd="codex", timeout=timeout)
+
+    monkeypatch.setattr(run_benchmark, "SKILL_FILE", skill_file)
+    monkeypatch.setattr(run_benchmark, "REF_DIR", ref_dir)
+    monkeypatch.setattr(run_benchmark, "EVALS_FILE", evals_file)
+    monkeypatch.setattr(run_benchmark, "run_opencode", fake_run_opencode)
+    monkeypatch.setattr(run_benchmark, "run_codex", fake_run_codex)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_benchmark.py",
+            "--backend",
+            "opencode",
+            "--fallback-backend",
+            "codex",
+            "--fallback-model",
+            "fallback-model",
+            "--timeout",
+            "7",
+            "--output-dir",
+            str(output_dir),
+            "--iteration-label",
+            "fallback-timeout",
+            "--filter",
+            "sample",
+        ],
+    )
+
+    assert run_benchmark.main() == 0
+
+    run_dir = output_dir / "fallback-timeout" / "eval-0-sample" / "with_skill"
+    assert (run_dir / "outputs" / "response.md").read_text() == (
+        "TIMEOUT after 7s; codex fallback also timed out after 7s"
+    )
+    timing = json.loads((run_dir / "timing.json").read_text())
+    assert timing["duration_seconds"] == 14.0
+    assert timing["backend"] == "opencode"
+    assert timing["effective_backend"] == "codex"
+    assert timing["model"] == "opencode/big-pickle"
+    assert timing["effective_model"] == "fallback-model"
+    assert timing["fallback_reason"] == "codex_timeout"
+    benchmark = json.loads((output_dir / "fallback-timeout" / "benchmark.json").read_text())
+    assert benchmark["runs"][0]["result"]["errors"] == 1
+    assert benchmark["runs"][0]["result"]["effective_backend"] == "codex"
+    assert benchmark["runs"][0]["result"]["effective_model"] == "fallback-model"
+    assert benchmark["runs"][0]["result"]["fallback_reason"] == "codex_timeout"
 
 
 def test_fallback_backend_requires_opencode_backend(tmp_path: Path, monkeypatch) -> None:

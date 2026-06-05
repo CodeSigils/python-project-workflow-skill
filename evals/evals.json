@@ -101,8 +101,11 @@
             "add mypy later",
             "rather than turning on strict mode immediately",
             "tests first",
-            "Then update",
-            "approach it in this order"
+            "add tests before changing behavior",
+            "start with current tests",
+            "stage mypy adoption",
+            "then add annotations",
+            "small steps"
           ]
         },
         {
