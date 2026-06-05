@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "description": "Phase 3 trigger-description eval queries for python-best-practices frontmatter optimization.",
-  "status": "draft-for-user-review",
+  "status": "optimization-complete",
   "target_skill": "python-best-practices",
   "target_frontmatter_field": "description",
   "created": "2026-06-05",
@@ -166,5 +166,9 @@
       "rationale": "Concept explanation without project application is outside trigger scope.",
       "expected_boundary": "Answer directly without verification commands."
     }
-  ]
+  ],
+  "user_approved": "2026-06-05",
+  "optimization_completed": "2026-06-05",
+  "selected_description": "Use for changing or reviewing Python project code, packaging, typing, tests, CI, or tooling; inspect first, not concept-only Q&A.",
+  "optimization_notes": "Selected by reviewing the approved 20-query trigger/near-miss set for broad Python project-work coverage while explicitly excluding concept-only Q&A."
 }

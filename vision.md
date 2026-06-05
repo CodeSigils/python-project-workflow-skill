@@ -63,10 +63,10 @@ The target tests whether the skill can survive a complex governance-heavy Python
 
 ## Trigger Optimization Strategy
 
-Phase 3 tunes when the skill should load, not the core runtime guidance. The current review artifact is
+Phase 3 tuned when the skill should load, not the core runtime guidance. The approved artifact is
 `evals/trigger-description-evals.json`: 20 prompts split evenly between should-trigger Python project work and near-miss
-non-triggers such as general Python concepts, docs-only edits, non-Python tooling, and Hermes usage. Keep this eval set
-human-reviewed before changing the frontmatter description.
+non-triggers such as general Python concepts, docs-only edits, non-Python tooling, and Hermes usage. It now records the
+selected frontmatter description, with the decision report in `evals/trigger-description-optimization-2026-06-05.md`.
 
 ## Longer-term Aspirations (deferred)
 

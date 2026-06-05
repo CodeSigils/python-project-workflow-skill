@@ -1,7 +1,7 @@
 ---
 name: python-best-practices
-description: "An adaptive workflow for working on Python projects. Inspect first, then advise."
-version: 1.2.4
+description: "Use for changing or reviewing Python project code, packaging, typing, tests, CI, or tooling; inspect first, not concept-only Q&A."
+version: 1.2.5
 author: CodeSigils
 license: MIT
 tier: powerful
@@ -13,7 +13,7 @@ metadata:
 
 # Python Best Practices Skill
 
-An adaptive workflow for working on Python projects. Inspect first, then advise.
+Use for changing or reviewing Python project code, packaging, typing, tests, CI, or tooling; inspect first, not concept-only Q&A.
 
 ## When to Use This Skill
 
