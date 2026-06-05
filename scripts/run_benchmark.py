@@ -635,7 +635,7 @@ def main() -> int:
                             raw_stderr = ""
                             returncode = -1
                             duration = float(args.timeout * 2)
-                            fallback_reason = "codex_timeout"
+                            fallback_reason = "opencode_timeout_codex_timeout"
                     else:
                         print(f"TIMEOUT ({args.timeout}s)")
                         cleaned = f"TIMEOUT after {args.timeout}s"
