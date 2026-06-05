@@ -62,10 +62,10 @@
 
 ## Phase 4 — Polish, Ship & Publish
 
-- [ ] Treat `skill/` as the directory-as-boundary runtime payload
+- [x] Treat `skill/` as the directory-as-boundary runtime payload
 - [x] Maintain local installed mirror for runtime testing
-- [ ] Run source-only and installed-mirror readiness gates
-- [ ] Verify in a fresh session with one trigger and one near-miss prompt
-- [ ] Produce user handoff with verification evidence and known limits
+- [x] Run source-only and installed-mirror readiness gates
+- [x] Verify in a fresh session with one trigger and one near-miss prompt
+- [x] Produce user handoff with verification evidence and known limits
 - [ ] Optional after explicit approval: package as .skill file
 - [ ] Optional after explicit approval: contribute to Hermes skill hub
