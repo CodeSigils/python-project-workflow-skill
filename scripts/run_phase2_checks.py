@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Phase 2 structural, fixture, and installed-mirror readiness checks.
+"""Structural, fixture, trigger-eval, and installed-mirror readiness checks.
 
 This script does not judge LLM eval output. It verifies that controlled eval
-assets are coherent enough for with-skill vs baseline runs, and that the local
+assets are coherent enough for with-skill vs baseline runs, Phase 3 trigger
+query assets are coherent enough for description optimization, and the local
 Hermes runtime mirror matches the source skill when requested.
 """
 
@@ -19,7 +20,7 @@ import subprocess
 import sys
 from json import JSONDecodeError
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 DEFAULT_ROOT = Path(__file__).resolve().parents[1]
 ROOT = Path(os.environ.get("PBP_SKILL_ROOT", DEFAULT_ROOT)).resolve()
@@ -46,6 +47,9 @@ REQUIRED_EVALS = {
     "shell-script-question",
     "mature-automation-repo-preservation",
 }
+REQUIRED_TRIGGER_EVAL_COUNT = 20
+REQUIRED_TRIGGER_EVAL_TRUE_COUNT = 10
+REQUIRED_TRIGGER_EVAL_FALSE_COUNT = 10
 PYTEST_FIXTURES = {
     "evals/fixtures/existing-buggy",
     "evals/fixtures/existing-preserve",
@@ -382,6 +386,57 @@ def check_evals() -> list[dict[str, Any]]:
     return evals
 
 
+def check_phase3_trigger_eval_set() -> None:
+    """Validate the Phase 3 trigger-description eval query set."""
+    path = ROOT / "evals" / "trigger-description-evals.json"
+    data = read_json_checked(path)
+    if data.get("schema_version") != 1:
+        fail("evals/trigger-description-evals.json schema_version must be 1")
+    if data.get("status") != "draft-for-user-review":
+        fail(
+            "evals/trigger-description-evals.json status must be draft-for-user-review",
+            hint="Keep the Phase 3 eval set marked as a user-review draft until the user approves it.",
+        )
+    evals = data.get("evals")
+    if not isinstance(evals, list):
+        fail("evals/trigger-description-evals.json field 'evals' must be a list")
+    trigger_evals = cast(list[dict[str, Any]], evals)
+    if len(trigger_evals) != REQUIRED_TRIGGER_EVAL_COUNT:
+        fail(
+            f"Phase 3 trigger eval set must contain {REQUIRED_TRIGGER_EVAL_COUNT} queries; found {len(trigger_evals)}",
+            hint="Keep the Phase 3 review set at 20 queries so trigger and near-miss coverage stays balanced.",
+        )
+    ids: set[str] = set()
+    trigger_count = 0
+    non_trigger_count = 0
+    required_string_fields = ["id", "query", "category", "rationale", "expected_boundary"]
+    for index, item in enumerate(trigger_evals, start=1):
+        if not isinstance(item, dict):
+            fail(f"trigger-description eval entry #{index} must be an object")
+        for field in required_string_fields:
+            value = item.get(field)
+            if not isinstance(value, str) or not value.strip():
+                fail(f"trigger-description eval entry #{index} field {field!r} must be a non-empty string")
+        eval_id = item["id"]
+        if eval_id in ids:
+            fail(f"duplicate trigger-description eval id: {eval_id}")
+        ids.add(eval_id)
+        should_trigger = item.get("should_trigger")
+        if not isinstance(should_trigger, bool):
+            fail(f"trigger-description eval {eval_id!r} is missing boolean should_trigger")
+        if should_trigger:
+            trigger_count += 1
+        else:
+            non_trigger_count += 1
+    if trigger_count != REQUIRED_TRIGGER_EVAL_TRUE_COUNT or non_trigger_count != REQUIRED_TRIGGER_EVAL_FALSE_COUNT:
+        fail(
+            "Phase 3 trigger eval set must contain "
+            f"{REQUIRED_TRIGGER_EVAL_TRUE_COUNT} trigger and {REQUIRED_TRIGGER_EVAL_FALSE_COUNT} non-trigger queries; "
+            f"found {trigger_count} trigger and {non_trigger_count} non-trigger",
+            hint="Keep Phase 3 description optimization balanced between should-trigger and should-not-trigger prompts.",
+        )
+
+
 def check_fixture_python_files(evals: list[dict[str, Any]]) -> None:
     fixture_dirs = sorted({ROOT / item["fixture"] for item in evals})
     for fixture in fixture_dirs:
@@ -490,6 +545,7 @@ def main() -> int:
     check_shipping_phase()
     check_live_docs_fresh()
     evals = check_evals()
+    check_phase3_trigger_eval_set()
     check_fixture_python_files(evals)
     run_pytest_smoke()
     if args.sync_installed:
@@ -497,7 +553,7 @@ def main() -> int:
     if not args.skip_installed:
         check_installed_mirror()
     mirror_scope = "source files only" if args.skip_installed else "source files and installed skill mirror"
-    print(f"OK: Phase 2 assets, fixture smoke checks, and {mirror_scope} are valid")
+    print(f"OK: Phase 2/3 assets, fixture smoke checks, and {mirror_scope} are valid")
     return 0
 
 

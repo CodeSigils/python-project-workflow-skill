@@ -109,7 +109,7 @@ formatting/structure checks; manual review of trigger scope and reference routin
 
 ---
 
-### Phase 2 — Test & Iterate (current)
+### Phase 2 — Test & Iterate (complete; qualitative approval recorded 2026-06-05)
 
 **Current status:** controlled eval prompts, fixtures, structural readiness checks, a source-guidance qualitative
 review, a first transcript benchmark, benchmark-runner guards, Codex non-trigger rerun evidence, a portable
@@ -119,7 +119,8 @@ automation case preserves the native gate. The targeted pass narrowed brittle ex
 groups so evals grade behavior rather than one-word wording choices. Follow-up hardening records effective fallback
 backend/model metadata for timed-out OpenCode runs and tightens the incremental typing/testing assertion group. A
 post-polish Codex rerun of the affected incremental typing/testing eval passed 9/9 assertions in both `with_skill` and
-`without_skill` configurations.
+`without_skill` configurations. User qualitative approval to close Phase 2 was recorded on 2026-06-05 after reviewing
+the recommendation to move into Phase 3.
 
 **Goal:** Validate that the skill improves agent behavior on realistic Python tasks without overfitting or causing
 unsafe migrations.
@@ -180,22 +181,25 @@ workspace benchmark outputs under `python-best-practices-workspace/codex-asserti
 `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`; raw local transcripts live in the ignored
 `python-best-practices-workspace/` directory.
 
-**Output:** Iterated skill revisions, benchmark results, and dogfood findings. **Verification:** User says "ship it"
-after qualitative review and benchmark evidence.
+**Output:** Iterated skill revisions, benchmark results, and dogfood findings. **Verification:** User qualitative
+approval recorded on 2026-06-05 after benchmark and dogfood review; Phase 3 is now the active phase.
 
 ---
 
-### Phase 3 — Description Optimization
+### Phase 3 — Description Optimization (current)
+
+**Current status:** the initial 20-query trigger/near-miss eval set exists at `evals/trigger-description-evals.json` and
+is marked `draft-for-user-review`. It contains 10 should-trigger prompts and 10 should-not-trigger near misses.
 
 **Goal:** Maximize triggering accuracy after the skill behavior is stable.
 
-- Generate 20 trigger eval queries: mix of should-trigger and should-not-trigger prompts.
-- Include near misses: generic Python questions, framework-specific requests, non-Python tooling, and docs-only
-  requests.
-- User reviews eval set.
-- Select or implement the description-optimization workflow/tooling for this repo.
-- Run up to 5 description-optimization iterations once the workflow is chosen.
-- Apply the selected description to `skill/SKILL.md` frontmatter.
+- [x] Generate 20 trigger eval queries: mix of should-trigger and should-not-trigger prompts.
+- [x] Include near misses: generic Python questions, framework-specific requests, non-Python tooling, and docs-only
+      requests.
+- [ ] User reviews eval set.
+- [ ] Select or implement the description-optimization workflow/tooling for this repo.
+- [ ] Run up to 5 description-optimization iterations once the workflow is chosen.
+- [ ] Apply the selected description to `skill/SKILL.md` frontmatter.
 
 **Output:** Optimized frontmatter `description:`. **Verification:** Trigger rate on held-out test set, target >80%
 without obvious over-triggering.

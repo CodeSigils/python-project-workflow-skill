@@ -56,3 +56,6 @@ guidance should prefer PEPs, PyPA specifications, and upstream tool documentatio
 8. Prefer PyPA specifications and upstream docs over popularity, blog posts, or public agent-rule examples.
 9. Review `.gitignore` against maintained Python templates, but preserve project-specific rules and avoid wholesale
    replacement.
+10. Treat trigger behavior as an interface: Python implementation, refactor, review, packaging, setup, testing, typing,
+    and tooling work should trigger; general concept questions, docs-only edits, non-Python tooling, and Hermes usage
+    should not trigger unless the user applies them to Python project code or workflow.
