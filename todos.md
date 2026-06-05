@@ -67,5 +67,5 @@
 - [x] Run source-only and installed-mirror readiness gates
 - [x] Verify in a fresh session with one trigger and one near-miss prompt
 - [x] Produce user handoff with verification evidence and known limits
-- [ ] Optional after explicit approval: package as .skill file
-- [ ] Optional after explicit approval: contribute to Hermes skill hub
+- [x] Document GitHub tap distribution model in `SHIPPING.md`
+- [ ] Optional after explicit approval: contribute to official Hermes optional skills catalog

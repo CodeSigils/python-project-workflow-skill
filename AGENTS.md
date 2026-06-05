@@ -13,8 +13,9 @@ dogfood evidence, runtime mature-repo preservation guidance, and benchmark-harde
 qualitative approval was recorded on 2026-06-05. Phase 3 description optimization is complete; the 20-query trigger eval
 set at `evals/trigger-description-evals.json` records the selected frontmatter description and
 `evals/trigger-description-optimization-2026-06-05.md` records the decision. Phase 4 handoff is complete as of
-2026-06-05: MIT license applied, readiness gates verified, mirror synced, handoff doc at `HANDOFF.md`. Optional
-packaging and hub contribution remain available on explicit request.
+2026-06-05: MIT license applied, readiness gates verified, mirror synced, handoff doc at `HANDOFF.md`. Distribution uses
+the GitHub tap model documented in `SHIPPING.md`. Official hub contribution remains optional, requiring explicit
+approval.
 
 ## Orientation Contract — BLOCKING
 
@@ -52,8 +53,7 @@ python3 scripts/run_phase2_checks.py --sync-installed
 
 - Edit `skill/SKILL.md` and `skill/references/*.md` first.
 - Treat `skill/` as the canonical runtime payload and directory-as-boundary shipping artifact.
-- Treat `/home/sand/.hermes/skills/software-development/python-best-practices` as a runtime mirror, not the canonical
-  source.
+- Treat `~/.hermes/skills/software-development/python-best-practices` as a runtime mirror, not the canonical source.
 - Repository-only assets (`README.md`, `plan.md`, `todos.md`, `research/`, `references/`, `evals/`, `tests/`,
   `.github/`, workspace outputs, and local session state) must not be described as installed runtime payload.
 - Do not publish, package, install elsewhere, sync to another Hermes profile, push, tag, or release without explicit
@@ -85,8 +85,7 @@ change, agents MUST update every affected source of truth in the same change. Ch
 5. `skill/SKILL.md` and `skill/references/` — runtime behavior and payload.
 6. `scripts/run_phase2_checks.py` and tests — machine-checkable guard coverage.
 7. `evals/evals.json` and fixture files — behavior expectations.
-8. Installed mirror under `/home/sand/.hermes/skills/software-development/python-best-practices` when runtime payload
-   changes.
+8. Installed mirror under `~/.hermes/skills/software-development/python-best-practices` when runtime payload changes.
 
 Agents MUST NOT leave stale transitional commands, old phase claims, unsupported shipping-readiness claims,
 runtime/source boundary confusion, or unverified benchmark assertions in live docs.
@@ -122,6 +121,7 @@ verifies structural readiness and fixture smoke tests; it does not judge LLM qua
 - `evals/fixtures/`: disposable fixture projects for controlled evals.
 - `LICENSE`: MIT license for the repository.
 - `HANDOFF.md`: Phase 4 user handoff with verification evidence, shipping boundary, and known limits.
+- `SHIPPING.md`: research-grounded shipping strategy, boundary, and update flow.
 
 ## Testing
 

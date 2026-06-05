@@ -1,31 +1,31 @@
 # Phase 4 Handoff: Python Best Practices Hermes Skill
 
-Handoff date: 2026-06-05
-Source commit: 56dc60d
+Handoff date: 2026-06-05 Source commit: 7519a70
 
 ## What the Skill Does
 
-The `python-best-practices` Hermes skill helps LLM agents work on Python projects
-safely, idiomatically, and with evidence-backed tooling choices. It is an adaptive
-workflow (ORIENT -> CLASSIFY -> LOAD FOCUSED REFERENCE -> ADVISE/EDIT -> VERIFY ->
-REPORT), not a Python encyclopedia.
+The `python-best-practices` Hermes skill helps LLM agents work on Python projects safely, idiomatically, and with
+evidence-backed tooling choices. It is an adaptive workflow (ORIENT -> CLASSIFY -> LOAD FOCUSED REFERENCE -> ADVISE/EDIT
+-> VERIFY -> REPORT), not a Python encyclopedia.
 
 Trigger description (optimized in Phase 3):
-> Use for changing or reviewing Python project code, packaging, typing, tests, CI,
-> or tooling; inspect first, not concept-only Q&A.
+
+> Use for changing or reviewing Python project code, packaging, typing, tests, CI, or tooling; inspect first, not
+> concept-only Q&A.
 
 ## Install / Runtime Boundary
 
-| Area                | Path                                                                              |
-| :------------------ | :-------------------------------------------------------------------------------- |
-| Canonical source    | `skill/` directory in this repository                                             |
-| Installed mirror    | `~/.hermes/skills/software-development/python-best-practices`                     |
-| Sync command        | `python3 scripts/run_phase2_checks.py --sync-installed`                           |
-| Source-only check   | `python3 scripts/run_phase2_checks.py --skip-installed`                           |
+| Area               | Path                                                              |
+| :----------------- | :---------------------------------------------------------------- |
+| Canonical source   | `skill/` directory in this repository                             |
+| Installed mirror   | `~/.hermes/skills/software-development/python-best-practices`     |
+| GitHub tap install | `hermes skills install <owner>/python-best-practices-skill/skill` |
+| Update command     | `hermes skills update`                                            |
+| Sync command       | `python3 scripts/run_phase2_checks.py --sync-installed`           |
+| Source-only check  | `python3 scripts/run_phase2_checks.py --skip-installed`           |
 
-The repository checkout also contains `evals/`, `tests/`, `research/`, `references/`,
-`scripts/`, workspace output, and documentation — these are repository-only assets,
-not runtime payload.
+The repository checkout also contains `evals/`, `tests/`, `research/`, `references/`, `scripts/`, workspace output, and
+documentation — these are repository-only assets, not runtime payload.
 
 ## Verification Evidence
 
@@ -48,8 +48,8 @@ All checks pass as of handoff:
 
 ## Fresh-Session Trigger Verification
 
-The installed mirror is synced. The skill is discoverable and enabled in the current
-Hermes profile. To verify trigger behavior in a truly fresh session:
+The installed mirror is synced. The skill is discoverable and enabled in the current Hermes profile. To verify trigger
+behavior in a truly fresh session:
 
 1. Start a new Hermes session with `hermes new`
 2. Send a Python prompt that should trigger (e.g., "review this Python file")
@@ -57,8 +57,7 @@ Hermes profile. To verify trigger behavior in a truly fresh session:
 4. Send a near-miss prompt (e.g., "what is a Python list comprehension")
 5. Verify the skill does not trigger and you get a plain answer
 
-Trigger eval set at `evals/trigger-description-evals.json` has 20 pre-written prompts
-for systematic testing.
+Trigger eval set at `evals/trigger-description-evals.json` has 20 pre-written prompts for systematic testing.
 
 ## Known Limits
 

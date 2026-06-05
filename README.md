@@ -21,7 +21,7 @@ recommending change.
 | :--------------------------------- | :--------------------------------------------------------------------------------- |
 | Active phase                       | Phase 4 — handoff complete; shipping boundary documented                           |
 | Runtime skill source               | `skill/`                                                                           |
-| Installed mirror                   | `/home/sand/.hermes/skills/software-development/python-best-practices`             |
+| Installed mirror                   | `~/.hermes/skills/software-development/python-best-practices`                      |
 | Runtime skill version              | `1.2.5` in `skill/SKILL.md`                                                        |
 | License                            | MIT — `LICENSE` in repository root                                                 |
 | Latest local gate                  | `python3 scripts/run_phase2_checks.py` passes for source plus installed mirror     |
@@ -76,6 +76,22 @@ Repository-only files such as `README.md`, `plan.md`, `todos.md`, `research/`, `
 as installed runtime payload.
 
 ## Quick validation
+
+### Install (for Hermes users)
+
+```bash
+hermes skills install <owner>/python-best-practices-skill/skill
+```
+
+This installs directly from GitHub. To update later:
+
+```bash
+hermes skills update
+```
+
+See [`SHIPPING.md`](./SHIPPING.md) for the full distribution model.
+
+### Validate (for maintainers)
 
 Run the source-only gate for CI-style validation:
 
@@ -139,6 +155,7 @@ user does not want to install/load that skill, continue with another verified so
 - `todos.md` — active task tracking
 - `VERSIONS.md` — version-choice rationale for templates and recommendations
 - `CONTRIBUTING.md` — local development loop and CI expectations
+- `SHIPPING.md` — shipping boundary, update flow, and evidence basis
 - `scripts/run_phase2_checks.py` — structural, fixture, repo-guard, and exact installed-mirror validation
 - `scripts/run_benchmark.py` — controlled eval benchmark runner with OpenCode and Codex backend support, including an
   optional Codex fallback for OpenCode timeouts
@@ -170,6 +187,7 @@ python-best-practices-skill/
 ├── README.md          # Project overview (this file)
 ├── AGENTS.md          # Agent instructions for this source checkout
 ├── CONTRIBUTING.md    # Local development and validation workflow
+├── SHIPPING.md        # Shipping boundary, update flow, and evidence basis
 ├── .gitignore         # Generated cache/build artifact ignores
 ├── .github/workflows/ # Portable CI validation
 ├── plan.md            # Phased implementation plan
@@ -182,10 +200,14 @@ python-best-practices-skill/
 ├── tests/             # Regression tests for validation and benchmark scripts
 │   ├── test_run_benchmark.py
 │   └── test_run_phase2_checks.py
-├── evals/             # Controlled Phase 2 eval prompts, Phase 3 trigger evals, and fixtures
+├── evals/             # Controlled Phase 2 eval prompts, Phase 3 trigger evals, benchmark reports, and fixtures
 │   ├── evals.json     # 9 controlled Phase 2 eval prompts
 │   ├── trigger-description-evals.json
 │   ├── trigger-description-optimization-2026-06-05.md
+│   ├── phase2-qualitative-review-2026-06-04.md
+│   ├── transcript-benchmark-expanded-9-2026-06-04.md
+│   ├── transcript-benchmark-iteration-1-2026-06-04.md
+│   ├── mature-repo-dogfood-ai-project-governance-2026-06-04.md
 │   └── fixtures/
 ├── research/          # Evidence, comparisons, and design rationale
 │   ├── README.md
