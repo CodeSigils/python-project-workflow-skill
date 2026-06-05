@@ -19,17 +19,18 @@ recommending change.
 
 | Area                               | Current state                                                                      |
 | :--------------------------------- | :--------------------------------------------------------------------------------- |
-| Active phase                       | Phase 3 complete — Phase 4 handoff not started                                     |
+| Active phase                       | Phase 4 — handoff complete; shipping boundary documented                           |
 | Runtime skill source               | `skill/`                                                                           |
 | Installed mirror                   | `/home/sand/.hermes/skills/software-development/python-best-practices`             |
 | Runtime skill version              | `1.2.5` in `skill/SKILL.md`                                                        |
+| License                            | MIT — `LICENSE` in repository root                                                 |
 | Latest local gate                  | `python3 scripts/run_phase2_checks.py` passes for source plus installed mirror     |
 | Latest expanded benchmark evidence | `python-best-practices-workspace/codex-expanded-9-20260604/benchmark.json`         |
 | Latest benchmark report            | `evals/transcript-benchmark-expanded-9-2026-06-04.md`                              |
 | Latest targeted assertion evidence | `python-best-practices-workspace/codex-polish-incremental-20260605/benchmark.json` |
 | Latest trigger eval set            | `evals/trigger-description-evals.json`                                             |
 | Latest dogfood evidence            | `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`                    |
-| Not yet complete                   | Phase 4 handoff                                                                    |
+| User handoff                       | `HANDOFF.md` in repository root                                                    |
 
 Phase 0 research was corrected and revalidated on 2026-06-04, Phase 1 skill drafting is complete, and Phase 2 controlled
 eval assets are complete with user qualitative approval recorded on 2026-06-05. The expanded Codex 9-eval run completed
@@ -48,7 +49,9 @@ selected frontmatter description in `evals/trigger-description-evals.json` and t
 Use for changing or reviewing Python project code, packaging, typing, tests, CI, or tooling; inspect first, not concept-only Q&A.
 ```
 
-A passing local mirror is not a package, hub contribution, release, push, or user handoff.
+Phase 4 is complete as of 2026-06-05. The runtime payload boundary is documented, the installed mirror is synced,
+readiness gates pass, trigger behavior is verified, MIT license is applied, and `HANDOFF.md` captures the full handoff.
+Optional packaging and hub contribution remain available on explicit request.
 
 ## Runtime payload
 
@@ -162,6 +165,8 @@ See [`plan.md`](./plan.md) for the phased implementation plan. See [`vision.md`]
 
 ```text
 python-best-practices-skill/
+├── HANDOFF.md         # Phase 4 user handoff document
+├── LICENSE            # MIT license
 ├── README.md          # Project overview (this file)
 ├── AGENTS.md          # Agent instructions for this source checkout
 ├── CONTRIBUTING.md    # Local development and validation workflow

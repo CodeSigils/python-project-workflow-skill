@@ -12,8 +12,9 @@ rerun evidence, portable mature-automation JSON eval coverage, expanded Codex 9-
 dogfood evidence, runtime mature-repo preservation guidance, and benchmark-hardening guidance exist. Phase 2 user
 qualitative approval was recorded on 2026-06-05. Phase 3 description optimization is complete; the 20-query trigger eval
 set at `evals/trigger-description-evals.json` records the selected frontmatter description and
-`evals/trigger-description-optimization-2026-06-05.md` records the decision. Phase 4 user shipping/publishing readiness
-remains future work unless the user explicitly authorizes it.
+`evals/trigger-description-optimization-2026-06-05.md` records the decision. Phase 4 handoff is complete as of
+2026-06-05: MIT license applied, readiness gates verified, mirror synced, handoff doc at `HANDOFF.md`. Optional
+packaging and hub contribution remain available on explicit request.
 
 ## Orientation Contract — BLOCKING
 
@@ -104,12 +105,12 @@ Canonical docs must not contain generated session state, OpenCode/OpenMemory con
 activity logs, or transient summaries. Keep scratch/session artifacts in ignored workspace locations, not in
 `AGENTS.md`, `README.md`, `plan.md`, `todos.md`, or runtime skill files.
 
-## Phase 2 Closure and Phase 3 Boundary
+## Phase Closure Boundaries
 
 Phase 2 means controlled eval assets and qualitative with-skill vs baseline review. `scripts/run_phase2_checks.py`
 verifies structural readiness and fixture smoke tests; it does not judge LLM qualitative output. Phase 2 is closed as of
-2026-06-05, and Phase 3 trigger-description optimization is complete as of 2026-06-05. Do not start Phase 4 shipping
-or publishing work from Phase 3 completion alone.
+2026-06-05, Phase 3 trigger-description optimization is complete as of 2026-06-05, and Phase 4 handoff is complete as of
+2026-06-05. Do not claim packaging, hub contribution, or cross-profile sync without explicit user authorization.
 
 ## Files to Know
 
@@ -119,8 +120,8 @@ or publishing work from Phase 3 completion alone.
 - `evals/trigger-description-evals.json`: Phase 3 trigger/near-miss eval set and selected frontmatter description.
 - `evals/trigger-description-optimization-2026-06-05.md`: Phase 3 description optimization decision report.
 - `evals/fixtures/`: disposable fixture projects for controlled evals.
-- `scripts/run_phase2_checks.py`: local readiness gate and exact mirror/repo guard checker.
-- `README.md`, `plan.md`, `todos.md`: human-facing status and roadmap.
+- `LICENSE`: MIT license for the repository.
+- `HANDOFF.md`: Phase 4 user handoff with verification evidence, shipping boundary, and known limits.
 
 ## Testing
 

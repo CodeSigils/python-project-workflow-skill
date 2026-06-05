@@ -215,7 +215,7 @@ updated to accept only draft or completed trigger-eval states.
 
 ---
 
-### Phase 4 — Polish, Ship & Publish
+### Phase 4 — Polish, Ship & Publish (complete; handoff delivered 2026-06-05)
 
 **Goal:** Ship a user-ready local skill, with optional packaging or hub publishing only after explicit approval.
 
