@@ -17,25 +17,26 @@ recommending change.
 
 ## Status at a glance
 
-| Area                               | Current state                                                                                       |
-| :--------------------------------- | :-------------------------------------------------------------------------------------------------- |
-| Active phase                       | Phase 2 — Test & Iterate                                                                            |
-| Runtime skill source               | `skill/`                                                                                            |
-| Installed mirror                   | `/home/sand/.hermes/skills/software-development/python-best-practices`                              |
-| Runtime skill version              | `1.2.2` in `skill/SKILL.md`                                                                         |
-| Latest local gate                  | `python3 scripts/run_phase2_checks.py` passes for source plus installed mirror                      |
-| Latest expanded benchmark evidence | `python-best-practices-workspace/codex-expanded-9-20260604/benchmark.json`                          |
-| Latest benchmark report            | `evals/transcript-benchmark-expanded-9-2026-06-04.md`                                               |
-| Latest targeted assertion evidence | `python-best-practices-workspace/codex-assertion-quality-final-20260605-incremental/benchmark.json` |
-| Latest dogfood evidence            | `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`                                     |
-| Not yet complete                   | Phase 2 user qualitative approval, Phase 3, Phase 4 handoff                                         |
+| Area                               | Current state                                                                      |
+| :--------------------------------- | :--------------------------------------------------------------------------------- |
+| Active phase                       | Phase 2 — Test & Iterate                                                           |
+| Runtime skill source               | `skill/`                                                                           |
+| Installed mirror                   | `/home/sand/.hermes/skills/software-development/python-best-practices`             |
+| Runtime skill version              | `1.2.3` in `skill/SKILL.md`                                                        |
+| Latest local gate                  | `python3 scripts/run_phase2_checks.py` passes for source plus installed mirror     |
+| Latest expanded benchmark evidence | `python-best-practices-workspace/codex-expanded-9-20260604/benchmark.json`         |
+| Latest benchmark report            | `evals/transcript-benchmark-expanded-9-2026-06-04.md`                              |
+| Latest targeted assertion evidence | `python-best-practices-workspace/codex-polish-incremental-20260605/benchmark.json` |
+| Latest dogfood evidence            | `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`                    |
+| Not yet complete                   | Phase 2 user qualitative approval, Phase 3, Phase 4 handoff                        |
 
 Phase 0 research was corrected and revalidated on 2026-06-04, Phase 1 skill drafting is complete, and Phase 2 controlled
 eval assets now exist. The expanded Codex 9-eval run completed 18/18 command runs successfully, with mean pass rates of
 0.9325 for `with_skill` and 0.9102 for `without_skill`. The four non-trigger cases scored 100% in both configurations;
 the new mature automation case preserved the native gate and a targeted assertion-quality pass now uses synonym groups
 for behavioral checks instead of brittle exact-phrase requirements. Follow-up hardening records effective fallback
-backend/model metadata in benchmark outputs and tightens incremental typing/testing assertion alternatives.
+backend/model metadata in benchmark outputs and tightens incremental typing/testing assertion alternatives. A
+post-polish Codex rerun of the affected incremental typing/testing eval passed 9/9 assertions in both configurations.
 
 Phase 2 is still open until the user gives qualitative approval after reviewing benchmark and dogfood evidence. A
 passing local mirror is not a package, hub contribution, release, push, or user handoff.
@@ -56,6 +57,7 @@ Runtime files:
 - `skill/references/lint-format-typing-testing.md`
 - `skill/references/review-checklist.md`
 - `skill/references/mature-repo-preservation.md`
+- `skill/references/eval-benchmark-hardening.md`
 
 Repository-only files such as `README.md`, `plan.md`, `todos.md`, `research/`, `references/`, `evals/`, `tests/`,
 `.github/`, and `python-best-practices-workspace/` are development, evaluation, or evidence assets. Do not describe them
@@ -186,5 +188,6 @@ python-best-practices-skill/
         ├── pyproject-template.md
         ├── lint-format-typing-testing.md
         ├── review-checklist.md
-        └── mature-repo-preservation.md
+        ├── mature-repo-preservation.md
+        └── eval-benchmark-hardening.md
 ```
