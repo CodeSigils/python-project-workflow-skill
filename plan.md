@@ -90,6 +90,10 @@ agent-instruction systems use scoped, concrete, repo-aware guidance with progres
    - uv/Ruff/mypy/pytest command recipes, staged strictness, existing-project caveats
 4. `skill/references/review-checklist.md`
    - practical Python review checklist for correctness, typing, tests, dependencies, error handling, and verification
+5. `skill/references/mature-repo-preservation.md`
+   - preservation-first guidance for mature automation repositories
+6. `skill/references/eval-benchmark-hardening.md`
+   - benchmark/eval runner metadata, fallback attribution, assertion-quality, and TDD hardening guidance
 
 **Reference files intentionally deferred until evals prove they are needed:**
 
@@ -100,7 +104,7 @@ agent-instruction systems use scoped, concrete, repo-aware guidance with progres
 - `scientific-python.md`
 - `web-frameworks.md`
 
-**Output:** `skill/SKILL.md` and the first four focused files under `skill/references/`. **Verification:** Markdown
+**Output:** `skill/SKILL.md` and focused files under `skill/references/`. **Verification:** Markdown
 formatting/structure checks; manual review of trigger scope and reference routing.
 
 ---
@@ -113,7 +117,9 @@ mature-automation JSON eval, mature-repo dogfood evidence, an expanded Codex 9-e
 assertion-quality iteration exist. The expanded run shows the earlier non-trigger leakage is controlled and the mature
 automation case preserves the native gate. The targeted pass narrowed brittle exact-phrase checks into named synonym
 groups so evals grade behavior rather than one-word wording choices. Follow-up hardening records effective fallback
-backend/model metadata for timed-out OpenCode runs and tightens the incremental typing/testing assertion group.
+backend/model metadata for timed-out OpenCode runs and tightens the incremental typing/testing assertion group. A
+post-polish Codex rerun of the affected incremental typing/testing eval passed 9/9 assertions in both `with_skill` and
+`without_skill` configurations.
 
 **Goal:** Validate that the skill improves agent behavior on realistic Python tasks without overfitting or causing
 unsafe migrations.
@@ -169,8 +175,9 @@ improvements.
 **Iteration loop:** fix based on feedback, rerun, repeat. Iteration 1 results are recorded in
 `evals/transcript-benchmark-iteration-1-2026-06-04.md`; expanded 9-eval Codex results are summarized in
 `evals/transcript-benchmark-expanded-9-2026-06-04.md`; targeted assertion-quality evidence is recorded in ignored
-workspace benchmark outputs under `python-best-practices-workspace/codex-assertion-quality-*`; mature-repo dogfood is
-recorded in `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`; raw local transcripts live in the ignored
+workspace benchmark outputs under `python-best-practices-workspace/codex-assertion-quality-*` and
+`python-best-practices-workspace/codex-polish-incremental-20260605/benchmark.json`; mature-repo dogfood is recorded in
+`evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`; raw local transcripts live in the ignored
 `python-best-practices-workspace/` directory.
 
 **Output:** Iterated skill revisions, benchmark results, and dogfood findings. **Verification:** User says "ship it"

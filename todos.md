@@ -26,6 +26,7 @@
 - [x] Add `skill/references/pyproject-template.md`
 - [x] Add `skill/references/lint-format-typing-testing.md`
 - [x] Add `skill/references/review-checklist.md`
+- [x] Add `skill/references/eval-benchmark-hardening.md` after benchmark-runner hardening proved the need
 - [x] Verify Markdown formatting and reference routing
 - [x] User review of skill draft
 
@@ -39,6 +40,7 @@
 - [x] Narrow brittle exact-phrase eval assertions surfaced by the expanded Codex run
 - [x] Record effective fallback backend/model metadata in benchmark outputs
 - [x] Add regression coverage for malformed `must_include_any` eval assertion groups and fallback timeout reporting
+- [x] Rerun the affected incremental typing/testing eval after assertion/metadata polish
 - [x] Add validation-script regression tests for actionable error output
 - [x] Add portable GitHub Actions source-validation workflow
 - [x] Add `CONTRIBUTING.md` with the local development loop

@@ -33,6 +33,7 @@ REQUIRED_REFS = {
     "lint-format-typing-testing.md",
     "review-checklist.md",
     "mature-repo-preservation.md",
+    "eval-benchmark-hardening.md",
 }
 REQUIRED_EVALS = {
     "greenfield-setup",

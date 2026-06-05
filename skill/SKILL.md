@@ -1,7 +1,7 @@
 ---
 name: python-best-practices
 description: "An adaptive workflow for working on Python projects. Inspect first, then advise."
-version: 1.2.2
+version: 1.2.3
 author: CodeSigils
 license: MIT
 tier: powerful
@@ -82,18 +82,18 @@ Always determine the project's declared and tested Python version range:
 
 Classify the task so the skill loads only what is useful:
 
-| Task                                              | Load reference                                                                        |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| New project setup                                 | `pyproject-template.md`, then `project-orientation.md`                                |
-| Existing project review                           | `review-checklist.md`, then task-specific files                                       |
-| Mature repository / automation repo review        | `mature-repo-preservation.md`, then `review-checklist.md`                             |
-| Type-hinting                                      | `lint-format-typing-testing.md` (`mypy.md` is deferred)                               |
-| Test work                                         | `lint-format-typing-testing.md` (`pytest.md` is deferred)                             |
-| Packaging/release                                 | `pyproject-template.md` and `lint-format-typing-testing.md` (`packaging.md` deferred) |
-| Error handling/logging                            | `review-checklist.md` (`errors-and-logging.md` is deferred)                           |
-| CLI development                                   | `pyproject-template.md` for entry points; CLI-specific reference is deferred          |
-| Migration from existing code                      | `project-orientation.md`; migration-specific reference is deferred                    |
-| General Python tooling (lint, format, type, test) | `lint-format-typing-testing.md`                                                       |
+| Task                                              | Load reference                                                                                                                             |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| New project setup                                 | `pyproject-template.md`, then `project-orientation.md`                                                                                     |
+| Existing project review                           | `review-checklist.md`, then task-specific files                                                                                            |
+| Mature repository / automation repo review        | `mature-repo-preservation.md`, then `review-checklist.md`; if eval/benchmark runners are involved, also load `eval-benchmark-hardening.md` |
+| Type-hinting                                      | `lint-format-typing-testing.md` (`mypy.md` is deferred)                                                                                    |
+| Test work                                         | `lint-format-typing-testing.md` (`pytest.md` is deferred)                                                                                  |
+| Packaging/release                                 | `pyproject-template.md` and `lint-format-typing-testing.md` (`packaging.md` deferred)                                                      |
+| Error handling/logging                            | `review-checklist.md` (`errors-and-logging.md` is deferred)                                                                                |
+| CLI development                                   | `pyproject-template.md` for entry points; CLI-specific reference is deferred                                                               |
+| Migration from existing code                      | `project-orientation.md`; migration-specific reference is deferred                                                                         |
+| General Python tooling (lint, format, type, test) | `lint-format-typing-testing.md`                                                                                                            |
 
 ## Modern Baseline Defaults
 
@@ -189,3 +189,8 @@ that work.
 When a mature repository has canonical source plus installed/runtime/generated mirrors, treat source/runtime drift as a
 blocking review finding. Edit canonical source first, sync mirrors with the project-provided command, and run both
 source-only and mirror-aware gates before claiming the runtime behavior changed.
+
+For Python automation repositories with eval or benchmark runners, load `references/eval-benchmark-hardening.md` before
+reviewing or changing runner behavior. In particular, preserve effective backend/model metadata in machine-readable
+artifacts when fallback paths are possible, and keep eval assertion alternatives diagnostic rather than broadly true of
+any reasonable answer.
