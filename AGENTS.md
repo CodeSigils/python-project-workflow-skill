@@ -104,6 +104,19 @@ Canonical docs must not contain generated session state, OpenCode/OpenMemory con
 activity logs, or transient summaries. Keep scratch/session artifacts in ignored workspace locations, not in
 `AGENTS.md`, `README.md`, `plan.md`, `todos.md`, or runtime skill files.
 
+## Author Guard — WARNING
+
+`scripts/run_phase2_checks.py` includes a `check_commit_authors()` function that inspects the last 10 commits for
+bot/agent-like authorship (e.g. names or emails matching "dependabot", "renovate", "[bot]", "agn", "automation") and
+warns when found. The check also flags commits where author differs from committer, which can indicate automated rebase
+or cherry-pick operations.
+
+This is a **non-fatal warning** — legitimate tool commits (Dependabot, Renovate, CI auto-merges) should not block the
+gate. The purpose is to surface unexpected or incorrectly configured authorship for human review.
+
+Agents making commits SHOULD ensure `user.name` and `user.email` are set to the project maintainer's identity, not an
+agent-specific or ephemeral identity.
+
 ## Phase Closure Boundaries
 
 Phase 2 means controlled eval assets and qualitative with-skill vs baseline review. `scripts/run_phase2_checks.py`
@@ -130,6 +143,18 @@ Before reporting Phase 3 or shipping-readiness work complete, run:
 ```bash
 python3 scripts/run_phase2_checks.py --sync-installed
 python3 scripts/run_phase2_checks.py
+```
+
+In addition to the structural and fixture checks, this gate now includes:
+
+- **Markdown format check** (`check_markdown_format`): verifies tracked `.md` files pass the `markdown-formatter` Hermes
+  skill. Gracefully skips when `node`/`oxfmt`/the skill are absent.
+- **Author guard** (`check_commit_authors`): warns on bot-like commit authorship and author-committer mismatches in the
+  last 10 commits (non-fatal).
+
+Run the full gate plus fixture tests:
+
+```bash
 python3 -m pytest tests -q
 python3 -m compileall -q scripts evals/fixtures tests
 (
@@ -140,15 +165,17 @@ python3 -m compileall -q scripts evals/fixtures tests
 )
 ```
 
-If `ruff` is available, also smoke-check the fixtures:
+If `ruff` is available, also smoke-check the fixtures and test suite:
 
 ```bash
 uvx ruff check evals/fixtures/existing-preserve
 uvx ruff check evals/fixtures/existing-buggy || true
+uvx ruff check tests || true
 ```
 
 The buggy fixture is intentionally lint-dirty; its pytest suite should still collect and pass so agents can run tests
-while reviewing the deliberately sloppy code.
+while reviewing the deliberately sloppy code. The test suite may carry unused forward-looking imports (e.g. `shutil`,
+`pytest`) as a work-in-progress convenience; these F401 warnings are expected and non-blocking.
 
 For CI or portable source-only validation, use `python3 scripts/run_phase2_checks.py --skip-installed`; CI runners do
 not have the local Hermes installed-skill mirror.

@@ -542,6 +542,133 @@ def check_installed_mirror() -> None:
             )
 
 
+def check_markdown_format() -> None:
+    """Verify tracked .md files pass the markdown formatter if available.
+
+    Runs the markdown-formatter Hermes skill in verify mode on all tracked
+    .md files. Gracefully skips when node, oxfmt, or the skill are absent.
+    """
+    formatter = (
+        Path.home()
+        / ".hermes"
+        / "skills"
+        / "markdown-formatter"
+        / "src"
+        / "index.js"
+    )
+    if not formatter.exists():
+        print("WARNING: markdown formatter not found, skipping format check")
+        return
+
+    for exe in ("node", "oxfmt"):
+        try:
+            subprocess.run(
+                ["which", exe],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True, timeout=10,
+            )
+        except (subprocess.SubprocessError, OSError):
+            print(f"WARNING: {exe} not available, skipping markdown format check")
+            return
+
+    try:
+        result = subprocess.run(
+            ["git", "ls-files", "*.md"],
+            cwd=ROOT,
+            text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            timeout=10, check=True,
+        )
+    except (subprocess.SubprocessError, OSError) as exc:
+        print(f"WARNING: could not list tracked .md files: {exc}")
+        return
+
+    md_files = [f for f in result.stdout.splitlines() if f.strip()]
+    if not md_files:
+        return
+
+    # Run as one shot with --all for efficiency
+    try:
+        verify = subprocess.run(
+            ["node", str(formatter), "--verify", "--all", *md_files],
+            cwd=ROOT,
+            text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            timeout=60,
+        )
+    except (subprocess.SubprocessError, OSError) as exc:
+        print(f"WARNING: markdown formatter check failed to run: {exc}")
+        return
+
+    if verify.returncode != 0:
+        print(verify.stdout, file=sys.stderr)
+        fail(
+            "tracked .md files are not formatted",
+            hint="Run the markdown formatter: node <skill>/markdown-formatter/src/index.js --fix --guard <files>",
+        )
+
+
+BOT_AUTHOR_PATTERNS = [
+    "dependabot",
+    "renovate",
+    "[bot]",
+    "bot@",
+    "agn",  # catches "agent", "agn" variants
+    "automation",
+    "auto-merge",
+]
+
+
+def check_commit_authors() -> None:
+    """Warn if recent commits have bot/agent-like authorship.
+
+    Checks the last 10 commits for author/committer names or emails that
+    match known bot/agent patterns, or where author and committer differ
+    (indicating automated rebase or cherry-pick).
+
+    This is a non-fatal warning because some bot commits (Dependabot,
+    Renovate) are legitimate and should not block CI.
+    """
+    try:
+        result = subprocess.run(
+            ["git", "log", "--max-count=10",
+             "--format=%H|%an|%ae|%cn|%ce"],
+            cwd=ROOT,
+            text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            timeout=10, check=False,
+        )
+    except (subprocess.SubprocessError, OSError) as exc:
+        print(f"WARNING: could not check git authors: {exc}")
+        return
+
+    if result.returncode != 0 or not result.stdout.strip():
+        return
+
+    for line in result.stdout.strip().splitlines():
+        parts = line.split("|", maxsplit=4)
+        if len(parts) != 5:
+            continue
+        sha, aname, aemail, cname, cemail = parts
+
+        fields = [
+            ("author", aname, aemail),
+            ("committer", cname, cemail),
+        ]
+        for role, name, email in fields:
+            combined = f"{name} <{email}>".lower()
+            for pattern in BOT_AUTHOR_PATTERNS:
+                if pattern in combined:
+                    print(
+                        f"WARNING: commit {sha[:8]} has {role} matching "
+                        f"bot pattern {pattern!r}: {name} <{email}>",
+                        file=sys.stderr,
+                    )
+
+        if f"{aname} <{aemail}>".lower() != f"{cname} <{cemail}>".lower():
+            print(
+                f"NOTE: commit {sha[:8]} author differs from committer "
+                f"(author: {aname} <{aemail}> vs committer: {cname} <{cemail}>)",
+                file=sys.stderr,
+            )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--sync-installed", action="store_true", help="copy source skill files into the local Hermes mirror before checking")
@@ -558,6 +685,8 @@ def main() -> int:
     check_phase3_trigger_eval_set()
     check_fixture_python_files(evals)
     run_pytest_smoke()
+    check_commit_authors()
+    check_markdown_format()
     if args.sync_installed:
         sync_installed_mirror()
     if not args.skip_installed:
