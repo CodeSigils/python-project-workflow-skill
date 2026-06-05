@@ -109,9 +109,10 @@ formatting/structure checks; manual review of trigger scope and reference routin
 
 **Current status:** controlled eval prompts, fixtures, structural readiness checks, a source-guidance qualitative
 review, a first transcript benchmark, benchmark-runner guards, Codex non-trigger rerun evidence, a portable
-mature-automation JSON eval, mature-repo dogfood evidence, and an expanded Codex 9-eval benchmark run exist. The
-expanded run shows the earlier non-trigger leakage is controlled and the mature automation case preserves the native
-gate, but it also exposes brittle exact-phrase assertions that should be narrowed before Phase 2 qualitative approval.
+mature-automation JSON eval, mature-repo dogfood evidence, an expanded Codex 9-eval benchmark run, and a targeted
+assertion-quality iteration exist. The expanded run shows the earlier non-trigger leakage is controlled and the mature
+automation case preserves the native gate. The targeted pass narrowed brittle exact-phrase checks into named synonym
+groups so evals grade behavior rather than one-word wording choices.
 
 **Goal:** Validate that the skill improves agent behavior on realistic Python tasks without overfitting or causing
 unsafe migrations.
@@ -161,13 +162,14 @@ improvements.
 - [x] Rerun affected non-trigger prompts successfully with Codex backend.
 - [x] Add portable mature-automation fixture coverage to `evals/evals.json` and `scripts/run_phase2_checks.py`.
 - [x] Rerun the expanded 9-eval benchmark suite after adding the mature-automation case.
-- [ ] Narrow brittle exact-phrase eval assertions surfaced by the expanded Codex run.
+- [x] Narrow brittle exact-phrase eval assertions surfaced by the expanded Codex run.
 - [x] Add ai-project-governance as a mature-repo dogfood report after the controlled cases establish baseline behavior.
 
 **Iteration loop:** fix based on feedback, rerun, repeat. Iteration 1 results are recorded in
 `evals/transcript-benchmark-iteration-1-2026-06-04.md`; expanded 9-eval Codex results are summarized in
-`evals/transcript-benchmark-expanded-9-2026-06-04.md`; mature-repo dogfood is recorded in
-`evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`; raw local transcripts live in the ignored
+`evals/transcript-benchmark-expanded-9-2026-06-04.md`; targeted assertion-quality evidence is recorded in ignored
+workspace benchmark outputs under `python-best-practices-workspace/codex-assertion-quality-*`; mature-repo dogfood is
+recorded in `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`; raw local transcripts live in the ignored
 `python-best-practices-workspace/` directory.
 
 **Output:** Iterated skill revisions, benchmark results, and dogfood findings. **Verification:** User says "ship it"

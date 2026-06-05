@@ -299,6 +299,26 @@ def require_list(item: dict[str, Any], key: str, name: str) -> list[str]:
     return value
 
 
+def require_any_groups(item: dict[str, Any], name: str) -> list[dict[str, Any]]:
+    value = item.get("must_include_any", [])
+    if not isinstance(value, list):
+        fail(f"eval {name!r} field 'must_include_any' must be a list of objects")
+    for index, group in enumerate(value, start=1):
+        if not isinstance(group, dict):
+            fail(f"eval {name!r} must_include_any group #{index} must be an object")
+        group_name = group.get("name")
+        if not isinstance(group_name, str) or not group_name:
+            fail(f"eval {name!r} must_include_any group #{index} needs a non-empty string name")
+        terms_value = group.get("terms")
+        if not isinstance(terms_value, list) or not terms_value:
+            fail(f"eval {name!r} must_include_any group {group_name!r} needs a non-empty terms list")
+        terms = terms_value
+        bad_terms = [term for term in terms if not isinstance(term, str) or not term]
+        if bad_terms:
+            fail(f"eval {name!r} must_include_any group {group_name!r} has invalid terms: {bad_terms!r}")
+    return value
+
+
 def check_evals() -> list[dict[str, Any]]:
     data = read_json_checked(ROOT / "evals" / "evals.json")
     if data.get("schema_version") != 1:
@@ -315,9 +335,11 @@ def check_evals() -> list[dict[str, Any]]:
         name = item.get("name")
         if not isinstance(name, str) or not name:
             fail(f"eval entry #{index + 1} is missing a non-empty string name")
-        if name in names:
-            fail(f"duplicate eval name: {name}")
-        names.add(name)
+        assert isinstance(name, str)
+        eval_name = name
+        if eval_name in names:
+            fail(f"duplicate eval name: {eval_name}")
+        names.add(eval_name)
         fixture_value = item.get("fixture")
         if not isinstance(fixture_value, str) or not fixture_value:
             fail(f"eval {name!r} is missing a non-empty string fixture path")
@@ -344,6 +366,7 @@ def check_evals() -> list[dict[str, Any]]:
             fail(f"eval {name!r} is missing boolean should_trigger")
         expected_refs = require_list(item, "expected_references", name)
         must_include = require_list(item, "must_include", name)
+        require_any_groups(item, name)
         require_list(item, "must_not_include", name)
         if item["should_trigger"] and not expected_refs:
             fail(f"triggering eval must name expected references: {name}")
