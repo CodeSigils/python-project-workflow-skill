@@ -84,10 +84,10 @@ as installed runtime payload.
 ### Install (for Hermes users)
 
 ```bash
-hermes skills install <owner>/python-best-practices-skill/skill
+hermes skills install skills-sh/CodeSigils/python-best-practices-skill/skill
 ```
 
-This installs directly from GitHub. To update later:
+This installs the public skill entry that points at the GitHub `skill/` payload. To update later:
 
 ```bash
 hermes skills update

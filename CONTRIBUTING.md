@@ -5,6 +5,15 @@ under `skill/`; the installed Hermes copy is only a local mirror for testing.
 
 ## Local development loop
 
+Install or provide the local validation dependencies before running the full gate:
+
+```bash
+python3 -m pip install pytest ruff
+```
+
+If you prefer not to install Ruff into the active Python environment, use the `uvx ruff ...` form for local Ruff checks
+instead. CI installs its own validation dependencies and does not rely on the developer's environment.
+
 1. Edit source files first:
    - `skill/SKILL.md`
    - `skill/references/*.md`
@@ -25,6 +34,12 @@ under `skill/`; the installed Hermes copy is only a local mirror for testing.
    python3 -m pytest tests -q
    python3 -m compileall -q scripts evals/fixtures tests
    python3 -m ruff check scripts tests
+   ```
+
+   Equivalent Ruff check without a local install:
+
+   ```bash
+   uvx ruff check scripts tests
    ```
 
 4. For portable checks that should not depend on a local Hermes installation, use:
