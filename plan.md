@@ -112,7 +112,8 @@ review, a first transcript benchmark, benchmark-runner guards, Codex non-trigger
 mature-automation JSON eval, mature-repo dogfood evidence, an expanded Codex 9-eval benchmark run, and a targeted
 assertion-quality iteration exist. The expanded run shows the earlier non-trigger leakage is controlled and the mature
 automation case preserves the native gate. The targeted pass narrowed brittle exact-phrase checks into named synonym
-groups so evals grade behavior rather than one-word wording choices.
+groups so evals grade behavior rather than one-word wording choices. Follow-up hardening records effective fallback
+backend/model metadata for timed-out OpenCode runs and tightens the incremental typing/testing assertion group.
 
 **Goal:** Validate that the skill improves agent behavior on realistic Python tasks without overfitting or causing
 unsafe migrations.
