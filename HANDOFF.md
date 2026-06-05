@@ -2,6 +2,10 @@
 
 Handoff date: 2026-06-05 Source commit: 7519a70
 
+Historical snapshot: this file records the Phase 4 handoff evidence as it existed at commit `7519a70`. For current
+repository status, use `README.md`, the latest CI run, and the validation commands below rather than treating this file
+as a live maintenance log.
+
 ## What the Skill Does
 
 The `python-best-practices` Hermes skill helps LLM agents work on Python projects safely, idiomatically, and with
@@ -15,14 +19,14 @@ Trigger description (optimized in Phase 3):
 
 ## Install / Runtime Boundary
 
-| Area               | Path                                                              |
-| :----------------- | :---------------------------------------------------------------- |
-| Canonical source   | `skill/` directory in this repository                             |
-| Installed mirror   | `~/.hermes/skills/software-development/python-best-practices`     |
-| GitHub tap install | `hermes skills install <owner>/python-best-practices-skill/skill` |
-| Update command     | `hermes skills update`                                            |
-| Sync command       | `python3 scripts/run_phase2_checks.py --sync-installed`           |
-| Source-only check  | `python3 scripts/run_phase2_checks.py --skip-installed`           |
+| Area              | Path                                                                           |
+| :---------------- | :----------------------------------------------------------------------------- |
+| Canonical source  | `skill/` directory in this repository                                          |
+| Installed mirror  | `~/.hermes/skills/software-development/python-best-practices`                  |
+| Public install    | `hermes skills install skills-sh/CodeSigils/python-best-practices-skill/skill` |
+| Update command    | `hermes skills update`                                                         |
+| Sync command      | `python3 scripts/run_phase2_checks.py --sync-installed`                        |
+| Source-only check | `python3 scripts/run_phase2_checks.py --skip-installed`                        |
 
 The repository checkout also contains `evals/`, `tests/`, `research/`, `references/`, `scripts/`, workspace output, and
 documentation — these are repository-only assets, not runtime payload.

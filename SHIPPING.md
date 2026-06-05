@@ -31,26 +31,24 @@ artifact. Files not referenced by `SKILL.md` are invisible at runtime.
 The canonical source is `skill/` in this repository. The installed Hermes mirror at
 `~/.hermes/skills/software-development/python-best-practices` is a local testing copy, not a distribution target.
 
-## Distribution Model: GitHub Tap
+## Distribution Model: GitHub-Backed Skill Entry
 
-This skill uses a **GitHub tap distribution model.** The GitHub repo IS the distribution channel — there is no separate
-registry or hub copy to maintain. Hermes pulls skills directly from `raw.githubusercontent.com` at install and update
-time.
+This skill uses a **GitHub-backed skill entry.** The GitHub repo IS the distribution channel — there is no separate
+runtime package to maintain. Hermes resolves the public skill identifier to the `skill/` payload in this repository at
+install and update time.
 
 ### How users install
 
 ```bash
-# Direct install (no tap required for a single skill):
-hermes skills install <owner>/python-best-practices-skill/skill
+# Public install identifier:
+hermes skills install skills-sh/CodeSigils/python-best-practices-skill/skill
 
-# Or add the whole repo as a tap, then install:
-hermes skills tap add <owner>/python-best-practices-skill
-# (edit ~/.hermes/.hub/taps.json to set path: "skill/" instead of default "skills/")
-hermes skills install <owner>/python-best-practices-skill/skill
+# Preview before installing:
+hermes skills inspect skills-sh/CodeSigils/python-best-practices-skill/skill
 ```
 
-Single-command direct install is the simplest path. The `skill/` directory in this repo IS the skill payload and maps
-directly to the install path.
+Single-command install is the simplest path. The `skill/` directory in this repo IS the skill payload behind the public
+identifier.
 
 ### Update workflow
 
@@ -70,16 +68,16 @@ hermes skills update             # reinstall with latest from GitHub
 
 ### Sync strategy
 
-| Event                | User action                                     |
-| :------------------- | :---------------------------------------------- |
-| First install        | `hermes skills install owner/repo/skill`        |
-| New references added | `git push` → `hermes skills update`             |
-| Bug fix to SKILL.md  | `git push` → `hermes skills update`             |
-| Check for updates    | `hermes skills check`                           |
-| Uninstall            | `hermes skills uninstall python-best-practices` |
+| Event                | User action                                                                    |
+| :------------------- | :----------------------------------------------------------------------------- |
+| First install        | `hermes skills install skills-sh/CodeSigils/python-best-practices-skill/skill` |
+| New references added | `git push` → `hermes skills update`                                            |
+| Bug fix to SKILL.md  | `git push` → `hermes skills update`                                            |
+| Check for updates    | `hermes skills check`                                                          |
+| Uninstall            | `hermes skills uninstall python-best-practices`                                |
 
-There is no dual-maintenance problem: GitHub is the single source of truth, and Hermes resolves taps directly from it.
-Links between the hub listing and the GitHub repo are automatic.
+There is no dual-maintenance problem: GitHub is the single source of truth, and the public skill entry points back to
+this repository.
 
 ## Development Workflow (Maintainers)
 
@@ -100,8 +98,8 @@ Once changes are ready, commit, push, and consumers run `hermes skills update`.
 
 ## Relationship to the Hermes Hub
 
-The Hermes hub (`hermes skills install ...`) already resolves GitHub repos as a built-in source type (`github`). There
-is no separate hub publishing step needed for GitHub-based distribution.
+The current install path uses the public `skills-sh/...` identifier for this GitHub-backed skill. There is no separate
+package file to build for GitHub-based distribution.
 
 If the skill is ever contributed to the **official Hermes optional skills catalog** (requiring a Hermes core PR), the
 install command would change to:
@@ -113,4 +111,5 @@ hermes skills install official/owner/python-best-practices
 That path would add an additional synchronization point (the Hermes release cycle) but would make the skill discoverable
 in `hermes skills browse --source official`. This remains an optional future step.
 
-For now, the GitHub tap model has zero external dependency, one source of truth, and a simple update chain.
+For now, the GitHub-backed public skill entry has zero package-build overhead, one source of truth, and a simple update
+chain.

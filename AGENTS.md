@@ -14,8 +14,8 @@ qualitative approval was recorded on 2026-06-05. Phase 3 description optimizatio
 set at `evals/trigger-description-evals.json` records the selected frontmatter description and
 `evals/trigger-description-optimization-2026-06-05.md` records the decision. Phase 4 handoff is complete as of
 2026-06-05: MIT license applied, readiness gates verified, mirror synced, handoff doc at `HANDOFF.md`. Distribution uses
-the GitHub tap model documented in `SHIPPING.md`. Official hub contribution remains optional, requiring explicit
-approval.
+the GitHub-backed public skill entry documented in `SHIPPING.md`. Official hub contribution remains optional, requiring
+explicit approval.
 
 ## Orientation Contract — BLOCKING
 
