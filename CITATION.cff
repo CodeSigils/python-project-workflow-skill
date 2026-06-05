@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this work in your research, please cite it as below."
+authors:
+  - family-names: "CodeSigils"
+    given-names: ""
+    email: "toolsoftrade.web@gmail.com"
+title: "Python Best Practices Hermes Skill"
+version: 1.2.5
+date-released: 2026-06-05
+repository-code: "https://github.com/CodeSigils/python-best-practices-skill"
+license: MIT
+type: software
+description: "A Hermes agent skill that provides adaptive guidance for Python project setup, linting, typing, testing, packaging, CI configuration, and code review."
