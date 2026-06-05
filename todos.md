@@ -50,12 +50,13 @@
 - [x] Strengthen non-trigger behavior and benchmark assertions
 - [x] Rerun affected non-trigger prompts successfully with Codex backend
 - [x] Dogfood on `/home/sand/projects/ai-project-governance` as a mature-repo review target
-- [ ] Iterate based on feedback
+- [x] Iterate based on feedback and record user qualitative approval to move into Phase 3
 
 ## Phase 3 — Description Optimization
 
-- [ ] Generate trigger eval set (20 queries, mix of should-trigger and should-not-trigger)
-- [ ] Include near misses so the skill does not over-trigger on generic Python or non-Python work
+- [x] Generate trigger eval set (20 queries, mix of should-trigger and should-not-trigger)
+- [x] Include near misses so the skill does not over-trigger on generic Python or non-Python work
+- [ ] User reviews `evals/trigger-description-evals.json`
 - [ ] Select or implement the description-optimization workflow/tooling for this repo
 - [ ] Run the chosen optimization workflow and apply the selected description to frontmatter
 

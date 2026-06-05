@@ -1,7 +1,7 @@
 ---
 name: python-best-practices
 description: "An adaptive workflow for working on Python projects. Inspect first, then advise."
-version: 1.2.3
+version: 1.2.4
 author: CodeSigils
 license: MIT
 tier: powerful
@@ -189,6 +189,12 @@ that work.
 When a mature repository has canonical source plus installed/runtime/generated mirrors, treat source/runtime drift as a
 blocking review finding. Edit canonical source first, sync mirrors with the project-provided command, and run both
 source-only and mirror-aware gates before claiming the runtime behavior changed.
+
+When resuming an interrupted Python implementation or review, treat compaction summaries and prior assistant claims as
+leads, not truth. Reconstruct state from machine facts first: inspect git status/log/diff, reread the repository's
+active agent/context files, check changed paths, and rerun the relevant project gates before continuing, committing, or
+claiming completion. If the interruption left staged or uncommitted changes, classify them before editing so you do not
+overwrite valid partial work or preserve stale transitional state.
 
 For Python automation repositories with eval or benchmark runners, load `references/eval-benchmark-hardening.md` before
 reviewing or changing runner behavior. In particular, preserve effective backend/model metadata in machine-readable

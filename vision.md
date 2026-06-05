@@ -61,9 +61,17 @@ The target tests whether the skill can survive a complex governance-heavy Python
 - produce a review/advice report before edits,
 - require explicit authorization for broad changes.
 
+## Trigger Optimization Strategy
+
+Phase 3 tunes when the skill should load, not the core runtime guidance. The current review artifact is
+`evals/trigger-description-evals.json`: 20 prompts split evenly between should-trigger Python project work and near-miss
+non-triggers such as general Python concepts, docs-only edits, non-Python tooling, and Hermes usage. Keep this eval set
+human-reviewed before changing the frontmatter description.
+
 ## Longer-term Aspirations (deferred)
 
-These are not part of the current Phase 2 stabilization and shipping path. Revisit after evals show real need:
+These are not part of the current Phase 3 optimization and Phase 4 shipping path. Revisit after trigger evaluation or
+real use shows need:
 
 1. **Auto-migration**: take a legacy Python project and suggest a staged upgrade path for typing, Ruff, packaging, or
    test structure.

@@ -1,6 +1,6 @@
 # Python Best Practices Skill Agent Instructions
 
-**Last verified:** 2026-06-04
+**Last verified:** 2026-06-05
 
 This repository is the source checkout for the `python-best-practices` Hermes skill. It builds and evaluates the skill
 source under `skill/`; the installed Hermes mirror is only a local runtime copy used for testing.
@@ -9,8 +9,10 @@ source under `skill/`; the installed Hermes mirror is only a local runtime copy 
 
 Phase 2 controlled eval assets, fixtures, structural checks, source-guidance review, benchmark runner, Codex non-trigger
 rerun evidence, portable mature-automation JSON eval coverage, expanded Codex 9-eval benchmark evidence, mature-repo
-dogfood evidence, and runtime mature-repo preservation guidance exist. Phase 3 description optimization and Phase 4 user
-shipping/publishing readiness remain future work unless the user explicitly authorizes them.
+dogfood evidence, runtime mature-repo preservation guidance, and benchmark-hardening guidance exist. Phase 2 user
+qualitative approval was recorded on 2026-06-05. Phase 3 description optimization is active; the 20-query trigger eval
+set exists at `evals/trigger-description-evals.json` and is pending user review before optimization iterations. Phase 4
+user shipping/publishing readiness remains future work unless the user explicitly authorizes it.
 
 ## Orientation Contract — BLOCKING
 
@@ -59,8 +61,10 @@ python3 scripts/run_phase2_checks.py --sync-installed
 
 ## Phase and User-Shipping Guard — BLOCKING
 
-- Phase 2 completion requires benchmark evidence plus explicit user qualitative approval (`ship it`).
-- Phase 3 optimizes trigger description only after behavior is stable.
+- Phase 2 completion required benchmark evidence plus explicit user qualitative approval; that approval was recorded on
+  2026-06-05.
+- Phase 3 optimizes trigger description only after behavior is stable. Keep `evals/trigger-description-evals.json`
+  marked as `draft-for-user-review` until the user approves the eval set.
 - Phase 4 is the user-shipping and optional publishing phase. Before claiming shipped/readiness, verify the source
   skill, installed mirror, fresh-session trigger behavior, and packaging boundary.
 - A local mirror passing checks is not the same thing as publishing, hub contribution, cross-profile sync, or user
@@ -98,23 +102,26 @@ Canonical docs must not contain generated session state, OpenCode/OpenMemory con
 activity logs, or transient summaries. Keep scratch/session artifacts in ignored workspace locations, not in
 `AGENTS.md`, `README.md`, `plan.md`, `todos.md`, or runtime skill files.
 
-## Phase 2 Boundary
+## Phase 2 Closure and Phase 3 Boundary
 
 Phase 2 means controlled eval assets and qualitative with-skill vs baseline review. `scripts/run_phase2_checks.py`
-verifies structural readiness and fixture smoke tests; it does not claim the qualitative eval review is complete.
+verifies structural readiness and fixture smoke tests; it does not judge LLM qualitative output. Phase 2 is closed as of
+2026-06-05, and Phase 3 is limited to trigger-description eval review and optimization. Do not start Phase 4 shipping or
+publishing work from Phase 3 status alone.
 
 ## Files to Know
 
 - `skill/SKILL.md`: runtime router and operating contract.
 - `skill/references/`: runtime reference files loaded by agents.
 - `evals/evals.json`: controlled Phase 2 eval prompts and expectations, including the portable mature-automation case.
+- `evals/trigger-description-evals.json`: Phase 3 trigger/near-miss eval set for frontmatter description optimization.
 - `evals/fixtures/`: disposable fixture projects for controlled evals.
 - `scripts/run_phase2_checks.py`: local readiness gate and exact mirror/repo guard checker.
 - `README.md`, `plan.md`, `todos.md`: human-facing status and roadmap.
 
 ## Testing
 
-Before reporting Phase 2 or shipping-readiness work complete, run:
+Before reporting Phase 3 or shipping-readiness work complete, run:
 
 ```bash
 python3 scripts/run_phase2_checks.py --sync-installed

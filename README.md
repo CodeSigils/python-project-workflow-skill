@@ -19,27 +19,31 @@ recommending change.
 
 | Area                               | Current state                                                                      |
 | :--------------------------------- | :--------------------------------------------------------------------------------- |
-| Active phase                       | Phase 2 — Test & Iterate                                                           |
+| Active phase                       | Phase 3 — Description Optimization                                                 |
 | Runtime skill source               | `skill/`                                                                           |
 | Installed mirror                   | `/home/sand/.hermes/skills/software-development/python-best-practices`             |
-| Runtime skill version              | `1.2.3` in `skill/SKILL.md`                                                        |
+| Runtime skill version              | `1.2.4` in `skill/SKILL.md`                                                        |
 | Latest local gate                  | `python3 scripts/run_phase2_checks.py` passes for source plus installed mirror     |
 | Latest expanded benchmark evidence | `python-best-practices-workspace/codex-expanded-9-20260604/benchmark.json`         |
 | Latest benchmark report            | `evals/transcript-benchmark-expanded-9-2026-06-04.md`                              |
 | Latest targeted assertion evidence | `python-best-practices-workspace/codex-polish-incremental-20260605/benchmark.json` |
+| Latest trigger eval set            | `evals/trigger-description-evals.json`                                             |
 | Latest dogfood evidence            | `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`                    |
-| Not yet complete                   | Phase 2 user qualitative approval, Phase 3, Phase 4 handoff                        |
+| Not yet complete                   | Phase 3 description optimization, Phase 4 handoff                                  |
 
 Phase 0 research was corrected and revalidated on 2026-06-04, Phase 1 skill drafting is complete, and Phase 2 controlled
-eval assets now exist. The expanded Codex 9-eval run completed 18/18 command runs successfully, with mean pass rates of
-0.9325 for `with_skill` and 0.9102 for `without_skill`. The four non-trigger cases scored 100% in both configurations;
-the new mature automation case preserved the native gate and a targeted assertion-quality pass now uses synonym groups
-for behavioral checks instead of brittle exact-phrase requirements. Follow-up hardening records effective fallback
-backend/model metadata in benchmark outputs and tightens incremental typing/testing assertion alternatives. A
-post-polish Codex rerun of the affected incremental typing/testing eval passed 9/9 assertions in both configurations.
+eval assets are complete with user qualitative approval recorded on 2026-06-05. The expanded Codex 9-eval run completed
+18/18 command runs successfully, with mean pass rates of 0.9325 for `with_skill` and 0.9102 for `without_skill`. The
+four non-trigger cases scored 100% in both configurations; the mature automation case preserved the native gate and a
+targeted assertion-quality pass now uses synonym groups for behavioral checks instead of brittle exact-phrase
+requirements. Follow-up hardening records effective fallback backend/model metadata in benchmark outputs and tightens
+incremental typing/testing assertion alternatives. A post-polish Codex rerun of the affected incremental typing/testing
+eval passed 9/9 assertions in both configurations.
 
-Phase 2 is still open until the user gives qualitative approval after reviewing benchmark and dogfood evidence. A
-passing local mirror is not a package, hub contribution, release, push, or user handoff.
+Phase 3 is now active. The first Phase 3 artifact is a 20-query trigger-description eval set with 10 should-trigger
+cases and 10 near-miss should-not-trigger cases in `evals/trigger-description-evals.json`; it is intentionally marked
+`draft-for-user-review` before description optimization runs. A passing local mirror is not a package, hub contribution,
+release, push, or user handoff.
 
 ## Runtime payload
 
@@ -134,6 +138,8 @@ user does not want to install/load that skill, continue with another verified so
 - `tests/test_run_benchmark.py` — benchmark grading/output regression tests
 - `.github/workflows/ci.yml` — portable source-only validation for GitHub Actions
 - `evals/evals.json` — 9 controlled Phase 2 eval prompts, including the portable mature-automation preservation fixture
+- `evals/trigger-description-evals.json` — 20-query Phase 3 trigger/near-miss eval set for frontmatter description
+  review
 - `evals/phase2-qualitative-review-2026-06-04.md` — source-guidance qualitative review and iteration notes
 - `evals/transcript-benchmark-expanded-9-2026-06-04.md` — expanded Codex 9-eval benchmark summary and analyst review
 - `evals/transcript-benchmark-iteration-1-2026-06-04.md` — first transcript benchmark summary and findings
@@ -165,8 +171,9 @@ python-best-practices-skill/
 ├── tests/             # Regression tests for validation and benchmark scripts
 │   ├── test_run_benchmark.py
 │   └── test_run_phase2_checks.py
-├── evals/             # Controlled Phase 2 eval prompts and fixtures
-│   ├── evals.json     # 9 controlled eval prompts
+├── evals/             # Controlled Phase 2 eval prompts, Phase 3 trigger evals, and fixtures
+│   ├── evals.json     # 9 controlled Phase 2 eval prompts
+│   ├── trigger-description-evals.json
 │   └── fixtures/
 ├── research/          # Evidence, comparisons, and design rationale
 │   ├── README.md

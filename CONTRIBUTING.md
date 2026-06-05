@@ -10,7 +10,7 @@ under `skill/`; the installed Hermes copy is only a local mirror for testing.
    - `skill/references/*.md`
    - `scripts/run_phase2_checks.py`
    - `tests/*.py`
-   - planning/research docs when behavior or status changes
+   - planning/research docs when behavior, phase status, or trigger-eval status changes
 
 2. If you changed runtime skill files, sync the local Hermes mirror:
 
@@ -64,6 +64,10 @@ Keep live status in these files:
 - `README.md` — human-facing current state and next step
 - `plan.md` — phase plan and decision summary
 - `todos.md` — active task checklist
+- `AGENTS.md` — repo-local maintenance contract and phase/shipping guards
+
+When Phase 3 trigger-description work changes, also keep `evals/trigger-description-evals.json` and the validation
+script aligned. Do not mark that eval set beyond `draft-for-user-review` until the user approves the prompts.
 
 Do not add one-off implementation summaries as live status documents. Keep live status in `README.md`, `plan.md`, and
 `todos.md`; use git history for completed-change records. `scripts/run_phase2_checks.py` enforces that removed summary

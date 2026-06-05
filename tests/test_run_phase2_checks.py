@@ -89,6 +89,21 @@ def make_minimal_repo(tmp_path: Path) -> Path:
                 "must_not_include": ["python-best-practices"],
             })
     (repo / "evals" / "evals.json").write_text(json.dumps({"schema_version": 1, "evals": evals}), encoding="utf-8")
+    trigger_description_evals = [
+        {
+            "id": f"trigger-{index}",
+            "query": f"Python project query {index}",
+            "should_trigger": index <= 10,
+            "category": "trigger" if index <= 10 else "near-miss",
+            "rationale": "Minimal trigger-description eval for checker tests.",
+            "expected_boundary": "Minimal expected boundary.",
+        }
+        for index in range(1, 21)
+    ]
+    (repo / "evals" / "trigger-description-evals.json").write_text(
+        json.dumps({"schema_version": 1, "status": "draft-for-user-review", "evals": trigger_description_evals}),
+        encoding="utf-8",
+    )
     (repo / "AGENTS.md").write_text(
         "\n".join([
             "# Agent contract",
@@ -141,6 +156,29 @@ def test_source_only_check_can_run_against_temp_repo(tmp_path: Path) -> None:
 
     assert result.returncode == 0
     assert "source files only are valid" in result.stdout
+
+
+def test_missing_trigger_description_eval_set_reports_hint(tmp_path: Path) -> None:
+    repo = make_minimal_repo(tmp_path)
+    (repo / "evals" / "trigger-description-evals.json").unlink()
+
+    result = run_checker(repo, "--skip-installed")
+
+    assert result.returncode == 1
+    assert "required file is missing: evals/trigger-description-evals.json" in result.stderr
+
+
+def test_imbalanced_trigger_description_eval_set_reports_hint(tmp_path: Path) -> None:
+    repo = make_minimal_repo(tmp_path)
+    data = json.loads((repo / "evals" / "trigger-description-evals.json").read_text(encoding="utf-8"))
+    data["evals"][10]["should_trigger"] = True
+    (repo / "evals" / "trigger-description-evals.json").write_text(json.dumps(data), encoding="utf-8")
+
+    result = run_checker(repo, "--skip-installed")
+
+    assert result.returncode == 1
+    assert "must contain 10 trigger and 10 non-trigger queries" in result.stderr
+    assert "balanced between should-trigger and should-not-trigger" in result.stderr
 
 
 def test_invalid_evals_json_reports_line_column_and_hint(tmp_path: Path) -> None:

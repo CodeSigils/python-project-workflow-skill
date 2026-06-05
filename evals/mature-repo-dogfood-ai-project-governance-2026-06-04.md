@@ -138,6 +138,6 @@ recommendations without editing the target.
 
 ## Follow-up for python-best-practices skill
 
-This dogfood supports marking the planned mature-repo review item complete, while keeping Phase 2 open until the user
-gives qualitative approval (`ship it`). Phase 3 trigger-description optimization and Phase 4 handoff/publishing remain
-future work.
+This dogfood supported marking the planned mature-repo review item complete. At the time of the report, Phase 2 still
+needed user qualitative approval; that approval was later recorded on 2026-06-05 and Phase 3 became active. Phase 4
+handoff/publishing remains future work.
