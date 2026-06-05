@@ -95,20 +95,19 @@ Use `# type: ignore` comments sparingly and only with a ticket or comment explai
 
 ### Characterization Tests (Approval Tests)
 
-When refactoring legacy code that has no existing tests, write **characterization tests** first to lock
-in existing behavior before making changes:
+When refactoring legacy code that has no existing tests, write **characterization tests** first to lock in existing
+behavior before making changes:
 
 1. Run the code against representative inputs and capture the output.
 2. Write a test that asserts the captured output (an "approval test" or "golden file" test).
 3. Refactor the code, then confirm the test still passes.
 4. If the refactoring is correct but changes behavior, update the golden file.
 
-Tools: `pytest-regressions` (data file approval), `syrupy` (snapshot testing),
-`pytest-approvaltests` (text-based approval). For new projects, `syrupy` is the lightest option;
-for existing projects, start with inline assertions or `pytest-regressions`.
+Tools: `pytest-regressions` (data file approval), `syrupy` (snapshot testing), `pytest-approvaltests` (text-based
+approval). For new projects, `syrupy` is the lightest option; for existing projects, start with inline assertions or
+`pytest-regressions`.
 
-This technique prevents accidental behavior changes during refactoring and builds a test safety net
-gradually.
+This technique prevents accidental behavior changes during refactoring and builds a test safety net gradually.
 
 ## Existing-Project Caveats
 

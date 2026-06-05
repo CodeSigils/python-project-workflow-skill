@@ -2,7 +2,9 @@
 
 ## Overview
 
-`requirements.txt` is a legacy format for specifying Python package dependencies. While modern Python projects increasingly use `pyproject.toml` (PEP 621) and lockfiles like `uv.lock` or `poetry.lock`, understanding `requirements.txt` remains important for maintaining existing projects and interfacing with tools that still expect it.
+`requirements.txt` is a legacy format for specifying Python package dependencies. While modern Python projects
+increasingly use `pyproject.toml` (PEP 621) and lockfiles like `uv.lock` or `poetry.lock`, understanding
+`requirements.txt` remains important for maintaining existing projects and interfacing with tools that still expect it.
 
 ## Best Practices
 
@@ -24,12 +26,14 @@
 - `pyproject.toml`: Source of truth for metadata and dependencies (PEP 621)
 - `requirements.in`: Input file for `pip-compile` containing direct dependencies (not transitive)
 - `requirements.txt`: Output of dependency resolution, containing pinned versions of all transitive dependencies
-- `uv.lock` / `poetry.lock` / `Pipfile.lock`: Lockfiles that provide reproducible environments (preferred over `requirements.txt`)
+- `uv.lock` / `poetry.lock` / `Pipfile.lock`: Lockfiles that provide reproducible environments (preferred over
+  `requirements.txt`)
 
 ### 4. Pitfalls to Avoid
 
 - **Committing both `requirements.txt` and a lockfile** without a clear strategy (can cause confusion)
-- **Using `requirements.txt` for development dependencies** without separating them (consider `requirements-dev.txt` or extras)
+- **Using `requirements.txt` for development dependencies** without separating them (consider `requirements-dev.txt` or
+  extras)
 - **Not updating `requirements.txt` when dependencies change** (leads to drift)
 - **Pinning overly strictly** (e.g., pinning transitive dependencies that don't need pinning)
 - **Mixing formats** (e.g., specifying VCS dependencies in `requirements.txt` without proper syntax)
@@ -37,6 +41,7 @@
 ### 5. Modern Recommendation
 
 For new projects, prefer:
+
 - `pyproject.toml` for declaring dependencies (with version ranges)
 - A lockfile (`uv.lock`, `poetry.lock`, etc.) for reproducible builds
 - Only generate `requirements.txt` if explicitly needed for legacy tooling
@@ -44,6 +49,7 @@ For new projects, prefer:
 ## Integration with Hermes Skill
 
 The Python Best Practices skill should:
+
 1. Inspect for existing `requirements.txt` files and understand their purpose in the project
 2. If present, verify that they are consistent with `pyproject.toml` or lockfiles
 3. Recommend generating `requirements.txt` from lockfiles if needed for compatibility

@@ -13,7 +13,8 @@ metadata:
 
 # Python Best Practices Skill
 
-Use for changing or reviewing Python project code, packaging, typing, tests, CI, or tooling; inspect first, not concept-only Q&A.
+Use for changing or reviewing Python project code, packaging, typing, tests, CI, or tooling; inspect first, not
+concept-only Q&A.
 
 ## When to Use This Skill
 
