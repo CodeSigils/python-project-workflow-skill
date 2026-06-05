@@ -11,8 +11,8 @@ This project is a single-version Hermes skill. The latest version on the `main` 
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in this skill's behavior, reference files, or distribution mechanism,
-please report it privately. Do not open a public issue.
+If you discover a security vulnerability in this skill's behavior, reference files, or distribution mechanism, please
+report it privately. Do not open a public issue.
 
 Contact: **toolsoftrade.web@gmail.com**
 
