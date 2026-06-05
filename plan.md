@@ -137,8 +137,9 @@ unsafe migrations.
 
 **High-complexity dogfood target:**
 
-Completed against `/home/sand/projects/ai-project-governance` after controlled evals established baseline behavior.
-Evidence is recorded in `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`.
+Completed against the [ai-project-governance](https://github.com/CodeSigils/ai-project-governance) repository after
+controlled evals established baseline behavior. Evidence is recorded in
+`evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`.
 
 Purpose:
 
@@ -226,8 +227,10 @@ Shipping model:
   workspace outputs stay in the source checkout.
 - The local installed Hermes mirror at `~/.hermes/skills/software-development/python-best-practices` is a test/runtime
   mirror, not source of truth. Sync only from `skill/` with `scripts/run_phase2_checks.py --sync-installed`.
-- Packaging/publishing uses an explicit human-authorized side-effect boundary: do not package, publish, contribute to
-  the hub, push tags, or sync to other Hermes profiles from routine validation.
+- Distribution uses the **GitHub tap model**: the GitHub repo IS the distribution channel. Users install directly with
+  `hermes skills install <owner>/python-best-practices-skill/skill` and update with `hermes skills update`. There is no
+  separate hub registry or package file to maintain.
+- Official Hermes hub contribution remains an optional future step requiring explicit approval.
 
 Tasks:
 
@@ -238,7 +241,9 @@ Tasks:
 4. Run at least one fresh-session trigger check and one should-not-trigger near miss after Phase 3 description tuning.
 5. Produce a concise user handoff: what the skill does, install/runtime boundary, verification evidence, known limits,
    and exact next command for the user.
-6. Optional, only after explicit approval: package with `package_skill.py` or contribute to Hermes skill hub.
+6. Document GitHub tap distribution model in `SHIPPING.md` (replaces standalone packaging; hub contribution remains
+   optional with explicit approval).
+7. Optional, only after explicit approval: contribute to official Hermes optional skills catalog.
 
 **Output:** User-ready local skill handoff, or an explicitly approved package/publish artifact. **Verification:** Full
 local gate, source-only gate, installed mirror sync check, fresh-session trigger/near-miss evidence, and confirmation
@@ -248,20 +253,21 @@ that repository-only files are absent from the runtime payload.
 
 ## Key Decisions
 
-| #   | Decision                                                      | Rationale                                                                                                                        | Evidence                                                                     |
-| :-- | :------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------- |
-| 1   | Adaptive workflow, not encyclopedia                           | Strong agent ecosystems use scoped, concrete, verifiable instructions                                                            | `research/cross-ecosystem-skill-strategy.md`                                 |
-| 2   | Inspect before advising                                       | Existing Python projects vary by package manager, runner, layout, and CI                                                         | Cursor/Claude/Codex/Copilot patterns; Python tooling docs                    |
-| 3   | `SKILL.md` as router / operating contract                     | Progressive disclosure keeps the always-loaded prompt small                                                                      | Claude Skills, Cursor rules, Codex `AGENTS.md` layering                      |
-| 4   | uv as greenfield package/project manager default              | Unified project, dependency, environment, build, and tool execution model                                                        | Astral uv docs                                                               |
-| 5   | Ruff as greenfield lint/import-sort/format tool               | Fast modern replacement for many lint/format tools                                                                               | Astral Ruff docs                                                             |
-| 6   | mypy for typing, with staged strictness                       | Static typing catches issues, but legacy projects need incremental rollout                                                       | mypy getting-started and existing-code docs                                  |
-| 7   | pytest as default test runner                                 | Widely used and well-documented; pairs well with `src/` layout                                                                   | pytest good practices                                                        |
-| 8   | PEP 621 / pyproject-centered config                           | Standard package metadata and tool config location                                                                               | PyPA packaging guide, PEP 518, PEP 621, current PyPA specs                   |
-| 9   | Google-style docstrings as default, not mandate               | Useful general default; NumPy/Sphinx styles remain valid in some projects                                                        | Google Python Style Guide, ecosystem caveats in strategy report              |
-| 10  | ai-project-governance as later mature dogfood                 | High-signal stress test but too complex for the first eval                                                                       | Strategy recommendation from 2026-06-03 session                              |
-| 11  | `.gitignore` guidance uses maintained templates as checklists | GitHub and gitignore.org/Toptal templates are useful baselines, but repo-specific ignores and lockfile policy must be preserved. | `research/python-gitignore-templates.md`                                     |
-| 12  | `skill/` is the user-shipping boundary                        | Industry packaging research favors simple directory/manifest boundaries over sprawling allowlist plus exclusion policy.          | `/home/sand/projects/ai-project-governance/research/packaging-strategies.md` |
+| #   | Decision                                                      | Rationale                                                                                                                                                              | Evidence                                                                                                       |
+| :-- | :------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------- |
+| 1   | Adaptive workflow, not encyclopedia                           | Strong agent ecosystems use scoped, concrete, verifiable instructions                                                                                                  | `research/cross-ecosystem-skill-strategy.md`                                                                   |
+| 2   | Inspect before advising                                       | Existing Python projects vary by package manager, runner, layout, and CI                                                                                               | Cursor/Claude/Codex/Copilot patterns; Python tooling docs                                                      |
+| 3   | `SKILL.md` as router / operating contract                     | Progressive disclosure keeps the always-loaded prompt small                                                                                                            | Claude Skills, Cursor rules, Codex `AGENTS.md` layering                                                        |
+| 4   | uv as greenfield package/project manager default              | Unified project, dependency, environment, build, and tool execution model                                                                                              | Astral uv docs                                                                                                 |
+| 5   | Ruff as greenfield lint/import-sort/format tool               | Fast modern replacement for many lint/format tools                                                                                                                     | Astral Ruff docs                                                                                               |
+| 6   | mypy for typing, with staged strictness                       | Static typing catches issues, but legacy projects need incremental rollout                                                                                             | mypy getting-started and existing-code docs                                                                    |
+| 7   | pytest as default test runner                                 | Widely used and well-documented; pairs well with `src/` layout                                                                                                         | pytest good practices                                                                                          |
+| 8   | PEP 621 / pyproject-centered config                           | Standard package metadata and tool config location                                                                                                                     | PyPA packaging guide, PEP 518, PEP 621, current PyPA specs                                                     |
+| 9   | Google-style docstrings as default, not mandate               | Useful general default; NumPy/Sphinx styles remain valid in some projects                                                                                              | Google Python Style Guide, ecosystem caveats in strategy report                                                |
+| 10  | ai-project-governance as later mature dogfood                 | High-signal stress test but too complex for the first eval                                                                                                             | Strategy recommendation from 2026-06-03 session                                                                |
+| 11  | `.gitignore` guidance uses maintained templates as checklists | GitHub and gitignore.org/Toptal templates are useful baselines, but repo-specific ignores and lockfile policy must be preserved.                                       | `research/python-gitignore-templates.md`                                                                       |
+| 12  | `skill/` is the user-shipping boundary                        | Industry packaging research favors simple directory/manifest boundaries over sprawling allowlist plus exclusion policy.                                                | `ai-project-governance/research/packaging-strategies.md` (external repo)                                       |
+| 13  | GitHub tap distribution model                                 | GitHub IS the distribution channel; no separate hub copy needed. Users install with `hermes skills install <owner>/repo/skill` and update with `hermes skills update`. | `SHIPPING.md`, [Hermes skills hub docs](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills) |
 
 ## Deferred Decisions
 
