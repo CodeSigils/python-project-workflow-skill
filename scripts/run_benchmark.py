@@ -16,6 +16,9 @@ Usage:
   # Codex backend with the default Codex model
   python3 scripts/run_benchmark.py --backend codex
 
+  # Try OpenCode first, but fall back to Codex if an OpenCode run times out
+  python3 scripts/run_benchmark.py --backend opencode --fallback-backend codex --timeout 60
+
   # Custom model
   python3 scripts/run_benchmark.py --model anthropic/claude-sonnet-4
 
@@ -223,16 +226,22 @@ def grade_output(
     response: str,
     assertions: dict,
 ) -> list[dict]:
-    """Run substring-based assertions against the response.
+    """Run assertion checks against the response.
+
+    Supports exact substring requirements (must_include / must_not_include)
+    plus synonym groups (must_include_any). The synonym groups keep evals
+    focused on behavior instead of brittle one-word phrasing.
 
     Returns a list of expectation dicts matching the grading.json format.
     """
     must_include = assertions.get("must_include", [])
+    must_include_any = assertions.get("must_include_any", [])
     must_not_include = assertions.get("must_not_include", [])
     expectations = []
+    response_lower = response.lower()
 
     for term in must_include:
-        passed = term.lower() in response.lower()
+        passed = term.lower() in response_lower
         expectations.append({
             "text": f"Includes expected guidance: {term}",
             "passed": passed,
@@ -243,8 +252,23 @@ def grade_output(
             ),
         })
 
+    for group in must_include_any:
+        name = group.get("name", "one of expected alternatives")
+        terms = group.get("terms", [])
+        found_terms = [term for term in terms if term.lower() in response_lower]
+        passed = bool(found_terms)
+        expectations.append({
+            "text": f"Includes expected guidance group: {name}",
+            "passed": passed,
+            "evidence": (
+                f"Found alternative(s): {found_terms!r}."
+                if passed
+                else f"Missing all alternatives for {name!r}: {terms!r}."
+            ),
+        })
+
     for term in must_not_include:
-        passed = term.lower() not in response.lower()
+        passed = term.lower() not in response_lower
         expectations.append({
             "text": f"Avoids prohibited guidance: {term}",
             "passed": passed,
@@ -416,6 +440,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Model identifier for the selected backend (or PBP_EVAL_MODEL env var)",
     )
     parser.add_argument(
+        "--fallback-backend", choices=("none", "codex"), default=os.environ.get("PBP_EVAL_FALLBACK_BACKEND", "none"),
+        help="Fallback backend to use when an OpenCode run times out (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--fallback-model", default=os.environ.get("PBP_EVAL_FALLBACK_MODEL", "gpt-5.5"),
+        help="Model identifier for the fallback backend (default: %(default)s, or PBP_EVAL_FALLBACK_MODEL env var)",
+    )
+    parser.add_argument(
         "--delegate", action="store_true",
         help="Use Hermes delegate_task backend instead of the selected CLI backend",
     )
@@ -470,6 +502,9 @@ def main() -> int:
     args = parse_args()
     if args.model is None:
         args.model = "gpt-5.5" if args.backend == "codex" else "opencode/big-pickle"
+    if args.fallback_backend != "none" and args.backend != "opencode":
+        print("ERROR: --fallback-backend is only supported when --backend opencode", file=sys.stderr)
+        return 1
 
     if not SKILL_FILE.exists():
         print(f"ERROR: skill file not found: {SKILL_FILE}", file=sys.stderr)
@@ -503,6 +538,8 @@ def main() -> int:
         print(f"[dry-run] Would output to: {output_dir}")
         print(f"[dry-run] Model: {args.model}")
         print(f"[dry-run] Backend: {'hermes delegate' if args.delegate else args.backend}")
+        if args.fallback_backend != "none":
+            print(f"[dry-run] Fallback: {args.fallback_backend} ({args.fallback_model}) on OpenCode timeout")
         print(f"[dry-run] Evals to run: {[e['name'] for e in evals]}")
         print("[dry-run] Configurations: with_skill, without_skill")
         return 0
@@ -518,6 +555,7 @@ def main() -> int:
         fixture_abs = ROOT / fixture if not fixture.is_absolute() else fixture
         assertions = {
             "must_include": eval_item.get("must_include", []),
+            "must_include_any": eval_item.get("must_include_any", []),
             "must_not_include": eval_item.get("must_not_include", []),
         }
 
@@ -570,12 +608,33 @@ def main() -> int:
                         )
                     print(f"exit={returncode} duration={duration:.1f}s")
                 except subprocess.TimeoutExpired:
-                    print(f"TIMEOUT ({args.timeout}s)")
-                    cleaned = f"TIMEOUT after {args.timeout}s"
-                    raw_output = cleaned
-                    raw_stderr = ""
-                    returncode = -1
-                    duration = float(args.timeout)
+                    if args.backend == "opencode" and args.fallback_backend == "codex":
+                        print(f"TIMEOUT ({args.timeout}s); falling back to codex ...", end=" ", flush=True)
+                        try:
+                            cleaned, raw_output, raw_stderr, returncode, fallback_duration = run_codex(
+                                prompt_text, args.fallback_model, input_dir, output_dir_cfg, timeout=args.timeout,
+                            )
+                            raw_stderr = (
+                                f"OpenCode timed out after {args.timeout}s; "
+                                f"fallback_backend=codex fallback_model={args.fallback_model}\n\n"
+                                f"{raw_stderr}"
+                            )
+                            duration = float(args.timeout) + fallback_duration
+                            print(f"exit={returncode} duration={duration:.1f}s")
+                        except subprocess.TimeoutExpired:
+                            print(f"FALLBACK TIMEOUT ({args.timeout}s)")
+                            cleaned = f"TIMEOUT after {args.timeout}s; codex fallback also timed out after {args.timeout}s"
+                            raw_output = cleaned
+                            raw_stderr = ""
+                            returncode = -1
+                            duration = float(args.timeout * 2)
+                    else:
+                        print(f"TIMEOUT ({args.timeout}s)")
+                        cleaned = f"TIMEOUT after {args.timeout}s"
+                        raw_output = cleaned
+                        raw_stderr = ""
+                        returncode = -1
+                        duration = float(args.timeout)
 
             # Write outputs
             response_file = output_dir_cfg / RESPONSE_FILENAME

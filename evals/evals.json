@@ -37,13 +37,32 @@
       "must_include": [
         "mutable default",
         "division",
-        "resource",
-        "wildcard",
         "verification"
       ],
       "must_not_include": [
         "rewrite the whole project",
         "switch to uv without asking"
+      ],
+      "must_include_any": [
+        {
+          "name": "file resource handling issue",
+          "terms": [
+            "context manager",
+            "closing",
+            "closes",
+            "file handles",
+            "with open"
+          ]
+        },
+        {
+          "name": "wildcard import issue",
+          "terms": [
+            "wildcard",
+            "import *",
+            "from some_module import *",
+            "pollutes the namespace"
+          ]
+        }
       ]
     },
     {
@@ -55,17 +74,46 @@
         "lint-format-typing-testing.md"
       ],
       "must_include": [
-        "inspect",
-        "incremental",
         "pytest",
         "mypy",
         "type hints",
-        "tests",
-        "existing tests"
+        "tests"
       ],
       "must_not_include": [
         "strict mypy all at once",
         "unverified"
+      ],
+      "must_include_any": [
+        {
+          "name": "inspect existing fixture files",
+          "terms": [
+            "inspected",
+            "reviewed",
+            "bad_code.py",
+            "tests/test_bad_code.py"
+          ]
+        },
+        {
+          "name": "incremental typing/testing rollout",
+          "terms": [
+            "incremental",
+            "start incrementally",
+            "add mypy later",
+            "rather than turning on strict mode immediately",
+            "tests first",
+            "Then update",
+            "approach it in this order"
+          ]
+        },
+        {
+          "name": "expand existing tests",
+          "terms": [
+            "existing test",
+            "current test",
+            "tests/test_bad_code.py",
+            "expand"
+          ]
+        }
       ]
     },
     {
@@ -125,7 +173,7 @@
     {
       "name": "typo-in-docstring",
       "fixture": "evals/fixtures/existing-preserve",
-      "prompt": "I noticed a typo in the docstring for `greet` — can you fix it?",
+      "prompt": "I noticed a typo in the docstring for `greet` \u2014 can you fix it?",
       "should_trigger": false,
       "expected_references": [],
       "must_include": [],
@@ -170,14 +218,26 @@
         "preserve",
         "native gate",
         "bash scripts/check-consistency.sh",
-        "python3 -m pytest tests -q",
-        "optional modernization"
+        "python3 -m pytest tests -q"
       ],
       "must_not_include": [
         "force uv",
         "force src layout",
         "replace the native gate",
         "convert to a package"
+      ],
+      "must_include_any": [
+        {
+          "name": "modernization stays optional and scoped",
+          "terms": [
+            "safe incremental",
+            "do not add `pyproject.toml`",
+            "unless the repository\u2019s role changes",
+            "unless the repository's role changes",
+            "not a packaged application",
+            "not a package"
+          ]
+        }
       ]
     }
   ]

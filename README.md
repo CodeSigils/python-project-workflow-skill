@@ -26,17 +26,18 @@ recommending change.
 | Latest local gate                  | `python3 scripts/run_phase2_checks.py` passes for source plus installed mirror                       |
 | Latest expanded benchmark evidence | `python-best-practices-workspace/codex-expanded-9-20260604/benchmark.json`                           |
 | Latest benchmark report            | `evals/transcript-benchmark-expanded-9-2026-06-04.md`                                                |
+| Latest targeted assertion evidence | `python-best-practices-workspace/codex-assertion-quality-final-20260605-incremental/benchmark.json`  |
 | Latest dogfood evidence            | `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`                                      |
-| Not yet complete                   | Narrow eval-assertion quality iteration, Phase 2 user qualitative approval, Phase 3, Phase 4 handoff |
+| Not yet complete                   | Phase 2 user qualitative approval, Phase 3, Phase 4 handoff                                          |
 
 Phase 0 research was corrected and revalidated on 2026-06-04, Phase 1 skill drafting is complete, and Phase 2 controlled
 eval assets now exist. The expanded Codex 9-eval run completed 18/18 command runs successfully, with mean pass rates of
 0.9325 for `with_skill` and 0.9102 for `without_skill`. The four non-trigger cases scored 100% in both configurations;
-the new mature automation case preserved the native gate but exposed one brittle exact-phrase assertion.
+the new mature automation case preserved the native gate and a targeted assertion-quality pass now uses synonym groups for
+behavioral checks instead of brittle exact-phrase requirements.
 
-Phase 2 is still open until the narrow eval-assertion quality iteration is resolved and the user gives qualitative
-approval after reviewing benchmark and dogfood evidence. A passing local mirror is not a package, hub contribution,
-release, push, or user handoff.
+Phase 2 is still open until the user gives qualitative approval after reviewing benchmark and dogfood evidence. A passing
+local mirror is not a package, hub contribution, release, push, or user handoff.
 
 ## Runtime payload
 
@@ -124,7 +125,8 @@ user does not want to install/load that skill, continue with another verified so
 - `VERSIONS.md` — version-choice rationale for templates and recommendations
 - `CONTRIBUTING.md` — local development loop and CI expectations
 - `scripts/run_phase2_checks.py` — structural, fixture, repo-guard, and exact installed-mirror validation
-- `scripts/run_benchmark.py` — controlled eval benchmark runner with OpenCode and Codex backend support
+- `scripts/run_benchmark.py` — controlled eval benchmark runner with OpenCode and Codex backend support, including an
+  optional Codex fallback for OpenCode timeouts
 - `tests/test_run_phase2_checks.py` — validation-script regression tests
 - `tests/test_run_benchmark.py` — benchmark grading/output regression tests
 - `.github/workflows/ci.yml` — portable source-only validation for GitHub Actions

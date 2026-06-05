@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -169,6 +170,78 @@ def test_benchmark_reused_iteration_label_clears_stale_input_files(tmp_path: Pat
     assert not stale_input_file.exists()
 
 
+def test_opencode_timeout_can_fall_back_to_codex(tmp_path: Path, monkeypatch) -> None:
+    skill_file = tmp_path / "skill" / "SKILL.md"
+    ref_dir = tmp_path / "skill" / "references"
+    evals_file = tmp_path / "evals.json"
+    output_dir = tmp_path / "workspace"
+    skill_file.parent.mkdir()
+    ref_dir.mkdir()
+    skill_file.write_text("---\nname: test\n---\n", encoding="utf-8")
+    evals_file.write_text(
+        json.dumps({"evals": [{"name": "sample", "prompt": "Hi", "should_trigger": False}]}),
+        encoding="utf-8",
+    )
+
+    def fake_run_opencode(prompt, model, input_dir, *, timeout=300):
+        raise subprocess.TimeoutExpired(cmd="opencode", timeout=timeout)
+
+    def fake_run_codex(prompt, model, input_dir, output_dir_cfg, *, timeout=300):
+        assert model == "fallback-model"
+        return "fallback answer\n", "raw fallback", "codex stderr", 0, 2.5
+
+    monkeypatch.setattr(run_benchmark, "SKILL_FILE", skill_file)
+    monkeypatch.setattr(run_benchmark, "REF_DIR", ref_dir)
+    monkeypatch.setattr(run_benchmark, "EVALS_FILE", evals_file)
+    monkeypatch.setattr(run_benchmark, "run_opencode", fake_run_opencode)
+    monkeypatch.setattr(run_benchmark, "run_codex", fake_run_codex)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_benchmark.py",
+            "--backend",
+            "opencode",
+            "--fallback-backend",
+            "codex",
+            "--fallback-model",
+            "fallback-model",
+            "--timeout",
+            "7",
+            "--output-dir",
+            str(output_dir),
+            "--iteration-label",
+            "fallback",
+            "--filter",
+            "sample",
+        ],
+    )
+
+    assert run_benchmark.main() == 0
+
+    run_dir = output_dir / "fallback" / "eval-0-sample" / "with_skill"
+    assert (run_dir / "outputs" / "response.md").read_text() == "fallback answer\n"
+    timing = json.loads((run_dir / "timing.json").read_text())
+    assert timing["duration_seconds"] == 9.5
+    stderr = (run_dir / "outputs" / "stderr.txt").read_text()
+    assert "OpenCode timed out after 7s" in stderr
+    assert "fallback_backend=codex fallback_model=fallback-model" in stderr
+
+
+def test_fallback_backend_requires_opencode_backend(tmp_path: Path, monkeypatch) -> None:
+    skill_file = tmp_path / "skill" / "SKILL.md"
+    skill_file.parent.mkdir()
+    skill_file.write_text("---\nname: test\n---\n", encoding="utf-8")
+    monkeypatch.setattr(run_benchmark, "SKILL_FILE", skill_file)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["run_benchmark.py", "--backend", "codex", "--fallback-backend", "codex"],
+    )
+
+    assert run_benchmark.main() == 1
+
+
 def test_run_status_check_fails_nonzero_exit() -> None:
     expectations = run_benchmark.check_run_status(-1)
 
@@ -178,3 +251,46 @@ def test_run_status_check_fails_nonzero_exit() -> None:
 
 def test_run_status_check_passes_clean_exit_without_extra_expectation() -> None:
     assert run_benchmark.check_run_status(0) == []
+
+
+def test_grade_output_supports_include_any_groups() -> None:
+    expectations = run_benchmark.grade_output(
+        "Use a context manager with open() so file handles are closed.\n",
+        {
+            "must_include": [],
+            "must_include_any": [
+                {
+                    "name": "file resource handling issue",
+                    "terms": ["resource", "context manager", "with open"],
+                }
+            ],
+            "must_not_include": [],
+        },
+    )
+
+    assert expectations == [
+        {
+            "text": "Includes expected guidance group: file resource handling issue",
+            "passed": True,
+            "evidence": "Found alternative(s): ['context manager', 'with open'].",
+        }
+    ]
+
+
+def test_grade_output_fails_include_any_group_when_all_terms_missing() -> None:
+    expectations = run_benchmark.grade_output(
+        "No relevant guidance here.\n",
+        {
+            "must_include": [],
+            "must_include_any": [
+                {
+                    "name": "wildcard import issue",
+                    "terms": ["wildcard", "import *"],
+                }
+            ],
+            "must_not_include": [],
+        },
+    )
+
+    assert failed_texts(expectations) == ["Includes expected guidance group: wildcard import issue"]
+    assert "Missing all alternatives" in expectations[0]["evidence"]

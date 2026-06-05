@@ -36,7 +36,7 @@
 - [x] Create `evals/evals.json` and fixture smoke validation in `scripts/run_phase2_checks.py`
 - [x] Add portable mature-automation preservation eval and fixture smoke coverage
 - [x] Rerun expanded 9-eval benchmark suite after adding the mature-automation case
-- [ ] Narrow brittle exact-phrase eval assertions surfaced by the expanded Codex run
+- [x] Narrow brittle exact-phrase eval assertions surfaced by the expanded Codex run
 - [x] Add validation-script regression tests for actionable error output
 - [x] Add portable GitHub Actions source-validation workflow
 - [x] Add `CONTRIBUTING.md` with the local development loop
