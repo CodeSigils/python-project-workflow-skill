@@ -176,8 +176,8 @@ uvx ruff check tests || true
 ```
 
 The buggy fixture is intentionally lint-dirty; its pytest suite should still collect and pass so agents can run tests
-while reviewing the deliberately sloppy code. The test suite may carry unused forward-looking imports (e.g. `shutil`,
-`pytest`) as a work-in-progress convenience; these F401 warnings are expected and non-blocking.
+while reviewing the deliberately sloppy code. The committed validation scripts and regression tests must remain
+Ruff-clean; only fixture-specific lint dirt should be tolerated, and only where the command explicitly expects it.
 
 For CI or portable source-only validation, use `python3 scripts/run_phase2_checks.py --skip-installed`; CI runners do
 not have the local Hermes installed-skill mirror.
