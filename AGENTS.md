@@ -133,6 +133,8 @@ verifies structural readiness and fixture smoke tests; it does not judge LLM qua
 - `evals/trigger-description-optimization-2026-06-05.md`: Phase 3 description optimization decision report.
 - `evals/fixtures/`: disposable fixture projects for controlled evals.
 - `LICENSE`: MIT license for the repository.
+- `CITATION.cff`: software citation metadata (CFF v1.2.0).
+- `SECURITY.md`: security policy and vulnerability reporting.
 - `HANDOFF.md`: Phase 4 user handoff with verification evidence, shipping boundary, and known limits.
 - `SHIPPING.md`: research-grounded shipping strategy, boundary, and update flow.
 

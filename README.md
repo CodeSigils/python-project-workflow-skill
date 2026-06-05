@@ -1,5 +1,9 @@
 # Python Best Practices Hermes Skill
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![Hermes Skill](https://img.shields.io/badge/hermes-skill-purple)](https://hermes-agent.nousresearch.com/docs)
+
 Build a Hermes skill that helps agents work on Python projects safely and idiomatically.
 
 The skill is adaptive rather than encyclopedic: inspect the live repository first, preserve coherent local conventions,
@@ -155,6 +159,8 @@ user does not want to install/load that skill, continue with another verified so
 - `todos.md` — active task tracking
 - `VERSIONS.md` — version-choice rationale for templates and recommendations
 - `CONTRIBUTING.md` — local development loop and CI expectations
+- `CITATION.cff` — software citation metadata (CFF v1.2.0)
+- `SECURITY.md` — security policy and vulnerability reporting
 - `SHIPPING.md` — shipping boundary, update flow, and evidence basis
 - `scripts/run_phase2_checks.py` — structural, fixture, repo-guard, and exact installed-mirror validation
 - `scripts/run_benchmark.py` — controlled eval benchmark runner with OpenCode and Codex backend support, including an
@@ -184,6 +190,8 @@ See [`plan.md`](./plan.md) for the phased implementation plan. See [`vision.md`]
 python-best-practices-skill/
 ├── HANDOFF.md         # Phase 4 user handoff document
 ├── LICENSE            # MIT license
+├── CITATION.cff       # Software citation metadata (CFF v1.2.0)
+├── SECURITY.md        # Security policy and vulnerability reporting
 ├── README.md          # Project overview (this file)
 ├── AGENTS.md          # Agent instructions for this source checkout
 ├── CONTRIBUTING.md    # Local development and validation workflow
