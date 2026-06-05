@@ -67,7 +67,8 @@ Keep live status in these files:
 - `AGENTS.md` — repo-local maintenance contract and phase/shipping guards
 
 When Phase 3 trigger-description work changes, also keep `evals/trigger-description-evals.json` and the validation
-script aligned. Do not mark that eval set beyond `draft-for-user-review` until the user approves the prompts.
+script aligned. Use `draft-for-user-review` before prompt approval and `optimization-complete` only when the selected
+frontmatter description is recorded.
 
 Do not add one-off implementation summaries as live status documents. Keep live status in `README.md`, `plan.md`, and
 `todos.md`; use git history for completed-change records. `scripts/run_phase2_checks.py` enforces that removed summary

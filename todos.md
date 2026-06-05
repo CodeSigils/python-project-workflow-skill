@@ -56,9 +56,9 @@
 
 - [x] Generate trigger eval set (20 queries, mix of should-trigger and should-not-trigger)
 - [x] Include near misses so the skill does not over-trigger on generic Python or non-Python work
-- [ ] User reviews `evals/trigger-description-evals.json`
-- [ ] Select or implement the description-optimization workflow/tooling for this repo
-- [ ] Run the chosen optimization workflow and apply the selected description to frontmatter
+- [x] User reviews `evals/trigger-description-evals.json`
+- [x] Select or implement the description-optimization workflow/tooling for this repo
+- [x] Run the chosen optimization workflow and apply the selected description to frontmatter
 
 ## Phase 4 — Polish, Ship & Publish
 

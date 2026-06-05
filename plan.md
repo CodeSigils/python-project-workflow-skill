@@ -182,27 +182,36 @@ workspace benchmark outputs under `python-best-practices-workspace/codex-asserti
 `python-best-practices-workspace/` directory.
 
 **Output:** Iterated skill revisions, benchmark results, and dogfood findings. **Verification:** User qualitative
-approval recorded on 2026-06-05 after benchmark and dogfood review; Phase 3 is now the active phase.
+approval recorded on 2026-06-05 after benchmark and dogfood review; Phase 3 description optimization followed and is now
+complete.
 
 ---
 
-### Phase 3 — Description Optimization (current)
+### Phase 3 — Description Optimization (complete; selected 2026-06-05)
 
-**Current status:** the initial 20-query trigger/near-miss eval set exists at `evals/trigger-description-evals.json` and
-is marked `draft-for-user-review`. It contains 10 should-trigger prompts and 10 should-not-trigger near misses.
+**Current status:** complete. The 20-query trigger/near-miss eval set at `evals/trigger-description-evals.json` is
+marked `optimization-complete` and records the selected frontmatter description. The decision report is
+`evals/trigger-description-optimization-2026-06-05.md`.
+
+Selected description:
+
+```text
+Use for changing or reviewing Python project code, packaging, typing, tests, CI, or tooling; inspect first, not concept-only Q&A.
+```
 
 **Goal:** Maximize triggering accuracy after the skill behavior is stable.
 
 - [x] Generate 20 trigger eval queries: mix of should-trigger and should-not-trigger prompts.
 - [x] Include near misses: generic Python questions, framework-specific requests, non-Python tooling, and docs-only
       requests.
-- [ ] User reviews eval set.
-- [ ] Select or implement the description-optimization workflow/tooling for this repo.
-- [ ] Run up to 5 description-optimization iterations once the workflow is chosen.
-- [ ] Apply the selected description to `skill/SKILL.md` frontmatter.
+- [x] User reviews eval set.
+- [x] Select and run the description-optimization workflow for this repo.
+- [x] Run description-candidate review against the approved trigger/near-miss boundary.
+- [x] Apply the selected description to `skill/SKILL.md` frontmatter.
 
-**Output:** Optimized frontmatter `description:`. **Verification:** Trigger rate on held-out test set, target >80%
-without obvious over-triggering.
+**Output:** Optimized frontmatter `description:` in `skill/SKILL.md`. **Verification:** approved 20-query
+trigger/near-miss set reviewed, selected description recorded in machine-readable eval metadata, and validation gates
+updated to accept only draft or completed trigger-eval states.
 
 ---
 

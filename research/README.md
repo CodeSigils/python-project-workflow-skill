@@ -33,9 +33,9 @@ That maps well to a Hermes skill: keep `SKILL.md` concise as a router and operat
 reference files for project orientation, pyproject templates, lint/format/type/test workflows, review checklists, mature
 repo preservation, and eval/benchmark hardening.
 
-Phase 2 is complete with qualitative approval recorded on 2026-06-05. Phase 3 applies the same progressive-disclosure
+Phase 2 is complete with qualitative approval recorded on 2026-06-05. Phase 3 applied the same progressive-disclosure
 principle to trigger behavior: `evals/trigger-description-evals.json` separates should-trigger Python project work from
-near-miss non-triggers before the frontmatter `description:` is optimized.
+near-miss non-triggers and records the optimized frontmatter `description:` selected on 2026-06-05.
 
 The mature-repo dogfood strategy used `/home/sand/projects/ai-project-governance` after controlled evals as a
 preservation-first review target rather than as the first test case. The report is recorded in

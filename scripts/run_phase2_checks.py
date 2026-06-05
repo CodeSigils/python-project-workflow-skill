@@ -50,6 +50,7 @@ REQUIRED_EVALS = {
 REQUIRED_TRIGGER_EVAL_COUNT = 20
 REQUIRED_TRIGGER_EVAL_TRUE_COUNT = 10
 REQUIRED_TRIGGER_EVAL_FALSE_COUNT = 10
+ALLOWED_TRIGGER_EVAL_STATUSES = {"draft-for-user-review", "optimization-complete"}
 PYTEST_FIXTURES = {
     "evals/fixtures/existing-buggy",
     "evals/fixtures/existing-preserve",
@@ -392,11 +393,20 @@ def check_phase3_trigger_eval_set() -> None:
     data = read_json_checked(path)
     if data.get("schema_version") != 1:
         fail("evals/trigger-description-evals.json schema_version must be 1")
-    if data.get("status") != "draft-for-user-review":
+    status = data.get("status")
+    if status not in ALLOWED_TRIGGER_EVAL_STATUSES:
+        allowed_statuses = ", ".join(sorted(ALLOWED_TRIGGER_EVAL_STATUSES))
         fail(
-            "evals/trigger-description-evals.json status must be draft-for-user-review",
-            hint="Keep the Phase 3 eval set marked as a user-review draft until the user approves it.",
+            f"evals/trigger-description-evals.json status must be one of: {allowed_statuses}",
+            hint="Use draft-for-user-review before approval, then optimization-complete once the selected frontmatter description is recorded.",
         )
+    if status == "optimization-complete":
+        selected_description = data.get("selected_description")
+        if not isinstance(selected_description, str) or not selected_description.strip():
+            fail(
+                "optimization-complete trigger eval set must record selected_description",
+                hint="Record the selected frontmatter description in evals/trigger-description-evals.json.",
+            )
     evals = data.get("evals")
     if not isinstance(evals, list):
         fail("evals/trigger-description-evals.json field 'evals' must be a list")

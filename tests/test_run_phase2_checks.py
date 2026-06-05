@@ -181,6 +181,44 @@ def test_imbalanced_trigger_description_eval_set_reports_hint(tmp_path: Path) ->
     assert "balanced between should-trigger and should-not-trigger" in result.stderr
 
 
+def test_optimization_complete_trigger_eval_set_requires_selected_description(tmp_path: Path) -> None:
+    repo = make_minimal_repo(tmp_path)
+    data = json.loads((repo / "evals" / "trigger-description-evals.json").read_text(encoding="utf-8"))
+    data["status"] = "optimization-complete"
+    (repo / "evals" / "trigger-description-evals.json").write_text(json.dumps(data), encoding="utf-8")
+
+    result = run_checker(repo, "--skip-installed")
+
+    assert result.returncode == 1
+    assert "optimization-complete trigger eval set must record selected_description" in result.stderr
+
+
+def test_optimization_complete_trigger_eval_set_passes_with_selected_description(tmp_path: Path) -> None:
+    repo = make_minimal_repo(tmp_path)
+    data = json.loads((repo / "evals" / "trigger-description-evals.json").read_text(encoding="utf-8"))
+    data["status"] = "optimization-complete"
+    data["selected_description"] = "Use for Python project code and tooling work after inspecting repo conventions."
+    (repo / "evals" / "trigger-description-evals.json").write_text(json.dumps(data), encoding="utf-8")
+
+    result = run_checker(repo, "--skip-installed")
+
+    assert result.returncode == 0
+
+
+def test_unknown_trigger_description_eval_status_reports_allowed_values(tmp_path: Path) -> None:
+    repo = make_minimal_repo(tmp_path)
+    data = json.loads((repo / "evals" / "trigger-description-evals.json").read_text(encoding="utf-8"))
+    data["status"] = "ready"
+    (repo / "evals" / "trigger-description-evals.json").write_text(json.dumps(data), encoding="utf-8")
+
+    result = run_checker(repo, "--skip-installed")
+
+    assert result.returncode == 1
+    assert "status must be one of" in result.stderr
+    assert "draft-for-user-review" in result.stderr
+    assert "optimization-complete" in result.stderr
+
+
 def test_invalid_evals_json_reports_line_column_and_hint(tmp_path: Path) -> None:
     repo = make_minimal_repo(tmp_path)
     (repo / "evals" / "evals.json").write_text('{"schema_version": 1, "evals": [}', encoding="utf-8")
