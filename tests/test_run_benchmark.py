@@ -299,12 +299,12 @@ def test_opencode_timeout_and_codex_fallback_timeout_are_recorded(tmp_path: Path
     assert timing["effective_backend"] ***REMOVED*** "codex"
     assert timing["model"] ***REMOVED*** "opencode/big-pickle"
     assert timing["effective_model"] ***REMOVED*** "fallback-model"
-    assert timing["fallback_reason"] ***REMOVED*** "codex_timeout"
+    assert timing["fallback_reason"] ***REMOVED*** "opencode_timeout_codex_timeout"
     benchmark = json.loads((output_dir / "fallback-timeout" / "benchmark.json").read_text())
     assert benchmark["runs"][0]["result"]["errors"] ***REMOVED*** 1
     assert benchmark["runs"][0]["result"]["effective_backend"] ***REMOVED*** "codex"
     assert benchmark["runs"][0]["result"]["effective_model"] ***REMOVED*** "fallback-model"
-    assert benchmark["runs"][0]["result"]["fallback_reason"] ***REMOVED*** "codex_timeout"
+    assert benchmark["runs"][0]["result"]["fallback_reason"] ***REMOVED*** "opencode_timeout_codex_timeout"
 
 
 def test_fallback_backend_requires_opencode_backend(tmp_path: Path, monkeypatch) -> None:

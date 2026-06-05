@@ -105,7 +105,7 @@
             "start with current tests",
             "stage mypy adoption",
             "then add annotations",
-            "small steps"
+            "small typing/testing steps"
           ]
         },
         {
