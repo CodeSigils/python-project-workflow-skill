@@ -19,16 +19,17 @@ metadata:
     related_skills: [codebase-inspection, python-best-practices, shell-scripting]
 ---
 
-# Python Best Practices Skill
+# Python Project Workflow
 
-Use for changing or reviewing Python project code, packaging, typing, tests, CI, or tooling; inspect first, not
-concept-only Q&A.
+Use for setting up, inspecting, and verifying Python projects — greenfield bootstrap, tooling
+configuration, CI, packaging, mature-repo preservation. Not for code review (handled by
+`python-best-practices` skill from nathan-gage/python-skills).
 
 ## When to Use This Skill
 
-Trigger on Python implementation, refactor, review, packaging, setup, testing, typing, and tooling work. Do not trigger
-on general Python concept questions, pure documentation changes, or non-Python tooling unless the user asks to apply the
-answer to project code or change Python workflow/conventions.
+Trigger on Python project setup, inspection, tooling configuration, CI/verification, packaging, and
+mature-repo preservation work. Do NOT trigger for pure Python code review — that is handled by
+`python-best-practices` (nathan-gage/python-skills).
 
 If this skill was loaded but the user request is a non-trigger, answer **directly** from general knowledge and nothing
 more:
@@ -64,22 +65,20 @@ The user should not be able to tell this skill was present in your configuration
 - **After loading, run the Orientation Checklist.** Read `project-orientation.md` to understand the repo's Python
   version contract, tooling, and layout before changing anything.
 
-## Pre-Load Assessment
+## Project Type Classification
 
-Before loading the full skill suite (references, review checklist, etc.), answer these questions
-to decide whether the effort is worth the overhead:
+On load, classify the project to load only relevant guidance:
 
-| Question | Yes means | No means |
-|---|---|---|
-| Does the repo have a `pyproject.toml` or `setup.py` with packaging metadata? | Full skill — load `project-orientation.md` then `review-checklist.md` | Skip packaging references. Consider `mature-repo-preservation.md` instead. |
-| Are there tests under `tests/` or `test/`? | Load `lint-format-typing-testing.md` pytest section | Skip test references. |
-| Is there a `ruff.toml`, `.mypy.ini`, or type-checking config? | Load tool-specific references as needed | Skip tooling references. The repo uses project-native gates. |
-| Is Python the *product* or *support code*? | Full skill suite is appropriate | Project-native gates (AGENTS.md Python policy, pre-commit hook) likely suffice. Cross-check the core review-checklist items manually instead of loading all references. |
-| Does the project have versioned releases or packaging lifecycle? | Load `pyproject-template.md` and `lint-format-typing-testing.md` packaging section | Skip — not relevant for automation-only scripts. |
+| Signal | Classification | Load |
+|--------|---------------|------|
+| No pyproject.toml, no setup.py, no tests directory | Greenfield | `pyproject-template.md`, then `project-orientation.md` |
+| pyproject.toml or setup.py present, coherent tooling | Existing | `project-orientation.md`, then tool-specific guidance |
+| Python only in scripts/, no packaging metadata, governance scripts | Automation / mature | `mature-repo-preservation.md`, skip packaging refs |
+| Eval/benchmark runners present | Automation with benchmarks | Also load `eval-benchmark-hardening.md` |
 
 **Support-code heuristic:** if all Python files are under `scripts/`, there are zero `.py` files in the repo root besides `__init__.py` stubs, and there is no `src/` layout, assume support code. The skill's `mature-repo-preservation.md` reference covers this case.
 
-When in doubt, load only `mature-repo-preservation.md` and `review-checklist.md` — the two smallest references. You can always load more later.
+When in doubt, load only `mature-repo-preservation.md` — the smallest reference. You can always load more later.
 
 ## Orientation Checklist
 
@@ -126,6 +125,15 @@ Always determine the project's declared and tested Python version range:
    - README claims broader support than tested in CI
    - Tool configs target a different version than `requires-python`
 
+## Resolution Chain
+
+When references don't cover the exact scenario, escalate in order:
+
+1. **Project-native gates first** — check Makefile, CI workflow scripts, project-specific commands
+2. **Skill references** — consult the relevant reference per the Project Type Classification above
+3. **Official tool docs** — search tool documentation via web (ruff docs, mypy docs, pytest docs, uv docs)
+4. **Ask the user** — request clarification or additional context
+
 ## Task Classification Table
 
 Classify the task so the skill loads only what is useful:
@@ -133,17 +141,16 @@ Classify the task so the skill loads only what is useful:
 | Task                                              | Load reference                                                                                                                             |
 | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | New project setup                                 | `pyproject-template.md`, then `project-orientation.md`                                                                                     |
-| Existing project review                           | `review-checklist.md`, then task-specific files                                                                                            |
-| Mature repository / automation repo review        | `mature-repo-preservation.md`, then `review-checklist.md`; if eval/benchmark runners are involved, also load `eval-benchmark-hardening.md` |
+| Existing project orientation                      | `project-orientation.md`                                                                                                                   |
+| Mature repository / automation repo review        | `mature-repo-preservation.md`; if eval/benchmark runners are involved, also load `eval-benchmark-hardening.md` |
 | **Study/notes repo with custom verification**     | `mature-repo-preservation.md`                                                                                                      |
-| Type-hinting                                      | `lint-format-typing-testing.md` (`mypy.md` is deferred)                                                                                    |
-| Test work                                         | `lint-format-typing-testing.md` (`pytest.md` is deferred)                                                                                  |
-| Packaging/release                                 | `pyproject-template.md` and `lint-format-typing-testing.md` (`packaging.md` deferred)                                                      |
-| Error handling/logging                            | `review-checklist.md` (`errors-and-logging.md` is deferred)                                                                                |
-| CLI development                                   | `pyproject-template.md` for entry points; for guidance on migrating CLI scripts from bash to Python (thin wrapper pattern, recognition criteria, reference sweep), see `shell-scripting` skill's "When to Migrate from Bash to Python" section |                                                               |
-| Migration from existing code                      | `project-orientation.md`; migration-specific reference is deferred                                                                         |
+| Type-hinting                                      | `lint-format-typing-testing.md` |
+| Test work                                         | `lint-format-typing-testing.md` |
+| Packaging/release                                 | `pyproject-template.md` |
+| CI / verification setup                           | `lint-format-typing-testing.md` |
+| CLI development                                   | `pyproject-template.md` for entry points |
+| Migration from existing code                      | `project-orientation.md` |
 | General Python tooling (lint, format, type, test) | `lint-format-typing-testing.md` |
-| Dependency update (check versions, read changelogs, clean up stale CI workarounds) | `review-checklist.md` (dependency section) |
 
 ## Modern Baseline Defaults
 
@@ -184,6 +191,19 @@ See `references/safe-editing.md` for the ranked safe-workflow guide and byte-lev
 ## Verification Commands
 
 Prefer project-native commands if present. Otherwise suggest the baseline.
+
+### Cross-Platform Tool Preference
+
+When writing or reviewing verification commands:
+- Prefer `rg` (ripgrep) over `grep` when installed — it respects `.gitignore`,
+  is faster, and has consistent flags across platforms.
+- Use POSIX-safe tools (`od -A x -t x1z`) over Linux-specific ones (`xxd`).
+- For file-searching patterns, prefer Python (`pathlib.rglob`, `os.walk`)
+  or `rg` over `find | grep` where possible — fewer escaping pitfalls.
+- Prefer project-native commands (Makefile scripts, CI workflow commands)
+  over ad-hoc shell one-liners.
+- **Check freshness.** If a reference file uses point-in-time version numbers,
+  verify them against current official documentation before relying on them.
 
 **Hermes runtime/plugin edits:** If the edited Python lives under `~/.hermes/hermes-agent/` rather than a normal product checkout, do not stop at gateway restart or manual behavior inspection. Run syntax/lint checks against the changed runtime files, a relevant pytest subset, and a focused import/behavior probe from the Hermes runtime venv.
 

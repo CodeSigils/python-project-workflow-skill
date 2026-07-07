@@ -1,11 +1,13 @@
 # Lint, Format, Typing, and Testing Commands
 
-This reference provides command recipes for the modern Python toolchain (uv, ruff, mypy, pytest) and guidance on
+This reference provides command recipes for the modern Python toolchain ([uv](https://docs.astral.sh/uv/), [ruff](https://docs.astral.sh/ruff/), [mypy](https://mypy.readthedocs.io/), [pytest](https://docs.pytest.org/)) and guidance on
 adopting strictness incrementally.
 
 ## Default Commands (Greenfield or when no project-native commands exist)
 
-Assuming you have `uv` installed and a `pyproject.toml` with the modern baseline:
+Assuming you have `uv` installed and a `pyproject.toml` with the modern baseline.
+If `uv` is not available, substitute `pip` for `uv sync` and `pip install` commands
+throughout — the tool commands (ruff, mypy, pytest) are the same either way.
 
 ```bash
 # Synchronize the virtual environment and install dependencies (including dev)

@@ -61,10 +61,22 @@ Note: `b"\x5c\x28"` is hex value 0x5c (backslash), 0x28 (open paren) — no back
 
 ```bash
 # Before editing
-sed -n '<LINE_NUM>p' <file> | xxd | grep '5c'
+sed -n '<LINE_NUM>p' <file> | od -A x -t x1z | grep '5c'
 
 # After editing — confirm single not doubled:
 #   5c 28 = \( (correct)
 #   5c 5c 28 = two backslashes + paren (doubled)
-sed -n '<LINE_NUM>p' <file> | xxd | grep '5c'
+sed -n '<LINE_NUM>p' <file> | od -A x -t x1z | grep '5c'
 ```
+
+> **Note:** `xxd` (Linux vim package) is not available on all systems.
+> `od -A x -t x1z` is POSIX and works on Linux, macOS, and other Unix systems.
+
+### sed -i Portability
+
+The `sed -i` flag differs between GNU sed (Linux) and BSD sed (macOS):
+
+- GNU: `sed -i 's/old/new/g' file` (in-place, no backup)
+- BSD: `sed -i '' 's/old/new/g' file` (requires empty backup extension)
+
+Portable form: use `sed -i.bak` (creates a `file.bak` backup on both), or use Python for in-place edits.

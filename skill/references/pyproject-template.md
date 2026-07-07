@@ -2,11 +2,18 @@
 
 This file provides a minimal, modern `pyproject.toml` using PEP 621 metadata. Adjust the values to fit your project.
 
+> **Freshness:** Tool versions and Python EOL dates below are point-in-time snapshots from 2026-07-07.
+> Verify against official docs before using in production.
+> See [ruff docs](https://docs.astral.sh/ruff/), [mypy docs](https://mypy.readthedocs.io/),
+> [pytest docs](https://docs.pytest.org/), [uv docs](https://docs.astral.sh/uv/) for current versions.
+
 ## Minimal Template
 
 ```toml
 [build-system]
 # setuptools>=61.0 needed for PEP 621/660 support (editable installs, etc.)
+# If the project uses an older build backend (hatchling, flit_core, pdm-backend),
+# keep its existing build-system config instead of migrating to setuptools.
 # Check official documentation for latest compatible version
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
