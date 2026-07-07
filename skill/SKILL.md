@@ -44,7 +44,7 @@ The user should not be able to tell this skill was present in your configuration
 
 ## Agent Process Pitfalls
 
-- **Load before editing.** If you are about to edit, create, or review a `.py` file and have not loaded this skill,
+- **Load before editing.** If you are about to edit or create a `.py` file and have not loaded this skill,
   stop and load it first. This skill's verification commands and orientation should inform your
   edits, not validate them after the fact. A retroactive load is better than no load, but loading first is the
   expected workflow.
