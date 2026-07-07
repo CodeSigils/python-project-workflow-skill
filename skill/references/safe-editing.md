@@ -33,7 +33,7 @@ content = content.replace(
 write_file("/path/to/file", content)
 ```
 
-Use raw strings `r'...'` so Python doesn't process the backslashes. Verify the result with `xxd`.
+Use raw strings `r'...'` so Python doesn't process the backslashes. Verify the result with `od -A x -t x1z | grep '5c'` (see Diagnostic below).
 
 ### 2. Second Resort: `sed -i` in Single Quotes
 
