@@ -5,6 +5,13 @@ version: 1.2.7
 author: CodeSigils
 license: MIT
 tier: powerful
+ref:
+  - references/project-orientation.md
+  - references/pyproject-template.md
+  - references/lint-format-typing-testing.md
+  - references/review-checklist.md
+  - references/mature-repo-preservation.md
+  - references/eval-benchmark-hardening.md
 metadata:
   hermes:
     tags: [python, best-practices, code-quality, tooling, verification]

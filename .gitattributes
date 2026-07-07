@@ -1,0 +1,28 @@
+# Auto-detect text files and normalize line endings
+* text=auto
+
+# Python source
+*.py text diff=python
+
+# Shell scripts
+*.sh text eol=lf
+
+# Markdown
+*.md text diff=markdown
+
+# Config files
+*.toml text
+*.cfg text
+*.ini text
+*.yaml text
+*.yml text
+*.json text
+
+# Lockfiles are generated — treat as binary
+*.lock binary
+
+# Git diff treats as binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.svg text
