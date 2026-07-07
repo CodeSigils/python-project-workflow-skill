@@ -134,7 +134,7 @@ Classify the task so the skill loads only what is useful:
 | New project setup                                 | `pyproject-template.md`, then `project-orientation.md`                                                                                     |
 | Existing project review                           | `review-checklist.md`, then task-specific files                                                                                            |
 | Mature repository / automation repo review        | `mature-repo-preservation.md`, then `review-checklist.md`; if eval/benchmark runners are involved, also load `eval-benchmark-hardening.md` |
-| **Study/notes repo with custom verification**     | `study-repo-verification-patterns.md`                                                                                                      |
+| **Study/notes repo with custom verification**     | `mature-repo-preservation.md`                                                                                                      |
 | Type-hinting                                      | `lint-format-typing-testing.md` (`mypy.md` is deferred)                                                                                    |
 | Test work                                         | `lint-format-typing-testing.md` (`pytest.md` is deferred)                                                                                  |
 | Packaging/release                                 | `pyproject-template.md` and `lint-format-typing-testing.md` (`packaging.md` deferred)                                                      |
@@ -142,7 +142,7 @@ Classify the task so the skill loads only what is useful:
 | CLI development                                   | `pyproject-template.md` for entry points; for guidance on migrating CLI scripts from bash to Python (thin wrapper pattern, recognition criteria, reference sweep), see `shell-scripting` skill's "When to Migrate from Bash to Python" section |                                                               |
 | Migration from existing code                      | `project-orientation.md`; migration-specific reference is deferred                                                                         |
 | General Python tooling (lint, format, type, test) | `lint-format-typing-testing.md` |
-| Dependency update (check versions, read changelogs, clean up stale CI workarounds) | `dependency-update-workflow.md` |
+| Dependency update (check versions, read changelogs, clean up stale CI workarounds) | `review-checklist.md` (dependency section) |
 
 ## Modern Baseline Defaults
 
@@ -291,7 +291,7 @@ sed -n '<LINE_NUM>p' <file> | xxd | grep '5c'
 
 Prefer project-native commands if present. Otherwise suggest the baseline.
 
-**Hermes runtime/plugin edits:** If the edited Python lives under `~/.hermes/hermes-agent/` rather than a normal product checkout, do not stop at gateway restart or manual behavior inspection. Run syntax/lint checks against the changed runtime files, a relevant pytest subset, and a focused import/behavior probe from the Hermes runtime venv. See `references/hermes-runtime-plugin-verification.md` for the concrete pattern and reporting requirements.
+**Hermes runtime/plugin edits:** If the edited Python lives under `~/.hermes/hermes-agent/` rather than a normal product checkout, do not stop at gateway restart or manual behavior inspection. Run syntax/lint checks against the changed runtime files, a relevant pytest subset, and a focused import/behavior probe from the Hermes runtime venv.
 
 **Ad-hoc verification when no canonical gate is available:** If a changed file has no project-native test/lint/build command, or the session verifier asks for fresh evidence, create a focused temporary verifier under `/tmp` with an OS-safe `hermes-verify-` filename prefix (`mktemp /tmp/hermes-verify-XXXXXX.sh` for shell or `tempfile.NamedTemporaryFile(prefix="hermes-verify-", dir="/tmp", delete=False)` for Python). The verifier should run the smallest meaningful checks for the changed behavior, assert expected outputs, and remove itself afterward when possible. Report this explicitly as "ad-hoc verification", not suite green or full repository validation.
 
