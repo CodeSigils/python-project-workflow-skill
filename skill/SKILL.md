@@ -1,6 +1,6 @@
 ---
-name: python-best-practices
-description: "Use for changing or reviewing Python project code, packaging, typing, tests, CI, or tooling; inspect first, not concept-only Q&A."
+name: python-project-workflow
+description: "Use for setting up, inspecting, and verifying Python projects — greenfield bootstrap, tooling configuration, CI, packaging, mature-repo preservation."
 version: 1.2.7
 author: CodeSigils
 license: MIT
@@ -9,15 +9,14 @@ ref:
   - references/project-orientation.md
   - references/pyproject-template.md
   - references/lint-format-typing-testing.md
-  - references/review-checklist.md
   - references/core-footguns.md
   - references/safe-editing.md
   - references/mature-repo-preservation.md
   - references/eval-benchmark-hardening.md
 metadata:
   hermes:
-    tags: [python, best-practices, code-quality, tooling, verification]
-    related_skills: [codebase-inspection, requesting-code-review, shell-scripting]
+    tags: [python, project-setup, workflow, tooling, verification]
+    related_skills: [codebase-inspection, python-best-practices, shell-scripting]
 ---
 
 # Python Best Practices Skill
