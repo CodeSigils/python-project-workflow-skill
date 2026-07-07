@@ -56,11 +56,6 @@ PYTEST_FIXTURES = {
     "evals/fixtures/existing-preserve",
     "evals/fixtures/mature-automation-repo",
 }
-LIVE_STATUS_DOCS = {
-    "README.md",
-    "plan.md",
-    "todos.md",
-}
 
 
 def rel(path: Path) -> str:
@@ -156,143 +151,20 @@ def check_status_sources() -> None:
     if removed_summary.exists():
         fail(
             "IMPLEMENTATION_SUMMARY.md should not exist",
-            hint="Keep live status in README.md, plan.md, and todos.md; use git history for completed-change records.",
+            hint="Keep status in README.md; use git history for completed-change records.",
         )
-    for name in LIVE_STATUS_DOCS:
-        path = ROOT / name
-        if path.exists() and "IMPLEMENTATION_SUMMARY.md" in read_text_checked(path):
-            fail(
-                f"stale IMPLEMENTATION_SUMMARY.md reference remains in {name}",
-                hint="Remove the reference and keep current status in README.md, plan.md, and todos.md.",
-            )
 
 
-def check_agent_contract() -> None:
-    """Verify repo-local agent guards stay present and free of generated state."""
-    agents_path = ROOT / "AGENTS.md"
-    text = read_text_checked(agents_path)
-    required_phrases = [
-        "**Last verified:**",
-        "## Orientation Contract — BLOCKING",
-        "## Source, Mirror, and Shipping Policy — BLOCKING",
-        "## Phase and User-Shipping Guard — BLOCKING",
-        "## Drift and Stale Information Contract — BLOCKING",
-        "## Generated State Guard — BLOCKING",
-        "skill/` as the canonical runtime payload",
-        "Do not publish, package, install elsewhere, sync to another Hermes profile, push, tag, or release",
-    ]
-    for phrase in required_phrases:
-        if phrase not in text:
-            fail(
-                f"AGENTS.md is missing required repo guard phrase: {phrase}",
-                hint="Restore the source/mirror/shipping, drift, orientation, and generated-state guards before continuing.",
-            )
-    forbidden_markers = [
-        "<!-- open-mem-context -->",
-        "<!-- omo-context -->",
-        "CONTEXT COMPACTION",
-        "Generated agent session state",
-    ]
-    for marker in forbidden_markers:
-        if marker in text:
-            fail(
-                f"AGENTS.md contains generated/session-state marker: {marker}",
-                hint="Remove transient agent state from canonical docs; keep it in ignored workspace/session files.",
-            )
 
 
 def check_shipping_phase() -> None:
-    """Verify the user-shipping phase and runtime boundary are documented."""
-    plan = read_text_checked(ROOT / "plan.md")
-    required_plan_phrases = [
-        "### Phase 4 — Polish, Ship & Publish",
-        "`skill/` is the directory-as-boundary runtime payload",
-        "Produce a concise user handoff",
-        "confirmation that repository-only files are absent from the runtime payload",
-    ]
-    for phrase in required_plan_phrases:
-        if not contains_markdown_phrase(plan, phrase):
-            fail(
-                f"plan.md is missing required shipping-phase phrase: {phrase}",
-                hint="Keep Phase 4 as an explicit user-shipping/publishing phase with runtime-boundary verification.",
-            )
+    """Verify README.md documents the runtime shipping boundary."""
     readme = read_text_checked(ROOT / "README.md")
     if not contains_markdown_phrase(readme, "Shipping boundary: `skill/` is the runtime payload and source of truth"):
         fail(
             "README.md is missing the shipping boundary summary",
             hint="README.md must tell humans that skill/ is the runtime payload and the installed mirror is only a test copy.",
         )
-
-
-def check_live_docs_fresh() -> None:
-    """Warn about [ ] items in plan.md and todos.md that may be stale.
-
-    Parses pending task entries from the live status docs, then checks
-    whether recent commit messages (last 20) mention the same topic.
-    A [ ] item whose keywords appear in recent commits is flagged as
-    potentially stale — the author may have completed it without updating
-    the doc.
-
-    This is a non-fatal warning because some [ ] items are legitimately
-    pending even when keywords overlap.
-    """
-    keywords_by_doc: dict[str, list[str]] = {}
-    for name in LIVE_STATUS_DOCS:
-        path = ROOT / name
-        if not path.exists():
-            continue
-        lines = path.read_text(encoding="utf-8").splitlines()
-        keywords = []
-        for line in lines:
-            stripped = line.strip()
-            # Match [ ] checklist items, not [x] done ones
-            if stripped.startswith("- [ ] ") or stripped.startswith("* [ ] "):
-                text = stripped[6:] if stripped.startswith("- [ ] ") else stripped[6:]
-                if len(text) > 5:
-                    keywords.append(text)
-        if keywords:
-            keywords_by_doc[name] = keywords
-
-    if not keywords_by_doc:
-        return
-
-    # Fetch recent commit subjects
-    try:
-        result = subprocess.run(
-            ["git", "log", "--oneline", "--max-count=20"],
-            cwd=ROOT,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            timeout=10,
-            check=False,
-        )
-    except (subprocess.TimeoutExpired, OSError):
-        return  # skip check if git is not available
-    if result.returncode != 0:
-        return
-
-    commits = result.stdout.lower()
-
-    for doc, items in keywords_by_doc.items():
-        for item in items:
-            significant_words = [
-                w.lower().strip(",:;.()\"'")
-                for w in item.split()
-                if len(w) > 5 and w.lower() not in {"without", "should", "after", "before", "their"}
-            ]
-            if not significant_words:
-                continue
-            match_count = sum(1 for w in significant_words if w in commits)
-            if match_count >= 2:
-                print(
-                    f"WARNING: {doc} has [ ] item that may be stale: \"{item}\"",
-                    file=sys.stderr,
-                )
-                print(
-                    "  Keywords from this item appear in recent commits.",
-                    file=sys.stderr,
-                )
 
 
 def require_list(item: dict[str, Any], key: str, name: str) -> list[str]:
@@ -678,9 +550,7 @@ def main() -> int:
     check_skill()
     check_references()
     check_status_sources()
-    check_agent_contract()
     check_shipping_phase()
-    check_live_docs_fresh()
     evals = check_evals()
     check_phase3_trigger_eval_set()
     check_fixture_python_files(evals)

@@ -77,14 +77,11 @@ python3 -m ruff check scripts tests
 Keep live status in these files:
 
 - `README.md` — human-facing current state and next step
-- `plan.md` — phase plan and decision summary
-- `todos.md` — active task checklist
-- `AGENTS.md` — repo-local maintenance contract and phase/shipping guards
 
 When Phase 3 trigger-description work changes, also keep `evals/trigger-description-evals.json` and the validation
 script aligned. Use `draft-for-user-review` before prompt approval and `optimization-complete` only when the selected
 frontmatter description is recorded.
 
-Do not add one-off implementation summaries as live status documents. Keep live status in `README.md`, `plan.md`, and
-`todos.md`; use git history for completed-change records. `scripts/run_phase2_checks.py` enforces that removed summary
+Do not add one-off implementation summaries as live status documents. Keep live status in `README.md`;
+use git history for completed-change records. `scripts/run_phase2_checks.py` enforces that removed summary
 files and references to them do not return.

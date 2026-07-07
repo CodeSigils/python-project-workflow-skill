@@ -22,8 +22,8 @@ artifact. Files not referenced by `SKILL.md` are invisible at runtime.
 
 | What ships to the user            | What stays in the repo                          |
 | :-------------------------------- | :---------------------------------------------- |
-| `skill/SKILL.md`                  | `README.md`, `plan.md`, `todos.md`, `vision.md` |
-| `skill/references/*.md`           | `AGENTS.md`, `CONTRIBUTING.md`, `SHIPPING.md`   |
+| `skill/SKILL.md`                  | `README.md`, `vision.md` |
+| `skill/references/*.md`           | `CONTRIBUTING.md`, `SHIPPING.md`   |
 | (anything else `skill/` contains) | `HANDOFF.md`, `VERSIONS.md`, `LICENSE`          |
 |                                   | `research/`, `references/`, `evals/`, `tests/`  |
 |                                   | `scripts/`, `.github/`, workspace output        |

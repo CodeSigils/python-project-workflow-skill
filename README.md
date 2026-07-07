@@ -75,7 +75,7 @@ Runtime files:
 - `skill/references/mature-repo-preservation.md`
 - `skill/references/eval-benchmark-hardening.md`
 
-Repository-only files such as `README.md`, `plan.md`, `todos.md`, `research/`, `references/`, `evals/`, `tests/`,
+Repository-only files such as `README.md`, `research/`, `references/`, `evals/`, `tests/`,
 `.github/`, and `python-best-practices-workspace/` are development, evaluation, or evidence assets. Do not describe them
 as installed runtime payload.
 
@@ -154,9 +154,6 @@ user does not want to install/load that skill, continue with another verified so
 
 ## Development assets
 
-- `AGENTS.md` — repo-local maintenance contract and source/mirror/shipping guards
-- `plan.md` — phase roadmap, verification gates, and key decisions
-- `todos.md` — active task tracking
 - `VERSIONS.md` — version-choice rationale for templates and recommendations
 - `CONTRIBUTING.md` — local development loop and CI expectations
 - `CITATION.cff` — software citation metadata (CFF v1.2.0)
@@ -181,7 +178,7 @@ user does not want to install/load that skill, continue with another verified so
 - `references/README.md` — authoritative source index
 - `references/research-evidence.md` — distilled planning evidence
 
-See [`plan.md`](./plan.md) for the phased implementation plan. See [`vision.md`](./vision.md) for deferred ideas. See
+See [`vision.md`](./vision.md) for deferred ideas. See
 [`research/cross-ecosystem-skill-strategy.md`](./research/cross-ecosystem-skill-strategy.md) for the current strategy.
 
 ## Layout
@@ -193,14 +190,11 @@ python-best-practices-skill/
 ├── CITATION.cff       # Software citation metadata (CFF v1.2.0)
 ├── SECURITY.md        # Security policy and vulnerability reporting
 ├── README.md          # Project overview (this file)
-├── AGENTS.md          # Agent instructions for this source checkout
 ├── CONTRIBUTING.md    # Local development and validation workflow
 ├── SHIPPING.md        # Shipping boundary, update flow, and evidence basis
 ├── .gitignore         # Generated cache/build artifact ignores
 ├── .github/workflows/ # Portable CI validation
-├── plan.md            # Phased implementation plan
 ├── vision.md          # Long-term vision / deferred ideas
-├── todos.md           # Current task tracking
 ├── VERSIONS.md        # Version choices rationale
 ├── scripts/           # Local validation and benchmark scripts
 │   ├── run_benchmark.py

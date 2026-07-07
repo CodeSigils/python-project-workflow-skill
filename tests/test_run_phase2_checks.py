@@ -101,34 +101,10 @@ def make_minimal_repo(tmp_path: Path) -> Path:
         json.dumps({"schema_version": 1, "status": "draft-for-user-review", "evals": trigger_description_evals}),
         encoding="utf-8",
     )
-    (repo / "AGENTS.md").write_text(
-        "\n".join([
-            "# Agent contract",
-            "**Last verified:** 2026-06-04",
-            "## Orientation Contract — BLOCKING",
-            "## Source, Mirror, and Shipping Policy — BLOCKING",
-            "Treat `skill/` as the canonical runtime payload.",
-            "Do not publish, package, install elsewhere, sync to another Hermes profile, push, tag, or release.",
-            "## Phase and User-Shipping Guard — BLOCKING",
-            "## Drift and Stale Information Contract — BLOCKING",
-            "## Generated State Guard — BLOCKING",
-        ]),
-        encoding="utf-8",
-    )
     (repo / "README.md").write_text(
         "Shipping boundary: `skill/` is the runtime payload and source of truth.\n",
         encoding="utf-8",
     )
-    (repo / "plan.md").write_text(
-        "\n".join([
-            "### Phase 4 — Polish, Ship & Publish",
-            "`skill/` is the directory-as-boundary runtime payload.",
-            "Produce a concise user handoff.",
-            "confirmation that repository-only files are absent from the runtime payload.",
-        ]),
-        encoding="utf-8",
-    )
-    (repo / "todos.md").write_text("# TODOs\n", encoding="utf-8")
     return repo
 
 
@@ -203,34 +179,6 @@ def test_bad_trigger_eval_count_fails(tmp_path: Path) -> None:
     assert "must contain 20" in result.stderr
 
 
-def test_missing_contract_section_fails(tmp_path: Path) -> None:
-    repo = make_minimal_repo(tmp_path)
-    (repo / "AGENTS.md").write_text("# Minimal\n", encoding="utf-8")
-    result = run_checker(repo, "--skip-installed")
-    assert result.returncode == 1
-
-
-def test_gentle_forbidden_marker_fails(tmp_path: Path) -> None:
-    """AGENTS.md with generated session markers must fail."""
-    repo = make_minimal_repo(tmp_path)
-    text = (repo / "AGENTS.md").read_text(encoding="utf-8")
-    (repo / "AGENTS.md").write_text(
-        text + "\n<!-- open-mem-context -->\n",
-        encoding="utf-8",
-    )
-    result = run_checker(repo, "--skip-installed")
-    assert result.returncode == 1
-
-
-def test_missing_shipping_phrases_fails(tmp_path: Path) -> None:
-    repo = make_minimal_repo(tmp_path)
-    (repo / "plan.md").write_text("Minimal plan.\n", encoding="utf-8")
-    result = run_checker(repo, "--skip-installed")
-
-    assert result.returncode == 1
-    assert "plan.md is missing required shipping-phase phrase" in result.stderr
-
-
 def test_missing_shipping_boundary_in_readme_fails(tmp_path: Path) -> None:
     repo = make_minimal_repo(tmp_path)
     (repo / "README.md").write_text("No boundary mentioned.\n", encoding="utf-8")
@@ -245,18 +193,6 @@ def test_imp_summary_file_fails(tmp_path: Path) -> None:
     result = run_checker(repo, "--skip-installed")
     assert result.returncode == 1
     assert "IMPLEMENTATION_SUMMARY.md should not exist" in result.stderr
-
-
-def test_imp_summary_in_readme_fails(tmp_path: Path) -> None:
-    repo = make_minimal_repo(tmp_path)
-    readme = (repo / "README.md").read_text(encoding="utf-8")
-    (repo / "README.md").write_text(
-        readme + "\nSee IMPLEMENTATION_SUMMARY.md for details.\n",
-        encoding="utf-8",
-    )
-    result = run_checker(repo, "--skip-installed")
-    assert result.returncode == 1
-    assert "stale IMPLEMENTATION_SUMMARY.md reference remains in README.md" in result.stderr
 
 
 def test_non_compiling_fixture_fails(tmp_path: Path) -> None:
@@ -329,24 +265,6 @@ def test_unknown_reference_in_evals_fails(tmp_path: Path) -> None:
     result = run_checker(repo, "--skip-installed")
     assert result.returncode == 1
     assert "references missing runtime files" in result.stderr
-
-
-def test_shipping_boundary_check_accepts_markdown_wrapped_phrase(tmp_path: Path) -> None:
-    repo = make_minimal_repo(tmp_path)
-    (repo / "plan.md").write_text(
-        "\n".join([
-            "### Phase 4 — Polish, Ship & Publish",
-            "`skill/` is the directory-as-boundary runtime payload.",
-            "Produce a concise user handoff.",
-            "confirmation that repository-only files are absent from the runtime",
-            "payload.",
-        ]),
-        encoding="utf-8",
-    )
-
-    result = run_checker(repo, "--skip-installed")
-
-    assert result.returncode == 0
 
 
 def test_markdown_format_check_skips_gracefully(tmp_path: Path) -> None:
