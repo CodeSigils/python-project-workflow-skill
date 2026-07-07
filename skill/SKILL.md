@@ -16,7 +16,7 @@ ref:
 metadata:
   hermes:
     tags: [python, project-setup, workflow, tooling, verification]
-    related_skills: [codebase-inspection, python-best-practices, shell-scripting]
+    related_skills: [codebase-inspection, shell-scripting]
 ---
 
 # Python Project Workflow
