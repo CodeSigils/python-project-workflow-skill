@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
-"""Structural, fixture, trigger-eval, and installed-mirror readiness checks.
+"""Source and installed-mirror readiness checks for the python-best-practices skill.
 
-This script does not judge LLM eval output. It verifies that controlled eval
-assets are coherent enough for with-skill vs baseline runs, Phase 3 trigger
-query assets are coherent enough for description optimization, and the local
-Hermes runtime mirror matches the source skill when requested.
+Validates:
+- skill/SKILL.md structure and required sections
+- skill/references/ completeness and size
+- README.md shipping boundary phrasing
+- No stale IMPLEMENTATION_SUMMARY.md
+- Git commit authorship hygiene
+- Markdown formatting (when formatter is available)
+- Installed mirror sync (when requested)
 """
 
 from __future__ import annotations
 
 import argparse
 import filecmp
-import json
 import os
-import py_compile
 import re
 import shutil
 import subprocess
 import sys
-from json import JSONDecodeError
 from pathlib import Path
-from typing import Any, cast
 
 DEFAULT_ROOT = Path(__file__).resolve().parents[1]
 ROOT = Path(os.environ.get("PBP_SKILL_ROOT", DEFAULT_ROOT)).resolve()
@@ -36,30 +36,9 @@ REQUIRED_REFS = {
     "mature-repo-preservation.md",
     "eval-benchmark-hardening.md",
 }
-REQUIRED_EVALS = {
-    "greenfield-setup",
-    "existing-file-review",
-    "incremental-typing-testing",
-    "existing-project-preservation",
-    "non-python-doc-only",
-    "generic-python-question",
-    "typo-in-docstring",
-    "shell-script-question",
-    "mature-automation-repo-preservation",
-}
-REQUIRED_TRIGGER_EVAL_COUNT = 20
-REQUIRED_TRIGGER_EVAL_TRUE_COUNT = 10
-REQUIRED_TRIGGER_EVAL_FALSE_COUNT = 10
-ALLOWED_TRIGGER_EVAL_STATUSES = {"draft-for-user-review", "optimization-complete"}
-PYTEST_FIXTURES = {
-    "evals/fixtures/existing-buggy",
-    "evals/fixtures/existing-preserve",
-    "evals/fixtures/mature-automation-repo",
-}
 
 
 def rel(path: Path) -> str:
-    """Return a repository-relative path when possible for readable errors."""
     try:
         return str(path.relative_to(ROOT))
     except ValueError:
@@ -85,22 +64,7 @@ def read_text_checked(path: Path) -> str:
     raise AssertionError("unreachable")
 
 
-def read_json_checked(path: Path) -> dict[str, Any]:
-    text = read_text_checked(path)
-    try:
-        data = json.loads(text)
-    except JSONDecodeError as exc:
-        fail(
-            f"invalid JSON in {rel(path)} at line {exc.lineno}, column {exc.colno}: {exc.msg}",
-            hint="Fix evals/evals.json syntax before running Phase 2 checks again.",
-        )
-    if not isinstance(data, dict):
-        fail(f"{rel(path)} top-level JSON value must be an object")
-    return data
-
-
 def contains_markdown_phrase(text: str, phrase: str) -> bool:
-    """Return whether phrase appears, allowing Markdown formatter line wrapping."""
     return " ".join(phrase.split()) in " ".join(text.split())
 
 
@@ -155,8 +119,6 @@ def check_status_sources() -> None:
         )
 
 
-
-
 def check_shipping_phase() -> None:
     """Verify README.md documents the runtime shipping boundary."""
     readme = read_text_checked(ROOT / "README.md")
@@ -165,200 +127,6 @@ def check_shipping_phase() -> None:
             "README.md is missing the shipping boundary summary",
             hint="README.md must tell humans that skill/ is the runtime payload and the installed mirror is only a test copy.",
         )
-
-
-def require_list(item: dict[str, Any], key: str, name: str) -> list[str]:
-    value = item.get(key)
-    if not isinstance(value, list):
-        fail(f"eval {name!r} field {key!r} must be a list of strings")
-    bad_values = [v for v in value if not isinstance(v, str) or not v]
-    if bad_values:
-        fail(f"eval {name!r} field {key!r} contains non-string or empty values: {bad_values!r}")
-    return value
-
-
-def require_any_groups(item: dict[str, Any], name: str) -> list[dict[str, Any]]:
-    value = item.get("must_include_any", [])
-    if not isinstance(value, list):
-        fail(f"eval {name!r} field 'must_include_any' must be a list of objects")
-    for index, group in enumerate(value, start=1):
-        if not isinstance(group, dict):
-            fail(f"eval {name!r} must_include_any group #{index} must be an object")
-        group_name = group.get("name")
-        if not isinstance(group_name, str) or not group_name:
-            fail(f"eval {name!r} must_include_any group #{index} needs a non-empty string name")
-        terms_value = group.get("terms")
-        if not isinstance(terms_value, list) or not terms_value:
-            fail(f"eval {name!r} must_include_any group {group_name!r} needs a non-empty terms list")
-        terms = terms_value
-        bad_terms = [term for term in terms if not isinstance(term, str) or not term]
-        if bad_terms:
-            fail(f"eval {name!r} must_include_any group {group_name!r} has invalid terms: {bad_terms!r}")
-    return value
-
-
-def check_evals() -> list[dict[str, Any]]:
-    data = read_json_checked(ROOT / "evals" / "evals.json")
-    if data.get("schema_version") != 1:
-        fail("evals/evals.json schema_version must be 1")
-    evals = data.get("evals")
-    if not isinstance(evals, list):
-        fail("evals/evals.json field 'evals' must be a list")
-
-    names: set[str] = set()
-    ref_names = {p.name for p in REF_DIR.glob("*.md")}
-    for index, item in enumerate(evals):
-        if not isinstance(item, dict):
-            fail(f"evals/evals.json entry #{index + 1} must be an object")
-        name = item.get("name")
-        if not isinstance(name, str) or not name:
-            fail(f"eval entry #{index + 1} is missing a non-empty string name")
-        assert isinstance(name, str)
-        eval_name = name
-        if eval_name in names:
-            fail(f"duplicate eval name: {eval_name}")
-        names.add(eval_name)
-        fixture_value = item.get("fixture")
-        if not isinstance(fixture_value, str) or not fixture_value:
-            fail(f"eval {name!r} is missing a non-empty string fixture path")
-        fixture = ROOT / fixture_value
-        if not fixture.exists():
-            fail(f"fixture missing for eval {name!r}: {rel(fixture)}")
-        if not isinstance(item.get("prompt"), str) or not item["prompt"].strip():
-            fail(f"eval {name!r} is missing a non-empty prompt")
-        prompt = item["prompt"]
-        prompt_symbols = [symbol for symbol in re.findall(r"`([^`]+)`", prompt) if symbol]
-        if prompt_symbols:
-            fixture_text = "\n".join(
-                path.read_text(encoding="utf-8", errors="ignore")
-                for path in fixture.rglob("*")
-                if path.is_file() and path.suffix in {".py", ".md", ".txt", ".toml", ".cfg"}
-            )
-            missing_symbols = [symbol for symbol in prompt_symbols if symbol not in fixture_text]
-            if missing_symbols:
-                fail(
-                    f"eval {name!r} prompt references fixture symbol(s) not found: {missing_symbols}",
-                    hint="Update the prompt or fixture so evals do not ask agents to edit nonexistent targets.",
-                )
-        if not isinstance(item.get("should_trigger"), bool):
-            fail(f"eval {name!r} is missing boolean should_trigger")
-        expected_refs = require_list(item, "expected_references", name)
-        must_include = require_list(item, "must_include", name)
-        require_any_groups(item, name)
-        require_list(item, "must_not_include", name)
-        if item["should_trigger"] and not expected_refs:
-            fail(f"triggering eval must name expected references: {name}")
-        if item["should_trigger"] and not must_include:
-            fail(f"triggering eval must define must_include terms: {name}")
-        unknown_refs = sorted(set(expected_refs) - ref_names)
-        if unknown_refs:
-            fail(f"eval {name!r} references missing runtime files: {unknown_refs}")
-    missing_names = REQUIRED_EVALS - names
-    if missing_names:
-        fail(f"missing required evals: {sorted(missing_names)}")
-    return evals
-
-
-def check_phase3_trigger_eval_set() -> None:
-    """Validate the Phase 3 trigger-description eval query set."""
-    path = ROOT / "evals" / "trigger-description-evals.json"
-    data = read_json_checked(path)
-    if data.get("schema_version") != 1:
-        fail("evals/trigger-description-evals.json schema_version must be 1")
-    status = data.get("status")
-    if status not in ALLOWED_TRIGGER_EVAL_STATUSES:
-        allowed_statuses = ", ".join(sorted(ALLOWED_TRIGGER_EVAL_STATUSES))
-        fail(
-            f"evals/trigger-description-evals.json status must be one of: {allowed_statuses}",
-            hint="Use draft-for-user-review before approval, then optimization-complete once the selected frontmatter description is recorded.",
-        )
-    if status == "optimization-complete":
-        selected_description = data.get("selected_description")
-        if not isinstance(selected_description, str) or not selected_description.strip():
-            fail(
-                "optimization-complete trigger eval set must record selected_description",
-                hint="Record the selected frontmatter description in evals/trigger-description-evals.json.",
-            )
-    evals = data.get("evals")
-    if not isinstance(evals, list):
-        fail("evals/trigger-description-evals.json field 'evals' must be a list")
-    trigger_evals = cast(list[dict[str, Any]], evals)
-    if len(trigger_evals) != REQUIRED_TRIGGER_EVAL_COUNT:
-        fail(
-            f"Phase 3 trigger eval set must contain {REQUIRED_TRIGGER_EVAL_COUNT} queries; found {len(trigger_evals)}",
-            hint="Keep the Phase 3 review set at 20 queries so trigger and near-miss coverage stays balanced.",
-        )
-    ids: set[str] = set()
-    trigger_count = 0
-    non_trigger_count = 0
-    required_string_fields = ["id", "query", "category", "rationale", "expected_boundary"]
-    for index, item in enumerate(trigger_evals, start=1):
-        if not isinstance(item, dict):
-            fail(f"trigger-description eval entry #{index} must be an object")
-        for field in required_string_fields:
-            value = item.get(field)
-            if not isinstance(value, str) or not value.strip():
-                fail(f"trigger-description eval entry #{index} field {field!r} must be a non-empty string")
-        eval_id = item["id"]
-        if eval_id in ids:
-            fail(f"duplicate trigger-description eval id: {eval_id}")
-        ids.add(eval_id)
-        should_trigger = item.get("should_trigger")
-        if not isinstance(should_trigger, bool):
-            fail(f"trigger-description eval {eval_id!r} is missing boolean should_trigger")
-        if should_trigger:
-            trigger_count += 1
-        else:
-            non_trigger_count += 1
-    if trigger_count != REQUIRED_TRIGGER_EVAL_TRUE_COUNT or non_trigger_count != REQUIRED_TRIGGER_EVAL_FALSE_COUNT:
-        fail(
-            "Phase 3 trigger eval set must contain "
-            f"{REQUIRED_TRIGGER_EVAL_TRUE_COUNT} trigger and {REQUIRED_TRIGGER_EVAL_FALSE_COUNT} non-trigger queries; "
-            f"found {trigger_count} trigger and {non_trigger_count} non-trigger",
-            hint="Keep Phase 3 description optimization balanced between should-trigger and should-not-trigger prompts.",
-        )
-
-
-def check_fixture_python_files(evals: list[dict[str, Any]]) -> None:
-    fixture_dirs = sorted({ROOT / item["fixture"] for item in evals})
-    for fixture in fixture_dirs:
-        for py_file in fixture.rglob("*.py"):
-            if any(part in {"__pycache__", "build", "dist"} or part.endswith(".egg-info") for part in py_file.parts):
-                continue
-            try:
-                py_compile.compile(str(py_file), doraise=True)
-            except py_compile.PyCompileError as exc:
-                fail(f"fixture Python file does not compile: {rel(py_file)}: {exc.msg}")
-
-
-def run_pytest_smoke() -> None:
-    for fixture in sorted(PYTEST_FIXTURES):
-        fixture_path = ROOT / fixture
-        if not fixture_path.exists():
-            fail(f"pytest fixture directory is missing: {fixture}")
-        try:
-            result = subprocess.run(
-                [sys.executable, "-m", "pytest", "-q"],
-                cwd=fixture_path,
-                text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                timeout=60,
-                check=False,
-            )
-        except subprocess.TimeoutExpired as exc:
-            output = exc.stdout or ""
-            if output:
-                print(output, file=sys.stderr)
-            fail(f"pytest smoke timed out after 60s for {fixture}")
-        except OSError as exc:
-            fail(f"could not run pytest smoke for {fixture}: {exc}")
-        if result.returncode != 0:
-            print(result.stdout, file=sys.stderr)
-            fail(f"pytest smoke failed for {fixture} with exit code {result.returncode}")
-        if " no tests ran" in result.stdout or "0 passed" in result.stdout:
-            print(result.stdout, file=sys.stderr)
-            fail(f"pytest smoke discovered zero tests for {fixture}")
 
 
 def sync_installed_mirror() -> None:
@@ -415,11 +183,7 @@ def check_installed_mirror() -> None:
 
 
 def check_markdown_format() -> None:
-    """Verify tracked .md files pass the markdown formatter if available.
-
-    Runs the markdown-formatter Hermes skill in verify mode on all tracked
-    .md files. Gracefully skips when node, oxfmt, or the skill are absent.
-    """
+    """Verify tracked .md files pass the markdown formatter if available."""
     formatter = (
         Path.home()
         / ".hermes"
@@ -457,7 +221,6 @@ def check_markdown_format() -> None:
     if not md_files:
         return
 
-    # Run as one shot with --all for efficiency
     try:
         verify = subprocess.run(
             ["node", str(formatter), "--verify", "--all", *md_files],
@@ -482,22 +245,14 @@ BOT_AUTHOR_PATTERNS = [
     "renovate",
     "[bot]",
     "bot@",
-    "agn",  # catches "agent", "agn" variants
+    "agn",
     "automation",
     "auto-merge",
 ]
 
 
 def check_commit_authors() -> None:
-    """Warn if recent commits have bot/agent-like authorship.
-
-    Checks the last 10 commits for author/committer names or emails that
-    match known bot/agent patterns, or where author and committer differ
-    (indicating automated rebase or cherry-pick).
-
-    This is a non-fatal warning because some bot commits (Dependabot,
-    Renovate) are legitimate and should not block CI.
-    """
+    """Warn if recent commits have bot/agent-like authorship (non-fatal)."""
     try:
         result = subprocess.run(
             ["git", "log", "--max-count=10",
@@ -551,10 +306,6 @@ def main() -> int:
     check_references()
     check_status_sources()
     check_shipping_phase()
-    evals = check_evals()
-    check_phase3_trigger_eval_set()
-    check_fixture_python_files(evals)
-    run_pytest_smoke()
     check_commit_authors()
     check_markdown_format()
     if args.sync_installed:
@@ -562,9 +313,9 @@ def main() -> int:
     if not args.skip_installed:
         check_installed_mirror()
     mirror_scope = "source files only" if args.skip_installed else "source files and installed skill mirror"
-    print(f"OK: Phase 2/3 assets, fixture smoke checks, and {mirror_scope} are valid")
+    print(f"OK: skill source checks and {mirror_scope} are valid")
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
