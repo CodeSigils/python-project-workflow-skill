@@ -4,9 +4,7 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![Hermes Skill](https://img.shields.io/badge/hermes-skill-purple)](https://hermes-agent.nousresearch.com/docs)
 
-Set up, inspect, and verify Python projects. Greenfield bootstrap, tooling configuration, CI packaging, mature-repo preservation — not code review.
-
-For Python code review rules, install [nathan-gage/python-skills](https://github.com/nathan-gage/python-skills) (70 rules, impact levels, code examples).
+Set up, inspect, and verify Python projects. Greenfield bootstrap, tooling configuration, CI, packaging, mature-repo preservation — not code review.
 
 ## Install
 
@@ -31,15 +29,9 @@ When loaded, the skill adapts to the target project:
 - **CI/verification** — project-native gates, cross-platform tool patterns, ad-hoc verification when no gate exists.
 - **Packaging** — build, publish, entry points, lockfile policy.
 
-## Suggested companion: nathan-gage/python-skills
+## Suggested companion: a Python code-review skill
 
-This skill doesn't cover Python code review. If you need code-review rules (70 rules across 8 categories with impact levels and code examples), consider also installing [nathan-gage/python-skills](https://github.com/nathan-gage/python-skills):
-
-```bash
-git clone https://github.com/nathan-gage/python-skills ~/.hermes/skills/python-skills
-```
-
-No dependency — the two skills are independent. Install it only if you need structured code-review guidance.
+This skill doesn't cover Python code review. If you need structured code-review rules (impact levels, code examples), install a dedicated Python code-review skill. The two skills are independent — the code-review rules are better served by a skill that focuses on nothing else.
 
 ## Verify
 
