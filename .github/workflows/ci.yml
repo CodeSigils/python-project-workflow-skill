@@ -27,7 +27,7 @@ jobs:
           python -m pip install ruff
 
       - name: Run skill source checks
-        run: python3 scripts/run_phase2_checks.py --skip-installed
+        run: python3 scripts/validate.py --skip-installed
 
       - name: Ruff check scripts
         run: python3 -m ruff check scripts

@@ -40,11 +40,11 @@ Python concept questions ("what is a decorator") answer directly without loading
 
 ```bash
 # Source-only check (portable, no local Hermes install needed):
-python3 scripts/run_phase2_checks.py --skip-installed
+python3 scripts/validate.py --skip-installed
 
 # Full gate with installed mirror:
-python3 scripts/run_phase2_checks.py --sync-installed
-python3 scripts/run_phase2_checks.py
+python3 scripts/validate.py --sync-installed
+python3 scripts/validate.py
 ```
 
 ## Layout
@@ -60,7 +60,7 @@ python-best-practices-skill/
 ├── .github/workflows/ # CI validation
 │   └── ci.yml
 ├── scripts/           # Local validation script
-│   └── run_phase2_checks.py
+│   └── validate.py
 └── skill/             # Runtime skill payload
     ├── SKILL.md
     └── references/
@@ -68,6 +68,8 @@ python-best-practices-skill/
         ├── pyproject-template.md
         ├── lint-format-typing-testing.md
         ├── review-checklist.md
+        ├── core-footguns.md
+        ├── safe-editing.md
         ├── mature-repo-preservation.md
         └── eval-benchmark-hardening.md
 ```
@@ -84,7 +86,9 @@ The skill loads scoped reference files at runtime rather than embedding all guid
 | `pyproject-template.md` | Modern baseline template with PEP 621 metadata |
 | `lint-format-typing-testing.md` | Practical uv/Ruff/mypy/pytest commands and staged adoption |
 | `review-checklist.md` | Structured code-review checklist |
-| `mature-repo-preservation.md` | Preservation-first workflow for established repos |
+|| `core-footguns.md` | Common Python pitfalls with examples and patterns |
+|| `safe-editing.md` | Safe edit workflow for backslash-heavy content |
+|| `mature-repo-preservation.md` | Preservation-first workflow for established repos |
 | `eval-benchmark-hardening.md` | Benchmark and eval hardening guidance |
 
 ## License
