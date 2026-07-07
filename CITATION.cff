@@ -4,10 +4,10 @@ authors:
   - family-names: "CodeSigils"
     given-names: ""
     email: "toolsoftrade.web@gmail.com"
-title: "Python Best Practices Hermes Skill"
+title: "Python Project Workflow Hermes Skill"
 version: 1.2.7
 date-released: 2026-06-05
 repository-code: "https://github.com/CodeSigils/python-project-workflow-skill"
 license: MIT
 type: software
-description: "A Hermes agent skill that provides adaptive guidance for Python project setup, linting, typing, testing, packaging, CI configuration, and code review."
+description: "A Hermes agent skill that provides adaptive guidance for Python project setup, tooling configuration, CI, packaging, mature-repo preservation, and cross-platform verification."
