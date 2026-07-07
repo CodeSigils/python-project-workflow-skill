@@ -8,7 +8,7 @@ tier: powerful
 metadata:
   hermes:
     tags: [python, best-practices, code-quality, tooling, verification]
-    related_skills: [codebase-inspection, requesting-code-review, shell-scripting, file-operations]
+    related_skills: [codebase-inspection, requesting-code-review, shell-scripting]
 ---
 
 # Python Best Practices Skill
@@ -211,12 +211,10 @@ recurring corruption site. Three independent layers each interpret backslashes d
 | Layer | `\(` becomes | Mechanism |
 |-------|-------------|-----------|
 | `patch` tool `old_string`/`new_string` | `\\(` (doubled) | Tool applies its own escape pass — each `\(` becomes `\\(` |
-| Python regular string `"\\([^}]*\\)"` | `\([^}]*\)` (correct) | `\\` → `\`, `\(` → `(` — works but fragile under editing |
+| Python regular string `"\\([^}]*\\)"` | `\([^}]*\)` (correct) | `\\\\` -> `\\`, `\(` -> `(` — works but fragile under editing |
 | Python raw string `r"\([^}]*\)"` | `\([^}]*\)` (correct) | Raw = literal — BUT `r"\\([^}]*\\)"` produces `\\(` (double), visually identical |
 
-**The core problem:** there is no single reliable escape-free path through `patch` + Python strings for backslash-heavy
-content. The old blanket rule "never use Python for file writes" (see the `file-operations` skill) contradicts the
-recovery options that say "use Python byte-level I/O." Here is the resolution:
+**The core problem:** there is no single reliable escape-free path through `patch` or Python strings for backslash-heavy content. Each layer interprets backslashes differently. Here is the resolution:
 
 #### Safe workflow (ranked by reliability)
 
@@ -231,41 +229,44 @@ from hermes_tools import terminal, write_file
 r = terminal(["cat", "/path/to/file"])
 content = r["output"]
 
-# Python string replacement — only backslashes in your replacement,\n# no escaping layer on the write side
+# Python string replacement — backslashes in your replacement text are literal
 content = content.replace(
-    'old_backslash_pattern',    # literal bytes from the file
-    'new_backslash_pattern'     # literal bytes you want
+    'old_backslash_pattern',   # literal bytes from the file
+    'new_backslash_pattern'    # literal bytes you want
 )
 
 # Write — write_file accepts raw content with no escaping
 write_file("/path/to/file", content)
 ```
 
+Use raw strings `r'...'` so Python doesn't process the backslashes. Verify the result with `xxd` (see Diagnostic below).
+
 **2. Second resort: `sed -i` in single quotes**
 
 Bash single quotes preserve backslashes literally — zero unexpected escaping:
 
 ```bash
-# Replace \\( with \\(  (correct BRE capture group)
-sed -i 's/\\\\(/\\\\(/g' file
+# Replace `\(` with `\(` (correct BRE capture group)
+sed -i 's/\(/\(/g' file
 ```
 
 **3. Third resort: Python byte-level (binary mode)**
 
-When the edit is too complex for `sed` but `write_file` from `terminal("cat")` has issues, use binary I/O in a Python
-heredoc with `<< 'PYEOF'` (quoted delimiter prevents shell escaping):
+When the edit is too complex for `sed` but `write_file` from `terminal("cat")` has issues, use binary I/O with explicit hex escapes to avoid any ambiguity:
 
 ```python3 << 'PYEOF'
 data = open('file', 'rb').read()
-# Byte-level replacement — no string escaping layer
-data = data.replace(b"\\\\(", b"\\\\(")   # WARNING: Python raw strings still
-                                          # process backslashes — use byte
-                                          # concatenation for clarity:
-correct = b"\\\\(" + b"[^}]*" + b"\\\\)"  # each 5c byte is explicit
-data = data.replace(b"old", correct)
+# Explicit hex escapes — no backslash-counting needed
+data = data.replace(b"\x5c\x28", b"\x5c\x29")  # \( and \)
+# Or use byte concatenation for extreme cases:
+open_paren = b"\x5c\x28"  # \(
+close_paren = b"\x5c\x29"  # \)
+data = data.replace(b"old_pattern", open_paren + b"[^}]*" + close_paren)
 open('file', 'wb').write(data)
 PYEOF
 ```
+
+*Note: `b"\x5c\x28"` is a Python bytes literal — `\x5c` is the hex value 0x5c (backslash), `\x28` is 0x28 (open paren). No backslash escaping confusion.*
 
 **4. Diagnostic: verify bytes before and after every backslash edit**
 
@@ -273,13 +274,11 @@ PYEOF
 # Before editing
 sed -n '<LINE_NUM>p' <file> | xxd | grep '5c'
 
-# After editing — confirm single not double: 5c 28 = \\( (correct),
-# 5c 5c 28 = \\\\( (doubled)
+# After editing — confirm single not doubled:
+#   5c 28 = \( (correct, one backslash + paren)
+#   5c 5c 28 = two backslashes + paren (doubled)
 sed -n '<LINE_NUM>p' <file> | xxd | grep '5c'
 ```
-
-See `file-operations` skill's "Backslash Escaping in patch Operations" section for the complete diagnosis and recovery
-workflow with worked examples.
 
 ## Verification Commands
 
