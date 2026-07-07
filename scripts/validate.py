@@ -26,7 +26,7 @@ DEFAULT_ROOT = Path(__file__).resolve().parents[1]
 ROOT = Path(os.environ.get("PBP_SKILL_ROOT", DEFAULT_ROOT)).resolve()
 SKILL = ROOT / "skill" / "SKILL.md"
 REF_DIR = ROOT / "skill" / "references"
-DEFAULT_INSTALLED = Path.home() / ".hermes" / "skills" / "software-development" / "python-best-practices"
+DEFAULT_INSTALLED = Path.home() / ".hermes" / "skills" / "software-development" / "python-project-workflow"
 INSTALLED = Path(os.environ.get("PBP_SKILL_INSTALLED", DEFAULT_INSTALLED)).resolve()
 REQUIRED_REFS = {
     "project-orientation.md",
