@@ -1,7 +1,7 @@
 ---
 name: python-project-workflow
 description: "Use for setting up, inspecting, and verifying Python projects — greenfield bootstrap, tooling configuration, CI, packaging, mature-repo preservation."
-version: 1.2.7
+version: 1.2.8
 author: CodeSigils
 license: MIT
 tier: powerful
@@ -21,14 +21,13 @@ metadata:
 # Python Project Workflow
 
 Use for setting up, inspecting, and verifying Python projects — greenfield bootstrap, tooling
-configuration, CI, packaging, mature-repo preservation. Not for code review (handled by
-`python-best-practices` skill from nathan-gage/python-skills).
+configuration, CI, packaging, mature-repo preservation. Not for code review (a dedicated Python code-review skill covers that, if one is installed).
 
 ## When to Use This Skill
 
 Trigger on Python project setup, inspection, tooling configuration, CI/verification, packaging, and
-mature-repo preservation work. Do NOT trigger for pure Python code review — that is handled by
-`python-best-practices` (nathan-gage/python-skills).
+mature-repo preservation work. Do NOT trigger for pure Python code review — that is better served by
+specialized code-review skills (e.g. `python-best-practices`, if installed).
 
 If this skill was loaded but the user request is a non-trigger, answer **directly** from general knowledge and nothing
 more:

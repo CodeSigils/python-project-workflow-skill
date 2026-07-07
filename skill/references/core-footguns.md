@@ -2,11 +2,11 @@
 
 Common Python pitfalls, ordered by frequency. This is a quick reference for awareness —
 not a code review checklist. For structured code review rules with impact levels and
-code examples, install [nathan-gage/python-skills](https://github.com/nathan-gage/python-skills).
+code examples, install a dedicated Python code-review skill.
 
-> **Note:** Items covered by nathan-gage/python-skills (mutable defaults, context managers,
-> bare `except:`) are omitted here — that skill has more thorough treatment with impact
-> levels and code examples.
+> **Note:** Items well-covered by dedicated Python code-review skills
+> (mutable defaults, context managers, bare `except:`) are omitted here — those skills
+> provide more thorough treatment with impact levels and code examples.
 
 ## Late Binding in Closures
 
