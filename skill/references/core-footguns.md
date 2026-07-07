@@ -1,15 +1,12 @@
 # Core Python Footguns
 
-Common sources of bugs or confusion that come up in Python code review, ordered by frequency.
+Common Python pitfalls, ordered by frequency. This is a quick reference for awareness —
+not a code review checklist. For structured code review rules with impact levels and
+code examples, install [nathan-gage/python-skills](https://github.com/nathan-gage/python-skills).
 
-## Mutable Default Arguments
-
-```python
-def foo(items=[]):       # WRONG - list is shared across calls
-def foo(items=None):     # RIGHT - create new list inside
-    if items is None:
-        items = []
-```
+> **Note:** Items covered by nathan-gage/python-skills (mutable defaults, context managers,
+> bare `except:`) are omitted here — that skill has more thorough treatment with impact
+> levels and code examples.
 
 ## Late Binding in Closures
 
@@ -23,21 +20,6 @@ for i in range(5):
 # Fix with default argument or functools.partial
 for i in range(5):
     funcs.append(lambda i=i: i)
-```
-
-## Resource Management
-
-Always use context managers for resources:
-
-```python
-# WRONG
-f = open("file")
-data = f.read()
-f.close()
-
-# RIGHT
-with open("file") as f:
-    data = f.read()
 ```
 
 ## `__init__` vs `__new__`
@@ -78,20 +60,6 @@ original = [x for x in original if not condition(x)]
 ## `import *`
 
 Pollutes the namespace, obscures where names come from, triggers linters. Use explicit imports.
-
-## Bare `except:`
-
-Catches everything including `KeyboardInterrupt` and `SystemExit`:
-
-```python
-try:
-    ...
-except:             # WRONG - catches everything
-    ...
-
-except Exception:   # RIGHT - catches normal exceptions
-    ...
-```
 
 ## Dict Ordering (Pre-3.7)
 
