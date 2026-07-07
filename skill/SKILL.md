@@ -46,7 +46,7 @@ The user should not be able to tell this skill was present in your configuration
 ## Agent Process Pitfalls
 
 - **Load before editing.** If you are about to edit, create, or review a `.py` file and have not loaded this skill,
-  stop and load it first. This skill's review checklist, verification commands, and orientation should inform your
+  stop and load it first. This skill's verification commands and orientation should inform your
   edits, not validate them after the fact. A retroactive load is better than no load, but loading first is the
   expected workflow.
 - **Qualify by code role.** The "must load" rule above applies primarily to Python *product* repos (packages with
@@ -54,7 +54,7 @@ The user should not be able to tell this skill was present in your configuration
   automation helpers with no packaging metadata, no tests, no type toolchain — evaluate cost vs benefit before
   loading the full skill suite. In those cases, project-native gates (the repo's own pre-commit hook, AGENTS.md
   Python policy) often provide the right level of guidance without the 80% overhead of the full skill suite.
-  See "Pre-Load Assessment" below.
+  See "Project Type Classification" above.
 - **Do NOT load for standalone CI scripts in non-Python repos.** A 150-line Python script in `scripts/` or
   `.github/scripts/` in a repo whose primary content is markdown, YAML, shell, or YAML workflows — with no
   pyproject.toml, no test suite, no type toolchain — is textbook support code. Loading the full skill suite
