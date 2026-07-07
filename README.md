@@ -58,6 +58,7 @@ python-best-practices-skill/
 ├── .gitignore
 ├── .gitattributes
 ├── .github/workflows/ # CI validation
+│   └── ci.yml
 ├── scripts/           # Local validation script
 │   └── run_phase2_checks.py
 └── skill/             # Runtime skill payload
