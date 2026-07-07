@@ -1,33 +1,18 @@
 ---
 name: python-project-workflow
-description: "Use for setting up, inspecting, and verifying Python projects — greenfield bootstrap, tooling configuration, CI, packaging, mature-repo preservation."
-version: 1.2.8
-author: CodeSigils
-license: MIT
-tier: powerful
-ref:
-  - references/project-orientation.md
-  - references/pyproject-template.md
-  - references/lint-format-typing-testing.md
-  - references/core-footguns.md
-  - references/safe-editing.md
-  - references/mature-repo-preservation.md
-  - references/eval-benchmark-hardening.md
-metadata:
-  hermes:
-    tags: [python, project-setup, workflow, tooling, verification]
+description: Set up, inspect, preserve, and verify Python projects across greenfield bootstrap, tooling configuration, CI, packaging, mature-repo preservation, and project-native verification. Use for Python project workflow tasks, not for pure code review; use py-review-skill or another dedicated review skill for review findings.
 ---
 
 # Python Project Workflow
 
-Use for setting up, inspecting, and verifying Python projects — greenfield bootstrap, tooling
-configuration, CI, packaging, mature-repo preservation. Not for code review (a dedicated Python code-review skill covers that, if one is installed).
+Use for setting up, inspecting, preserving, and verifying Python projects:
+greenfield bootstrap, tooling configuration, CI, packaging, mature-repo preservation,
+and project-native verification.
 
-## When to Use This Skill
+Do not use this as a Python code-review rule set. If the task is pure code
+review, prefer `py-review-skill` or another dedicated review skill.
 
-Trigger on Python project setup, inspection, tooling configuration, CI/verification, packaging, and
-mature-repo preservation work. Do NOT trigger for pure Python code review — that is better served by
-specialized code-review skills (e.g. `python-best-practices`, if installed).
+## Scope
 
 If this skill was loaded but the user request is a non-trigger, answer **directly** from general knowledge and nothing
 more:
@@ -53,7 +38,7 @@ The user should not be able to tell this skill was present in your configuration
   loading the full skill suite. In those cases, project-native gates (the repo's own pre-commit hook, AGENTS.md
   Python policy) often provide the right level of guidance without the 80% overhead of the full skill suite.
   See "Project Type Classification" above.
-- **Do NOT load for standalone CI scripts in non-Python repos.** A 150-line Python script in `scripts/` or
+- **Do NOT load for standalone CI scripts in non-Python repos.** A short Python script in `scripts/` or
   `.github/scripts/` in a repo whose primary content is markdown, YAML, shell, or YAML workflows — with no
   pyproject.toml, no test suite, no type toolchain — is textbook support code. Loading the full skill suite
   in that scenario adds 80% overhead (orientation checklist, version-contract audit, lint-format-typing-testing
@@ -86,7 +71,7 @@ layout, configuration files, CI workflows, and agent documentation.
 ### Version Control State (Actionable)
 
 - `.gitignore`: inspect existing project-specific rules before suggesting changes. Compare against the
-  [official GitHub Python template](https://raw.githubusercontent.com/github/gitignore/main/Python.gitignore) and
+  [official GitHub Python template](https://github.com/github/gitignore/blob/main/Python.gitignore) and
   [Toptal Python template](https://www.toptal.com/developers/gitignore/api/python). Check common artifacts:
   `__pycache__/`, `*.py[codz]`, `*.egg-info/`, `build/`, `dist/`, `.coverage`, `.coverage.*`, `coverage.xml`,
   `htmlcov/`, `.pytest_cache/`, `.ruff_cache/`, `.mypy_cache/`, `.tox/`, `.nox/`, `.hypothesis/`, `.pytype/`, `.pyre/`,
@@ -203,11 +188,9 @@ When writing or reviewing verification commands:
 - **Check freshness.** If a reference file uses point-in-time version numbers,
   verify them against current official documentation before relying on them.
 
-**Hermes runtime/plugin edits:** If the edited Python lives under `~/.hermes/hermes-agent/` rather than a normal product checkout, do not stop at gateway restart or manual behavior inspection. Run syntax/lint checks against the changed runtime files, a relevant pytest subset, and a focused import/behavior probe from the Hermes runtime venv.
+**Ad-hoc verification when no canonical gate is available:** If a changed file has no project-native test/lint/build command, or the session verifier asks for fresh evidence, create a focused temporary verifier under `/tmp` with an OS-safe `py-workflow-verify-` filename prefix (`mktemp /tmp/py-workflow-verify-XXXXXX.sh` for shell or `tempfile.NamedTemporaryFile(prefix="py-workflow-verify-", dir="/tmp", delete=False)` for Python). The verifier should run the smallest meaningful checks for the changed behavior, assert expected outputs, and remove itself afterward when possible. Report this explicitly as "ad-hoc verification", not suite green or full repository validation.
 
-**Ad-hoc verification when no canonical gate is available:** If a changed file has no project-native test/lint/build command, or the session verifier asks for fresh evidence, create a focused temporary verifier under `/tmp` with an OS-safe `hermes-verify-` filename prefix (`mktemp /tmp/hermes-verify-XXXXXX.sh` for shell or `tempfile.NamedTemporaryFile(prefix="hermes-verify-", dir="/tmp", delete=False)` for Python). The verifier should run the smallest meaningful checks for the changed behavior, assert expected outputs, and remove itself afterward when possible. Report this explicitly as "ad-hoc verification", not suite green or full repository validation.
-
-Freshness pitfall: ad-hoc verification is scoped to the files and behavior it checked. If you edit another file afterward — even a comment/docstring/usage example in a sibling script — the previous ad-hoc evidence is stale for that new changed path. Create a new focused `/tmp/hermes-verify-*` verifier for the newly edited behavior before reporting completion. For rewritten validators, mock external dependencies where possible so you can prove both pass and fail paths deterministically instead of relying only on live network state.
+Freshness pitfall: ad-hoc verification is scoped to the files and behavior it checked. If you edit another file afterward — even a comment/docstring/usage example in a sibling script — the previous ad-hoc evidence is stale for that new changed path. Create a new focused `/tmp/py-workflow-verify-*` verifier for the newly edited behavior before reporting completion. For rewritten validators, mock external dependencies where possible so you can prove both pass and fail paths deterministically instead of relying only on live network state.
 
 For ordinary Python projects:
 

@@ -3,8 +3,22 @@ name: CI
 on:
   push:
     branches: [main]
+    paths:
+      - ".github/workflows/ci.yml"
+      - "README.md"
+      - "CITATION.cff"
+      - "scripts/**"
+      - "skills/**"
   pull_request:
     branches: [main]
+    paths:
+      - ".github/workflows/ci.yml"
+      - "README.md"
+      - "CITATION.cff"
+      - "scripts/**"
+      - "skills/**"
+  schedule:
+    - cron: "0 9 * * 1"
   workflow_dispatch:
 
 jobs:
@@ -27,7 +41,10 @@ jobs:
           python -m pip install ruff
 
       - name: Run skill source checks
-        run: python3 scripts/validate.py --skip-installed
+        run: python3 scripts/validate.py
+
+      - name: Verify referenced URLs
+        run: python3 scripts/verify-urls.py
 
       - name: Ruff check scripts
         run: python3 -m ruff check scripts

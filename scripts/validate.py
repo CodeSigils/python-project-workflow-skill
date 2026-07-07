@@ -1,33 +1,18 @@
 #!/usr/bin/env python3
-"""Source and installed-mirror readiness checks for the python-project-workflow skill.
-
-Validates:
-- skill/SKILL.md structure and required sections
-- skill/references/ completeness and size
-- README.md shipping boundary phrasing
-- No stale IMPLEMENTATION_SUMMARY.md
-- Git commit authorship hygiene
-- Markdown formatting (when formatter is available)
-- Installed mirror sync (when requested)
-"""
+"""Validate the python-project-workflow skill source."""
 
 from __future__ import annotations
 
-import argparse
-import filecmp
-import os
 import re
-import shutil
 import subprocess
 import sys
 from pathlib import Path
 
-DEFAULT_ROOT = Path(__file__).resolve().parents[1]
-ROOT = Path(os.environ.get("PBP_SKILL_ROOT", DEFAULT_ROOT)).resolve()
-SKILL = ROOT / "skill" / "SKILL.md"
-REF_DIR = ROOT / "skill" / "references"
-DEFAULT_INSTALLED = Path.home() / ".hermes" / "skills" / "software-development" / "python-project-workflow"
-INSTALLED = Path(os.environ.get("PBP_SKILL_INSTALLED", DEFAULT_INSTALLED)).resolve()
+
+ROOT = Path(__file__).resolve().parents[1]
+SKILL_DIR = ROOT / "skills" / "python-project-workflow"
+SKILL = SKILL_DIR / "SKILL.md"
+REF_DIR = SKILL_DIR / "references"
 REQUIRED_REFS = {
     "project-orientation.md",
     "pyproject-template.md",
@@ -36,6 +21,13 @@ REQUIRED_REFS = {
     "safe-editing.md",
     "mature-repo-preservation.md",
     "eval-benchmark-hardening.md",
+}
+REQUIRED_SECTIONS = {
+    "## Scope",
+    "## Orientation Checklist",
+    "## Task Classification Table",
+    "## Verification Commands",
+    "## Preserve Local Conventions",
 }
 
 
@@ -65,134 +57,117 @@ def read_text_checked(path: Path) -> str:
     raise AssertionError("unreachable")
 
 
+def parse_frontmatter(text: str) -> tuple[dict[str, str], str]:
+    if not text.startswith("---\n"):
+        fail("SKILL.md does not start with YAML frontmatter")
+    try:
+        _, raw, body = text.split("---\n", 2)
+    except ValueError:
+        fail("SKILL.md frontmatter is not closed")
+
+    data: dict[str, str] = {}
+    for line in raw.splitlines():
+        if not line.strip():
+            continue
+        if ":" not in line:
+            fail(f"malformed frontmatter line: {line!r}")
+        key, value = line.split(":", 1)
+        data[key.strip()] = value.strip().strip('"')
+
+    extra = set(data) - {"name", "description"}
+    if extra:
+        fail(f"unsupported frontmatter fields: {sorted(extra)}")
+    if data.get("name") != "python-project-workflow":
+        fail("frontmatter name must be python-project-workflow")
+    if len(data.get("description", "").split()) < 18:
+        fail("frontmatter description is too short to trigger reliably")
+    return data, body
+
+
 def contains_markdown_phrase(text: str, phrase: str) -> bool:
     return " ".join(phrase.split()) in " ".join(text.split())
 
 
 def check_skill() -> None:
     text = read_text_checked(SKILL)
-    if not text.startswith("---\n"):
-        fail("skill/SKILL.md does not start with YAML frontmatter")
-    if "\n---\n" not in text[4:]:
-        fail("skill/SKILL.md frontmatter is not closed")
-    for section in [
-        "## When to Use This Skill",
-        "## Orientation Checklist",
-        "## Task Classification Table",
-        "## Verification Commands",
-        "## Preserve Local Conventions",
-    ]:
-        if section not in text:
-            fail(f"missing section in skill/SKILL.md: {section}")
-    if re.search(r"^\|\|", text, re.MULTILINE):
-        fail("skill/SKILL.md table still has accidental double-pipe rows")
+    _, body = parse_frontmatter(text)
+
+    for section in sorted(REQUIRED_SECTIONS):
+        if section not in body:
+            fail(f"missing section in {rel(SKILL)}: {section}")
+
+    if re.search(r"^\|\|", body, re.MULTILINE):
+        fail(f"{rel(SKILL)} table still has accidental double-pipe rows")
+
+    forbidden = [
+        "metadata:",
+        "tier:",
+        "ref:",
+        "version:",
+        "author:",
+        ".hermes",
+        "hermes-verify",
+    ]
+    for needle in forbidden:
+        if needle in text:
+            fail(f"{rel(SKILL)} contains non-portable runtime marker: {needle}")
+
     for missing_ref in ["packaging.md", "errors-and-logging.md", "cli.md", "migration-existing-code.md"]:
-        if f"`{missing_ref}` (deferred)" in text:
+        if f"`{missing_ref}` (deferred)" in body:
             fail(
                 f"task table routes directly to deferred reference without fallback: {missing_ref}",
                 hint="Point the row at an existing fallback reference, then label the richer reference as deferred.",
             )
 
+    if len(text.splitlines()) > 500:
+        fail(f"{rel(SKILL)} exceeds 500-line runtime budget")
+
 
 def check_references() -> None:
     if not REF_DIR.exists():
         fail(f"runtime reference directory is missing: {rel(REF_DIR)}")
-    found = {p.name for p in REF_DIR.glob("*.md")}
+    found = {path.name for path in REF_DIR.glob("*.md")}
     missing = REQUIRED_REFS - found
+    extra = found - REQUIRED_REFS
     if missing:
-        fail(
-            f"missing reference files: {sorted(missing)}",
-            hint="Create the missing files under skill/references/ or update REQUIRED_REFS if the source set changed.",
-        )
+        fail(f"missing reference files: {sorted(missing)}")
+    if extra:
+        fail(f"unexpected reference files: {sorted(extra)}")
     for name in REQUIRED_REFS:
         path = REF_DIR / name
         size = path.stat().st_size
         if size < 500:
             fail(f"reference file looks too small: {rel(path)} ({size} bytes)")
+        if len(read_text_checked(path).splitlines()) > 250:
+            fail(f"reference file exceeds 250-line budget: {rel(path)}")
+
+
+def check_readme() -> None:
+    readme = read_text_checked(ROOT / "README.md")
+    required = [
+        "agentskills.io-compatible",
+        "skills/python-project-workflow/",
+        "Shipping boundary: `skills/python-project-workflow/` is the runtime payload",
+    ]
+    for phrase in required:
+        if not contains_markdown_phrase(readme, phrase):
+            fail(f"README.md missing required phrase: {phrase}")
+    if "Hermes Skill" in readme:
+        fail("README.md should not frame the project as Hermes-only")
 
 
 def check_status_sources() -> None:
     removed_summary = ROOT / "IMPLEMENTATION_SUMMARY.md"
     if removed_summary.exists():
-        fail(
-            "IMPLEMENTATION_SUMMARY.md should not exist",
-            hint="Keep status in README.md; use git history for completed-change records.",
-        )
-
-
-def check_shipping_phase() -> None:
-    """Verify README.md documents the runtime shipping boundary."""
-    readme = read_text_checked(ROOT / "README.md")
-    if not contains_markdown_phrase(readme, "Shipping boundary: `skill/` is the runtime payload and source of truth"):
-        fail(
-            "README.md is missing the shipping boundary summary",
-            hint="README.md must tell humans that skill/ is the runtime payload and the installed mirror is only a test copy.",
-        )
-
-
-def sync_installed_mirror() -> None:
-    try:
-        if INSTALLED.exists():
-            shutil.rmtree(INSTALLED)
-        INSTALLED.mkdir(parents=True, exist_ok=True)
-        (INSTALLED / "references").mkdir(exist_ok=True)
-        shutil.copy2(SKILL, INSTALLED / "SKILL.md")
-        for name in REQUIRED_REFS:
-            shutil.copy2(REF_DIR / name, INSTALLED / "references" / name)
-    except OSError as exc:
-        fail(f"could not sync installed mirror at {INSTALLED}: {exc}")
-
-
-def check_installed_mirror() -> None:
-    if not INSTALLED.exists():
-        fail(
-            f"installed mirror missing: {INSTALLED}",
-            hint="Run python3 scripts/validate.py --sync-installed to create it, or use --skip-installed for source-only checks.",
-        )
-    installed_skill = INSTALLED / "SKILL.md"
-    if not installed_skill.exists():
-        fail(
-            f"installed mirror missing SKILL.md: {installed_skill}",
-            hint="Run python3 scripts/validate.py --sync-installed.",
-        )
-    if not filecmp.cmp(SKILL, installed_skill, shallow=False):
-        fail(
-            "installed SKILL.md differs from source skill/SKILL.md",
-            hint="Run python3 scripts/validate.py --sync-installed, then rerun the check.",
-        )
-    allowed_files = {Path("SKILL.md")} | {Path("references") / name for name in REQUIRED_REFS}
-    actual_files = {path.relative_to(INSTALLED) for path in INSTALLED.rglob("*") if path.is_file()}
-    extra_files = sorted(actual_files - allowed_files)
-    if extra_files:
-        fail(
-            f"installed mirror has file(s) outside source runtime payload: {[str(path) for path in extra_files]}",
-            hint="Run python3 scripts/validate.py --sync-installed to replace the mirror with the canonical skill/ payload.",
-        )
-    for name in REQUIRED_REFS:
-        src = REF_DIR / name
-        dst = INSTALLED / "references" / name
-        if not dst.exists():
-            fail(
-                f"installed mirror missing reference: {name}",
-                hint="Run python3 scripts/validate.py --sync-installed.",
-            )
-        if not filecmp.cmp(src, dst, shallow=False):
-            fail(
-                f"installed mirror reference differs: {name}",
-                hint="Run python3 scripts/validate.py --sync-installed, then rerun the check.",
-            )
+        fail("IMPLEMENTATION_SUMMARY.md should not exist")
+    old_skill = ROOT / "skill"
+    if old_skill.exists():
+        fail("old runtime directory still exists: skill/")
 
 
 def check_markdown_format() -> None:
     """Verify tracked .md files pass the markdown formatter if available."""
-    formatter = (
-        Path.home()
-        / ".hermes"
-        / "skills"
-        / "markdown-formatter"
-        / "src"
-        / "index.js"
-    )
+    formatter = Path.home() / ".hermes" / "skills" / "markdown-formatter" / "src" / "index.js"
     if not formatter.exists():
         print("WARNING: markdown formatter not found, skipping format check")
         return
@@ -201,7 +176,10 @@ def check_markdown_format() -> None:
         try:
             subprocess.run(
                 ["which", exe],
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True, timeout=10,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                check=True,
+                timeout=10,
             )
         except (subprocess.SubprocessError, OSError):
             print(f"WARNING: {exe} not available, skipping markdown format check")
@@ -211,14 +189,17 @@ def check_markdown_format() -> None:
         result = subprocess.run(
             ["git", "ls-files", "*.md"],
             cwd=ROOT,
-            text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            timeout=10, check=True,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=10,
+            check=True,
         )
     except (subprocess.SubprocessError, OSError) as exc:
         print(f"WARNING: could not list tracked .md files: {exc}")
         return
 
-    md_files = [f for f in result.stdout.splitlines() if f.strip()]
+    md_files = [file for file in result.stdout.splitlines() if file.strip()]
     if not md_files:
         return
 
@@ -226,8 +207,11 @@ def check_markdown_format() -> None:
         verify = subprocess.run(
             ["node", str(formatter), "--verify", "--all", *md_files],
             cwd=ROOT,
-            text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
             timeout=60,
+            check=False,
         )
     except (subprocess.SubprocessError, OSError) as exc:
         print(f"WARNING: markdown formatter check failed to run: {exc}")
@@ -235,88 +219,18 @@ def check_markdown_format() -> None:
 
     if verify.returncode != 0:
         print(verify.stdout, file=sys.stderr)
-        fail(
-            "tracked .md files are not formatted",
-            hint="Run the markdown formatter: node <skill>/markdown-formatter/src/index.js --fix --guard <files>",
-        )
-
-
-BOT_AUTHOR_PATTERNS = [
-    "dependabot",
-    "renovate",
-    "[bot]",
-    "bot@",
-    "agn",
-    "automation",
-    "auto-merge",
-]
-
-
-def check_commit_authors() -> None:
-    """Warn if recent commits have bot/agent-like authorship (non-fatal)."""
-    try:
-        result = subprocess.run(
-            ["git", "log", "--max-count=10",
-             "--format=%H|%an|%ae|%cn|%ce"],
-            cwd=ROOT,
-            text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            timeout=10, check=False,
-        )
-    except (subprocess.SubprocessError, OSError) as exc:
-        print(f"WARNING: could not check git authors: {exc}")
-        return
-
-    if result.returncode != 0 or not result.stdout.strip():
-        return
-
-    for line in result.stdout.strip().splitlines():
-        parts = line.split("|", maxsplit=4)
-        if len(parts) != 5:
-            continue
-        sha, aname, aemail, cname, cemail = parts
-
-        fields = [
-            ("author", aname, aemail),
-            ("committer", cname, cemail),
-        ]
-        for role, name, email in fields:
-            combined = f"{name} <{email}>".lower()
-            for pattern in BOT_AUTHOR_PATTERNS:
-                if pattern in combined:
-                    print(
-                        f"WARNING: commit {sha[:8]} has {role} matching "
-                        f"bot pattern {pattern!r}: {name} <{email}>",
-                        file=sys.stderr,
-                    )
-
-        if f"{aname} <{aemail}>".lower() != f"{cname} <{cemail}>".lower():
-            print(
-                f"NOTE: commit {sha[:8]} author differs from committer "
-                f"(author: {aname} <{aemail}> vs committer: {cname} <{cemail}>)",
-                file=sys.stderr,
-            )
+        fail("tracked .md files are not formatted")
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--sync-installed", action="store_true", help="copy source skill files into the local Hermes mirror before checking")
-    parser.add_argument("--skip-installed", action="store_true", help="skip local Hermes mirror verification for portable source-only checks")
-    args = parser.parse_args()
-
     check_skill()
     check_references()
+    check_readme()
     check_status_sources()
-    check_shipping_phase()
-    check_commit_authors()
     check_markdown_format()
-    if args.sync_installed:
-        sync_installed_mirror()
-    if not args.skip_installed:
-        check_installed_mirror()
-    mirror_scope = "source files only" if args.skip_installed else "source files and installed skill mirror"
-    print(f"OK: skill source checks and {mirror_scope} are valid")
+    print("OK: portable skill source checks are valid")
     return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
