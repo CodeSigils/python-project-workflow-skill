@@ -31,15 +31,15 @@ When loaded, the skill adapts to the target project:
 - **CI/verification** — project-native gates, cross-platform tool patterns, ad-hoc verification when no gate exists.
 - **Packaging** — build, publish, entry points, lockfile policy.
 
-## Companion: nathan-gage/python-skills
+## Suggested companion: nathan-gage/python-skills
 
-For code review rules (70 rules across 8 categories with impact levels), install:
+This skill doesn't cover Python code review. If you need code-review rules (70 rules across 8 categories with impact levels and code examples), consider also installing [nathan-gage/python-skills](https://github.com/nathan-gage/python-skills):
 
 ```bash
 git clone https://github.com/nathan-gage/python-skills ~/.hermes/skills/python-skills
 ```
 
-Both skills coexist. nathan-gage handles code review. This skill handles project workflow.
+No dependency — the two skills are independent. Install it only if you need structured code-review guidance.
 
 ## Verify
 
