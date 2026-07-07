@@ -5,7 +5,7 @@ authors:
     given-names: ""
     email: "toolsoftrade.web@gmail.com"
 title: "Python Project Workflow Hermes Skill"
-version: 1.2.7
+version: 1.2.8
 date-released: 2026-06-05
 repository-code: "https://github.com/CodeSigils/python-project-workflow-skill"
 license: MIT
