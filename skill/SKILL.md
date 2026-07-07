@@ -10,6 +10,8 @@ ref:
   - references/pyproject-template.md
   - references/lint-format-typing-testing.md
   - references/review-checklist.md
+  - references/core-footguns.md
+  - references/safe-editing.md
   - references/mature-repo-preservation.md
   - references/eval-benchmark-hardening.md
 metadata:
@@ -171,121 +173,14 @@ declared Python version range.
 
 ## Core Python Footguns
 
-Watch out for these common sources of bugs or confusion:
-
-- Mutable default arguments: `def foo(items=[]):` -> use `None` and create a new list inside.
-- Late binding closures in loops: capture loop variables with `functools.partial` or default arguments.
-- Misunderstanding `__init__` vs `__new__`.
-- Assuming `==` works for all types (especially floats).
-- Not closing resources (files, sockets, etc.) -> use context managers (`with`).
-- Confusion between `is` and `==` for mutable types.
-- Modifying a list while iterating over it -> iterate over a copy or use list comprehensions.
-- Importing `*` from modules -> pollutes namespace and makes dependencies unclear.
-- Not handling exceptions properly -> bare `except:` or swallowing exceptions.
-- Assuming dictionaries are ordered (before Python 3.7, they were not guaranteed to be).
-- Using `+` for string concatenation in loops -> use `str.join()` or `io.StringIO`.
-- Threading issues: GIL, race conditions, deadlocks.
-- Multiprocessing: pickling issues, shared state.
-- **`IOError` *is* `OSError` since Python 3.3.** Catching both `except (IOError, OSError)` is redundant — `IOError` was merged into `OSError` in PEP 3151. Catching `OSError` alone covers both. This is a common pattern in code written against Python 2 or early 3.x that was never cleaned up. When reviewing, flag the redundancy as a style issue.
-- **Guard-condition ordering: classify before allow-list.** When filtering items that need both a STRUCTURAL classification (what IS this thing?) and an ALLOW-LIST check (is it one of the known exceptions?), apply the structural check first, then the allow-list. The reverse order silently accepts items that match the allow-list even when the structural gate should have rejected them. Concrete example: processing `*-by:` attribution trailers where `Co-authored-by:` must be caught but `Closes:` (a standard git trailer that happens to look structurally similar) should be left alone:
-
-  ```python
-  # WRONG — allow-list check before structural classification
-  if key in ALLOWED_TRAILERS:
-      continue              # ← prematurely accepts "co-authored-by" because it IS in
-                            #   the list, when it should have been caught by the -by rule
-  if not key.endswith("-by"):
-      continue
-  violations.append(trailer)
-
-  # RIGHT — structural classification first, then allow-list
-  if not key.endswith("-by"):
-      continue              # ← skip anything that isn't a -by trailer at all
-  if key in ALLOWED_TRAILERS:
-      continue              # ← now this is safe — we know it IS a -by trailer
-  violations.append(trailer)
-  ```
-
-  The one-line mnemonic: **"What is it?" before "Is it allowed?"** Without this order, the allow-list doubles as a silent bypass for everything the structural filter was meant to catch.
-- **Shared config duplication across sibling scripts.** When two or more Python scripts in the same project define the same hardcoded paths, file lists, or configuration values, each copy is a drift surface. Worse, the same list may have different names in each file (`MISSING_FILES` vs `KEY_FILES`), concealing the duplication from casual inspection. Fix by extracting shared values to a `_paths.py` or `_config.py` module imported by all scripts. Run a cross-file trace (`grep -rn` each value across the repo) before concluding that a single-file review is complete — see P17 in durable-patterns.md and Step 0 in requesting-code-review.
-- **Review sibling scripts after editing.** If you changed one Python script, also review its immediate siblings in the same directory — especially scripts that share constants, are called via `subprocess.run`, or implement complementary functions. A `ROOT = Path(".")` or `SCRIPT_DIR` defined independently in two sibling scripts is a drift surface that a single-file review misses. The user will notice if you only reviewed the file you edited and not the ones it depends on or mirrors.
+Watch out for common Python pitfalls: mutable defaults, `is` vs `==`, float equality, bare `except:`, `import *`,
+`IOError`/`OSError`, and more. See `references/core-footguns.md` for the full list with examples and patterns.
 
 ### Backslash-heavy Content: Safe Edit Workflow
 
-Editing files with dense backslash patterns (e.g. sed BRE capture groups `\(...\)`, grep ERE, or shell regex) is a
-recurring corruption site. Three independent layers each interpret backslashes differently:
-
-| Layer | `\(` becomes | Mechanism |
-|-------|-------------|-----------|
-| `patch` tool `old_string`/`new_string` | `\\(` (doubled) | Tool applies its own escape pass — each `\(` becomes `\\(` |
-| Python regular string `"\\([^}]*\\)"` | `\([^}]*\)` (correct) | `\\\\` -> `\\`, `\(` -> `(` — works but fragile under editing |
-| Python raw string `r"\([^}]*\)"` | `\([^}]*\)` (correct) | Raw = literal — BUT `r"\\([^}]*\\)"` produces `\\(` (double), visually identical |
-
-**The core problem:** there is no single reliable escape-free path through `patch` or Python strings for backslash-heavy content. Each layer interprets backslashes differently. Here is the resolution:
-
-#### Safe workflow (ranked by reliability)
-
-**1. First resort: `write_file` with raw `terminal("cat")` input**
-
-Use `execute_code` with `terminal("cat")` to read raw bytes, then `write_file` — zero escaping layers:
-
-```python
-from hermes_tools import terminal, write_file
-
-# Read raw file (no escaping, no format wrapping)
-r = terminal(["cat", "/path/to/file"])
-content = r["output"]
-
-# Python string replacement — backslashes in your replacement text are literal
-content = content.replace(
-    'old_backslash_pattern',   # literal bytes from the file
-    'new_backslash_pattern'    # literal bytes you want
-)
-
-# Write — write_file accepts raw content with no escaping
-write_file("/path/to/file", content)
-```
-
-Use raw strings `r'...'` so Python doesn't process the backslashes. Verify the result with `xxd` (see Diagnostic below).
-
-**2. Second resort: `sed -i` in single quotes**
-
-Bash single quotes preserve backslashes literally — zero unexpected escaping:
-
-```bash
-# Replace `\(` with `\(` (correct BRE capture group)
-sed -i 's/\(/\(/g' file
-```
-
-**3. Third resort: Python byte-level (binary mode)**
-
-When the edit is too complex for `sed` but `write_file` from `terminal("cat")` has issues, use binary I/O with explicit hex escapes to avoid any ambiguity:
-
-```python3 << 'PYEOF'
-data = open('file', 'rb').read()
-# Explicit hex escapes — no backslash-counting needed
-data = data.replace(b"\x5c\x28", b"\x5c\x29")  # \( and \)
-# Or use byte concatenation for extreme cases:
-open_paren = b"\x5c\x28"  # \(
-close_paren = b"\x5c\x29"  # \)
-data = data.replace(b"old_pattern", open_paren + b"[^}]*" + close_paren)
-open('file', 'wb').write(data)
-PYEOF
-```
-
-*Note: `b"\x5c\x28"` is a Python bytes literal — `\x5c` is the hex value 0x5c (backslash), `\x28` is 0x28 (open paren). No backslash escaping confusion.*
-
-**4. Diagnostic: verify bytes before and after every backslash edit**
-
-```bash
-# Before editing
-sed -n '<LINE_NUM>p' <file> | xxd | grep '5c'
-
-# After editing — confirm single not doubled:
-#   5c 28 = \( (correct, one backslash + paren)
-#   5c 5c 28 = two backslashes + paren (doubled)
-sed -n '<LINE_NUM>p' <file> | xxd | grep '5c'
-```
+Editing files with dense backslash patterns (sed/grep/shell regex) is a recurring corruption site
+because each layering (patch tool, Python strings, shell) interprets backslashes differently.
+See `references/safe-editing.md` for the ranked safe-workflow guide and byte-level diagnostic.
 
 ## Verification Commands
 

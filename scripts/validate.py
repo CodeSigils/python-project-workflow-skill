@@ -33,6 +33,8 @@ REQUIRED_REFS = {
     "pyproject-template.md",
     "lint-format-typing-testing.md",
     "review-checklist.md",
+    "core-footguns.md",
+    "safe-editing.md",
     "mature-repo-preservation.md",
     "eval-benchmark-hardening.md",
 }
@@ -146,18 +148,18 @@ def check_installed_mirror() -> None:
     if not INSTALLED.exists():
         fail(
             f"installed mirror missing: {INSTALLED}",
-            hint="Run python3 scripts/run_phase2_checks.py --sync-installed to create it, or use --skip-installed for source-only checks.",
+            hint="Run python3 scripts/validate.py --sync-installed to create it, or use --skip-installed for source-only checks.",
         )
     installed_skill = INSTALLED / "SKILL.md"
     if not installed_skill.exists():
         fail(
             f"installed mirror missing SKILL.md: {installed_skill}",
-            hint="Run python3 scripts/run_phase2_checks.py --sync-installed.",
+            hint="Run python3 scripts/validate.py --sync-installed.",
         )
     if not filecmp.cmp(SKILL, installed_skill, shallow=False):
         fail(
             "installed SKILL.md differs from source skill/SKILL.md",
-            hint="Run python3 scripts/run_phase2_checks.py --sync-installed, then rerun the check.",
+            hint="Run python3 scripts/validate.py --sync-installed, then rerun the check.",
         )
     allowed_files = {Path("SKILL.md")} | {Path("references") / name for name in REQUIRED_REFS}
     actual_files = {path.relative_to(INSTALLED) for path in INSTALLED.rglob("*") if path.is_file()}
@@ -165,7 +167,7 @@ def check_installed_mirror() -> None:
     if extra_files:
         fail(
             f"installed mirror has file(s) outside source runtime payload: {[str(path) for path in extra_files]}",
-            hint="Run python3 scripts/run_phase2_checks.py --sync-installed to replace the mirror with the canonical skill/ payload.",
+            hint="Run python3 scripts/validate.py --sync-installed to replace the mirror with the canonical skill/ payload.",
         )
     for name in REQUIRED_REFS:
         src = REF_DIR / name
@@ -173,12 +175,12 @@ def check_installed_mirror() -> None:
         if not dst.exists():
             fail(
                 f"installed mirror missing reference: {name}",
-                hint="Run python3 scripts/run_phase2_checks.py --sync-installed.",
+                hint="Run python3 scripts/validate.py --sync-installed.",
             )
         if not filecmp.cmp(src, dst, shallow=False):
             fail(
                 f"installed mirror reference differs: {name}",
-                hint="Run python3 scripts/run_phase2_checks.py --sync-installed, then rerun the check.",
+                hint="Run python3 scripts/validate.py --sync-installed, then rerun the check.",
             )
 
 
