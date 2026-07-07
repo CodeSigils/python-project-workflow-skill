@@ -62,7 +62,7 @@ Before giving advice, inspect the repository to understand its current state and
 - `.gitignore`:
   - Inspect existing project-specific rules before suggesting changes.
   - Compare against the official GitHub Python template first:
-    <https://raw.githubusercontent.com/github/gitignore/main/Python.gitignore>.
+    <https://github.com/github/gitignore/blob/main/Python.gitignore>.
   - Use the gitignore.org/Toptal generated Python template as a secondary checklist:
     <https://www.toptal.com/developers/gitignore/api/python>.
   - Check common Python-generated artifacts: `__pycache__/`, `*.py[codz]`, `*.egg-info/`, `build/`, `dist/`,
