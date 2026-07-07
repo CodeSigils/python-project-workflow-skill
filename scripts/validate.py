@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Source and installed-mirror readiness checks for the python-best-practices skill.
+"""Source and installed-mirror readiness checks for the python-project-workflow skill.
 
 Validates:
 - skill/SKILL.md structure and required sections
@@ -32,7 +32,6 @@ REQUIRED_REFS = {
     "project-orientation.md",
     "pyproject-template.md",
     "lint-format-typing-testing.md",
-    "review-checklist.md",
     "core-footguns.md",
     "safe-editing.md",
     "mature-repo-preservation.md",
