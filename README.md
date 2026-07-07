@@ -1,229 +1,65 @@
-# Python Best Practices Hermes Skill
+# Python Best Practices — Hermes Skill
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![Hermes Skill](https://img.shields.io/badge/hermes-skill-purple)](https://hermes-agent.nousresearch.com/docs)
 
-Build a Hermes skill that helps agents work on Python projects safely and idiomatically.
+Adaptive guidance for Python projects: inspect the repo, preserve local conventions, apply modern defaults where they fit.
 
-The skill is adaptive rather than encyclopedic: inspect the live repository first, preserve coherent local conventions,
-then apply modern Python defaults only when they fit the project state.
+The skill is a structured workflow — **orient, classify, load focused reference, advise/edit, verify, report** — not a Python encyclopedia. It helps agents make safe, evidence-backed decisions about tooling, linting, typing, testing, packaging, and code review.
 
-Preferred greenfield baseline:
-
-```text
-uv + ruff + mypy + pytest + pyproject.toml/PEP 621 + src/ layout + Google-style docstrings
-```
-
-Those are defaults, not mandates. Existing projects may already use Poetry, Hatch, tox, nox, pixi, conda, Black, isort,
-Flake8, Pylint, Pyright, unittest, or framework-specific workflows. The skill should discover those choices before
-recommending change.
-
-## Status at a glance
-
-| Area                               | Current state                                                                      |
-| :--------------------------------- | :--------------------------------------------------------------------------------- |
-| Active phase                       | Phase 4 — handoff complete; shipping boundary documented                           |
-| Runtime skill source               | `skill/`                                                                           |
-| Installed mirror                   | `~/.hermes/skills/software-development/python-best-practices`                      |
-| Runtime skill version              | `1.2.5` in `skill/SKILL.md`                                                        |
-| License                            | MIT — `LICENSE` in repository root                                                 |
-| Latest local gate                  | `python3 scripts/run_phase2_checks.py` passes for source plus installed mirror     |
-| Latest expanded benchmark evidence | `python-best-practices-workspace/codex-expanded-9-20260604/benchmark.json`         |
-| Latest benchmark report            | `evals/transcript-benchmark-expanded-9-2026-06-04.md`                              |
-| Latest targeted assertion evidence | `python-best-practices-workspace/codex-polish-incremental-20260605/benchmark.json` |
-| Latest trigger eval set            | `evals/trigger-description-evals.json`                                             |
-| Latest dogfood evidence            | `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md`                    |
-| User handoff                       | `HANDOFF.md` in repository root                                                    |
-
-Phase 0 research was corrected and revalidated on 2026-06-04, Phase 1 skill drafting is complete, and Phase 2 controlled
-eval assets are complete with user qualitative approval recorded on 2026-06-05. The expanded Codex 9-eval run completed
-18/18 command runs successfully, with mean pass rates of 0.9325 for `with_skill` and 0.9102 for `without_skill`. The
-four non-trigger cases scored 100% in both configurations; the mature automation case preserved the native gate and a
-targeted assertion-quality pass now uses synonym groups for behavioral checks instead of brittle exact-phrase
-requirements. Follow-up hardening records effective fallback backend/model metadata in benchmark outputs and tightens
-incremental typing/testing assertion alternatives. A post-polish Codex rerun of the affected incremental typing/testing
-eval passed 9/9 assertions in both configurations.
-
-Phase 3 description optimization is complete. The approved 20-query trigger-description eval set now records the
-selected frontmatter description in `evals/trigger-description-evals.json` and the decision report lives in
-`evals/trigger-description-optimization-2026-06-05.md`. The selected description is:
-
-```text
-Use for changing or reviewing Python project code, packaging, typing, tests, CI, or tooling; inspect first, not concept-only Q&A.
-```
-
-Phase 4 is complete as of 2026-06-05. The runtime payload boundary is documented, the installed mirror is synced,
-readiness gates pass, trigger behavior is verified, MIT license is applied, and `HANDOFF.md` captures the full handoff.
-Optional packaging and hub contribution remain available on explicit request.
-
-## Runtime payload
-
-Shipping boundary: `skill/` is the runtime payload and source of truth. The installed Hermes mirror is only a local
-testing copy. Packaging, hub contribution, cross-profile sync, push, tag, or release remain explicit user-authorized
-side effects, not routine validation steps.
-
-Only `skill/` is the runtime payload and source of truth for the skill that can be installed or shipped.
-
-Runtime files:
-
-- `skill/SKILL.md` — router and operating contract
-- `skill/references/project-orientation.md`
-- `skill/references/pyproject-template.md`
-- `skill/references/lint-format-typing-testing.md`
-- `skill/references/review-checklist.md`
-- `skill/references/mature-repo-preservation.md`
-- `skill/references/eval-benchmark-hardening.md`
-
-Repository-only files such as `README.md`, `research/`, `references/`, `evals/`, `tests/`,
-`.github/`, and `python-best-practices-workspace/` are development, evaluation, or evidence assets. Do not describe them
-as installed runtime payload.
-
-## Quick validation
-
-### Install (for Hermes users)
+## Install
 
 ```bash
 hermes skills install skills-sh/CodeSigils/python-best-practices-skill/skill
 ```
 
-This installs the public skill entry that points at the GitHub `skill/` payload. To update later:
+To update later:
 
 ```bash
+hermes skills check
 hermes skills update
 ```
 
-See [`SHIPPING.md`](./SHIPPING.md) for the full distribution model.
+## What it does
 
-### Validate (for maintainers)
+When loaded, the skill adapts to the target project:
 
-Run the source-only gate for CI-style validation:
+- **Greenfield projects** — sets up `pyproject.toml` (PEP 621), `src/` layout, uv, Ruff, mypy, pytest, and Google-style docstrings.
+- **Existing projects** — discovers the project's own tooling (Poetry, Hatch, tox, nox, unittest, etc.) and works within its conventions. No forced migration.
+- **Mature repositories** — preservation-first: find the native gate, respect `AGENTS.md`, avoid broad defaults, produce a review report before editing.
+- **Code review** — checks typing, packaging, CI, test structure, security posture, and common Python pitfalls with a structured checklist.
+
+The trigger description is deliberately scoped:
+
+> Use for changing or reviewing Python project code, packaging, typing, tests, CI, or tooling; inspect first, not concept-only Q&A.
+
+Python concept questions ("what is a decorator") answer directly without loading the skill suite.
+
+## Verify
 
 ```bash
+# Source-only check (portable, no local Hermes install needed):
 python3 scripts/run_phase2_checks.py --skip-installed
-```
 
-Run the local source-plus-installed-mirror gate:
-
-```bash
-python3 scripts/run_phase2_checks.py
-```
-
-After changing `skill/`, sync the installed mirror and rerun the gate:
-
-```bash
+# Full gate with installed mirror:
 python3 scripts/run_phase2_checks.py --sync-installed
 python3 scripts/run_phase2_checks.py
 ```
-
-Run the regression suite:
-
-```bash
-python3 -m pytest tests -q
-python3 -m compileall -q scripts evals/fixtures tests
-```
-
-Preview the Codex non-trigger benchmark rerun without spending model calls:
-
-```bash
-python3 scripts/run_benchmark.py --dry-run --trigger-filter non-trigger --backend codex --iteration-label review-dry-run
-```
-
-## Strategy summary
-
-The skill should operate as:
-
-```text
-ORIENT → CLASSIFY → LOAD FOCUSED REFERENCE → ADVISE/EDIT → VERIFY → REPORT
-```
-
-Core rules:
-
-1. Inspect project files and repo-local agent instructions before advising.
-2. Prefer project-native commands over generic commands.
-3. Use the greenfield baseline only for new or incoherent projects.
-4. Keep `SKILL.md` concise; move detailed guidance into scoped reference files.
-5. Report verification evidence and skipped checks honestly.
-6. Treat mature repositories as preservation-first targets, not migration targets.
-7. For non-trigger prompts, answer directly without exposing skill or trigger-classification machinery.
-
-## Research integration
-
-When deeper web research would help, the skill may suggest installing or loading the **Scrapling** Hermes skill. If the
-user does not want to install/load that skill, continue with another verified source when possible.
-
-## Development assets
-
-- `VERSIONS.md` — version-choice rationale for templates and recommendations
-- `CONTRIBUTING.md` — local development loop and CI expectations
-- `CITATION.cff` — software citation metadata (CFF v1.2.0)
-- `SECURITY.md` — security policy and vulnerability reporting
-- `SHIPPING.md` — shipping boundary, update flow, and evidence basis
-- `scripts/run_phase2_checks.py` — structural, fixture, repo-guard, and exact installed-mirror validation
-- `scripts/run_benchmark.py` — controlled eval benchmark runner with OpenCode and Codex backend support, including an
-  optional Codex fallback for OpenCode timeouts
-- `tests/test_run_phase2_checks.py` — validation-script regression tests
-- `tests/test_run_benchmark.py` — benchmark grading/output regression tests
-- `.github/workflows/ci.yml` — portable source-only validation for GitHub Actions
-- `evals/evals.json` — 9 controlled Phase 2 eval prompts, including the portable mature-automation preservation fixture
-- `evals/trigger-description-evals.json` — 20-query Phase 3 trigger/near-miss eval set with selected frontmatter
-  description recorded
-- `evals/trigger-description-optimization-2026-06-05.md` — Phase 3 description selection report
-- `evals/phase2-qualitative-review-2026-06-04.md` — source-guidance qualitative review and iteration notes
-- `evals/transcript-benchmark-expanded-9-2026-06-04.md` — expanded Codex 9-eval benchmark summary and analyst review
-- `evals/transcript-benchmark-iteration-1-2026-06-04.md` — first transcript benchmark summary and findings
-- `evals/mature-repo-dogfood-ai-project-governance-2026-06-04.md` — preservation-first mature-repo dogfood report
-- `research/tooling-version-snapshot-2026-06-04.md` — live GitHub/PyPI snapshot for Phase 0 revalidation
-- `research/code-extraction/best-practices.md` — code extraction and analysis best practices
-- `references/README.md` — authoritative source index
-- `references/research-evidence.md` — distilled planning evidence
-
-See [`vision.md`](./vision.md) for deferred ideas. See
-[`research/cross-ecosystem-skill-strategy.md`](./research/cross-ecosystem-skill-strategy.md) for the current strategy.
 
 ## Layout
 
 ```text
 python-best-practices-skill/
-├── HANDOFF.md         # Phase 4 user handoff document
 ├── LICENSE            # MIT license
 ├── CITATION.cff       # Software citation metadata (CFF v1.2.0)
 ├── SECURITY.md        # Security policy and vulnerability reporting
 ├── README.md          # Project overview (this file)
-├── CONTRIBUTING.md    # Local development and validation workflow
-├── SHIPPING.md        # Shipping boundary, update flow, and evidence basis
-├── .gitignore         # Generated cache/build artifact ignores
-├── .github/workflows/ # Portable CI validation
-├── vision.md          # Long-term vision / deferred ideas
-├── VERSIONS.md        # Version choices rationale
-├── scripts/           # Local validation and benchmark scripts
-│   ├── run_benchmark.py
+├── .gitignore
+├── .gitattributes
+├── .github/workflows/ # CI validation
+├── scripts/           # Local validation script
 │   └── run_phase2_checks.py
-├── tests/             # Regression tests for validation and benchmark scripts
-│   ├── test_run_benchmark.py
-│   └── test_run_phase2_checks.py
-├── evals/             # Controlled Phase 2 eval prompts, Phase 3 trigger evals, benchmark reports, and fixtures
-│   ├── evals.json     # 9 controlled Phase 2 eval prompts
-│   ├── trigger-description-evals.json
-│   ├── trigger-description-optimization-2026-06-05.md
-│   ├── phase2-qualitative-review-2026-06-04.md
-│   ├── transcript-benchmark-expanded-9-2026-06-04.md
-│   ├── transcript-benchmark-iteration-1-2026-06-04.md
-│   ├── mature-repo-dogfood-ai-project-governance-2026-06-04.md
-│   └── fixtures/
-├── research/          # Evidence, comparisons, and design rationale
-│   ├── README.md
-│   ├── cross-ecosystem-agent-instructions.md
-│   ├── cross-ecosystem-skill-strategy.md
-│   ├── hermes-skill-patterns.md
-│   ├── tooling-version-snapshot-2026-06-04.md
-│   ├── python-gitignore-templates.md
-│   ├── requirements-txt-role.md
-│   └── code-extraction/
-│       └── best-practices.md  # Code extraction and analysis best practices
-├── references/        # Authoritative source links and distilled planning references
-│   ├── README.md
-│   └── research-evidence.md
 └── skill/             # Runtime skill payload
     ├── SKILL.md
     └── references/
@@ -234,3 +70,22 @@ python-best-practices-skill/
         ├── mature-repo-preservation.md
         └── eval-benchmark-hardening.md
 ```
+
+Shipping boundary: `skill/` is the runtime payload and source of truth. Everything else is repository-only development infrastructure.
+
+## References
+
+The skill loads scoped reference files at runtime rather than embedding all guidance in the router:
+
+| Reference | Purpose |
+| :--- | :--- |
+| `project-orientation.md` | Inspection checklist — discover project tooling and conventions |
+| `pyproject-template.md` | Modern baseline template with PEP 621 metadata |
+| `lint-format-typing-testing.md` | Practical uv/Ruff/mypy/pytest commands and staged adoption |
+| `review-checklist.md` | Structured code-review checklist |
+| `mature-repo-preservation.md` | Preservation-first workflow for established repos |
+| `eval-benchmark-hardening.md` | Benchmark and eval hardening guidance |
+
+## License
+
+MIT — see [LICENSE](LICENSE).
