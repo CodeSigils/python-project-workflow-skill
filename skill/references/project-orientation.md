@@ -103,23 +103,14 @@ Always determine the project's declared and tested Python version range:
 
 ## Decision: Apply Baseline or Preserve?
 
-After inspection, classify the project:
+After inspection, classify the project using the table in SKILL.md (§ Project Type Classification):
 
-- **Greenfield** (no coherent tooling): Recommend the modern baseline.
-- **Coherent existing toolchain**: Preserve local conventions; suggest incremental improvements within them.
+- **Greenfield** (no pyproject.toml, no setup.py, no tests): Load `pyproject-template.md` and set up the modern baseline.
+- **Existing / coherent toolchain**: Preserve local conventions; suggest incremental improvements within them.
+- **Automation / mature** (Python only in scripts/, no packaging metadata): Load `mature-repo-preservation.md` — do not force greenfield defaults.
 - **Fragmented or stale toolchain**: Recommend modernization only with explicit user approval and a migration plan.
-- **Specialized domains** (scientific, embedded, enterprise): Respect domain-specific constraints (e.g.,
-  conda/pixi/mamba, older Python LTS).
+- **Specialized domains** (scientific, embedded, enterprise): Respect domain-specific constraints (e.g., conda/pixi/mamba, older Python LTS).
 
 Do not force `src/` layout, uv, Ruff, strict MyPy, or another greenfield convention onto a coherent existing project.
 Recommend those as optional migrations only when the user asks for modernization or the inspection shows clear toolchain
 fragmentation.
-
-## Modern Baseline (Preferred for Greenfield or Incoherent Projects)
-
-```text
-uv + ruff + mypy + pytest + pyproject.toml/PEP 621 + src/ layout + Google-style docstrings
-```
-
-But present this as a default, not a mandate. Always explain the trade-offs and verify compatibility with the project's
-declared Python version range.
