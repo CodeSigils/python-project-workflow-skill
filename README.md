@@ -85,7 +85,7 @@ For agents that support external skill directories, point the config at
 1. **Load `python-project-workflow`** when working with a Python project.
 2. **The skill classifies your project** — greenfield, existing, mature, or
    automation — and loads the relevant reference file automatically.
-3. **Read the orientation checklist** (`project-orientation.md`) to understand
+3. **Review the orientation checklist** (in SKILL.md § Orientation Checklist) to understand
    the project's Python version contract, tooling, and layout before editing.
 4. **Use the task classification table** in SKILL.md to load the right
    reference for your task.
@@ -136,9 +136,8 @@ python-project-workflow/
 │   └── verify-urls.py
 └── skills/
     └── python-project-workflow/
-        ├── SKILL.md
+        ├── SKILL.md                         # orientation inlined
         └── references/
-            ├── project-orientation.md
             ├── pyproject-template.md
             ├── lint-format-typing-testing.md
             ├── core-footguns.md
@@ -154,13 +153,14 @@ source of truth. Everything else is repository-only development infrastructure.
 
 | Reference | Purpose |
 | :--- | :--- |
-| `project-orientation.md` | Inspection checklist: discover project tooling and conventions |
 | `pyproject-template.md` | Modern baseline template with PEP 621 metadata |
 | `lint-format-typing-testing.md` | Practical uv/Ruff/mypy/pytest commands and cross-platform tool guidance |
 | `core-footguns.md` | Common Python pitfalls with examples and patterns |
 | `safe-editing.md` | Safe edit workflow for backslash-heavy content |
 | `mature-repo-preservation.md` | Preservation-first workflow for established repos |
 | `eval-benchmark-hardening.md` | Benchmark and eval hardening guidance |
+
+The Orientation Checklist is now inlined in SKILL.md § Orientation Checklist.
 
 ## License
 

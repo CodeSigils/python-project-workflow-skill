@@ -14,7 +14,6 @@ SKILL_DIR = ROOT / "skills" / "python-project-workflow"
 SKILL = SKILL_DIR / "SKILL.md"
 REF_DIR = SKILL_DIR / "references"
 REQUIRED_REFS = {
-    "project-orientation.md",
     "pyproject-template.md",
     "lint-format-typing-testing.md",
     "core-footguns.md",

@@ -45,7 +45,7 @@ The user should not be able to tell this skill was present in your configuration
   review) for 0% benefit. The script is already correct for its purpose. Use project-native gates instead
   (`shellcheck`, `npx awesome-lint`, the repo's own `verify.sh`, or whatever the repo already has). If the
   pre-load assessment says "support code," trust it without further overhead.
-- **After loading, run the Orientation Checklist.** Read `project-orientation.md` to understand the repo's Python
+- **After loading, run the Orientation Checklist.** Use the checklist below to understand the repo's Python
   version contract, tooling, and layout before changing anything.
 
 ## Project Type Classification
@@ -54,8 +54,8 @@ On load, classify the project to load only relevant guidance:
 
 | Signal | Classification | Load |
 |--------|---------------|------|
-| No pyproject.toml, no setup.py, no tests directory | Greenfield | `pyproject-template.md`, then `project-orientation.md` |
-| pyproject.toml or setup.py present, coherent tooling | Existing | `project-orientation.md`, then tool-specific guidance |
+| No pyproject.toml, no setup.py, no tests directory | Greenfield | `pyproject-template.md`, then Orientation Checklist below |
+| pyproject.toml or setup.py present, coherent tooling | Existing | Orientation Checklist below, then tool-specific guidance |
 | Python only in scripts/, no packaging metadata, governance scripts | Automation / mature | `mature-repo-preservation.md`, skip packaging refs |
 | Eval/benchmark runners present | Automation with benchmarks | Also load `eval-benchmark-hardening.md` |
 
@@ -65,8 +65,47 @@ When in doubt, load only `mature-repo-preservation.md` — the smallest referenc
 
 ## Orientation Checklist
 
-Load and read `project-orientation.md` to orient yourself in the repository. It covers metadata inspection, source/test
-layout, configuration files, CI workflows, and agent documentation.
+Before giving advice, inspect the repository to understand its current state
+and conventions. This checklist covers metadata, layout, configuration, CI,
+and documentation.
+
+### Python Project Metadata
+
+- `pyproject.toml`:
+  - `[project].name`, `version`, `description`, `authors`
+  - `[project].requires-python`
+  - `[project].dependencies`, `optional-dependencies`
+  - `[build-system]` (build backend)
+  - Tool sections: `[tool.ruff]`, `[tool.mypy]`, `[tool.pytest.ini_options]`, `[tool.hatch]`
+- `setup.py` / `setup.cfg` (if present)
+- `requirements*.txt`, `uv.lock`, `poetry.lock`, `Pipfile`
+- `.pre-commit-config.yaml`
+
+### Source and Test Layout
+
+- Source layout: `src/<package>/` (recommended), flat `<package>/`, or namespace packages
+- Test layout: `tests/` or `test/`; presence of `conftest.py`, fixtures
+- CLI entry points: `scripts/`, `cli/`, or `console_scripts` in metadata
+
+### Configuration Files
+
+- Ruff: `ruff.toml`, `.ruff.toml`, or `pyproject.toml` under `[tool.ruff]`
+- MyPy: `mypy.ini`, `.mypy.ini`, or `pyproject.toml` under `[tool.mypy]`
+- Pytest: `pytest.ini`, `tox.ini`, `noxfile.py`, or `pyproject.toml` under `[tool.pytest.ini_options]`
+- Formatting: `pyproject.toml` under `[tool.black]` or project-native formatter config
+- Type checking stubs: `py.typed` marker
+
+### CI and Workflow
+
+- `.github/workflows/*.yml`, `.gitlab-ci.yml`, `Jenkinsfile`, etc.
+- Look for steps running: `uv sync`, `pip install`, `tox`, `nox`, `pytest`, `ruff`, `mypy`, `build`, `publish`
+- Cross-platform indicators: CI matrix across OS, `setup-python` version spec, `.gitattributes` line endings
+
+### Agent and Developer Documentation
+
+- `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/*` # portability: allow-platform-ref, `.continue/rules/*`, `.github/copilot-instructions.md`
+- `README.md`, `CONTRIBUTING.md`, `DEVELOPMENT.md`
+- Documentation directories: `docs/`, `doc/`, `documentation/`
 
 ### Version Control State (Actionable)
 
@@ -123,8 +162,8 @@ Classify the task so the skill loads only what is useful:
 
 | Task                                              | Load reference                                                                                                                             |
 | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| New project setup                                 | `pyproject-template.md`, then `project-orientation.md`                                                                                     |
-| Existing project orientation                      | `project-orientation.md`                                                                                                                   |
+| New project setup                                 | `pyproject-template.md`, then Orientation Checklist below |
+| Existing project orientation                      | Orientation Checklist above |
 | Mature repository / automation repo review        | `mature-repo-preservation.md`; if eval/benchmark runners are involved, also load `eval-benchmark-hardening.md` |
 | **Study/notes repo with custom verification**     | `mature-repo-preservation.md`                                                                                                      |
 | Type-hinting                                      | `lint-format-typing-testing.md` |
@@ -132,7 +171,7 @@ Classify the task so the skill loads only what is useful:
 | Packaging/release                                 | `pyproject-template.md` |
 | CI / verification setup                           | `lint-format-typing-testing.md` |
 | CLI development                                   | `pyproject-template.md` for entry points |
-| Migration from existing code                      | `project-orientation.md` |
+| Migration from existing code                      | Orientation Checklist above |
 | General Python tooling (lint, format, type, test) | `lint-format-typing-testing.md` |
 
 ## Modern Baseline Defaults

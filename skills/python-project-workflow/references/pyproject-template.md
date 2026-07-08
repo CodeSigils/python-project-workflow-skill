@@ -58,19 +58,8 @@ dev = [
 
 ## CLI Greenfield Minimum
 
-For a new CLI project, include a small importable package plus a console-script entry point. Keep the first CLI thin:
-parse arguments, call testable functions, return an exit code, and put business logic outside the argument parser.
-
-Suggested minimum:
-
-```text
-src/your_package/__init__.py
-src/your_package/__main__.py
-tests/test_cli.py
-```
-
-Use `argparse` from the standard library unless the user asks for richer ergonomics or the project already uses Click or
-Typer. Add at least one CLI smoke test that invokes the entry point or `python -m your_package`.
+For a new CLI project: `src/your_package/__init__.py`, `__main__.py`, `tests/test_cli.py`.
+Use `argparse` unless the user prefers Click or Typer. Add one CLI smoke test.
 
 ## Source Layout Recommendation
 
@@ -126,29 +115,6 @@ python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = ["-ra", "-q"]
-```
-
-### Black (if used separately)
-
-```toml
-[tool.black]
-line-length = 88
-target-version = ['py310']
-include = '\\.py$'
-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
 ```
 
 ## Cross-Platform Considerations
