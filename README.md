@@ -59,6 +59,7 @@ When loaded, the skill adapts to the target project:
 ## Verify
 
 ```bash
+python3 .github/scripts/check-portability.py
 python3 scripts/validate.py
 python3 scripts/verify-urls.py
 python3 -m ruff check scripts
@@ -74,8 +75,9 @@ python-project-workflow/
 ├── README.md
 ├── .gitignore
 ├── .gitattributes
-├── .github/workflows/
-│   └── ci.yml
+├── .github/
+│   ├── workflows/ci.yml
+│   └── scripts/check-portability.py
 ├── scripts/
 │   ├── validate.py
 │   └── verify-urls.py

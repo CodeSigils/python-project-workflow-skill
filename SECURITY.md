@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-This project is a single-version Hermes skill. The latest version on the `main` branch is the only supported version.
+This project is a single-version agentskills.io-compatible skill. The latest version on the `main` branch is the only supported version.
 
 | Version | Supported          |
 | :------ | :----------------- |
