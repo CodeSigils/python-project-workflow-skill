@@ -1,60 +1,111 @@
 # Python Project Workflow
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/CodeSigils/python-project-workflow-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/CodeSigils/python-project-workflow-skill/actions)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![agentskills.io](https://img.shields.io/badge/agentskills.io-v1-blue)](https://agentskills.io/specification)
 
-Set up, inspect, preserve, and verify Python projects. This skill covers
-greenfield bootstrap, tooling configuration, CI, packaging, mature-repo
-preservation, and project-native verification.
+Portable Python project workflow skill for agentskills.io-compatible agents.
+
+This repo ships an adaptive skill that handles greenfield bootstrap, tooling
+configuration, CI setup, packaging, mature-repo preservation, and cross-platform
+verification. No agent-specific commands or paths — compatible with Hermes,
+Claude Code, Codex CLI, Gemini CLI, OpenCode, and any agentskills.io client.
+
+- **Greenfield projects** — scaffold `pyproject.toml` (PEP 621), `src/` layout,
+  uv, Ruff, mypy, pytest, and Google-style docstrings
+- **Existing projects** — discover the project's own tooling, work within its
+  conventions. No forced migration.
+- **Mature repositories** — preservation-first workflow; find the native gate,
+  respect conventions, avoid broad defaults, and report before editing
+- **CI/verification** — project-native gates, cross-platform tool patterns,
+  ad-hoc verification when no gate exists
+- **Packaging** — build, publish, entry points, lockfile policy
 
 It is not a Python code-review rule set. For code-review findings, use a
 dedicated review skill such as `py-review-skill`.
 
-## Install
+---
 
-Install the runtime payload by copying or symlinking
-`skills/python-project-workflow/` into your agent's skills directory.
+## Quick Start
 
-Generic agentskills.io-compatible layout:
+Make the skill discoverable by your agent.
+
+<details>
+<summary><b>Hermes Agent</b></summary>
 
 ```bash
-cp -r skills/python-project-workflow <your-skills-dir>/
+hermes skills install CodeSigils/python-project-workflow-skill
+# Or add to external_dirs in ~/.hermes/config.yaml:
+# skills:
+#   external_dirs:
+#     - /path/to/python-project-workflow/skills
 ```
+</details>
 
-Codex CLI:
+<details>
+<summary><b>Claude Code</b></summary>
+
+```bash
+cp -r skills/python-project-workflow ~/.claude/skills/
+```
+</details>
+
+<details>
+<summary><b>Codex CLI</b></summary>
 
 ```bash
 cp -r skills/python-project-workflow ~/.codex/skills/
 ```
+</details>
 
-Claude Code:
+<details>
+<summary><b>Gemini CLI / .agents/ path</b></summary>
 
 ```bash
-cp -r skills/python-project-workflow .claude/skills/
+cp -r skills/python-project-workflow .agents/skills/
 ```
+</details>
 
-Hermes Agent:
+<details>
+<summary><b>OpenCode</b></summary>
 
-```yaml
-skills:
-  external_dirs:
-    - /path/to/python-project-workflow/skills/python-project-workflow
+```bash
+cp -r skills/python-project-workflow .opencode/skills/
 ```
+</details>
 
-## What It Does
+For agents that support external skill directories, point the config at
+`skills/python-project-workflow/` for live-updating access.
 
-When loaded, the skill adapts to the target project:
+---
 
-- **Greenfield projects**: scaffold `pyproject.toml` (PEP 621), `src/` layout,
-  uv, Ruff, mypy, pytest, and Google-style docstrings.
-- **Existing projects**: discover the project's own tooling and work within its
-  conventions. No forced migration.
-- **Mature repositories**: preservation-first workflow; find the native gate,
-  respect conventions, avoid broad defaults, and report before editing.
-- **CI/verification**: project-native gates, cross-platform tool patterns, and
-  ad-hoc verification when no gate exists.
-- **Packaging**: build, publish, entry points, and lockfile policy.
+## How to Use
+
+1. **Load `python-project-workflow`** when working with a Python project.
+2. **The skill classifies your project** — greenfield, existing, mature, or
+   automation — and loads the relevant reference file automatically.
+3. **Read the orientation checklist** (`project-orientation.md`) to understand
+   the project's Python version contract, tooling, and layout before editing.
+4. **Use the task classification table** in SKILL.md to load the right
+   reference for your task.
+
+All references are self-contained. No external setup, config files, or
+environment variables required.
+
+---
+
+## Portability
+
+Each shipped file in `skills/` is checked by CI for agent-specific references
+(`skill_view`, `hermes skills`, `from hermes_tools`, platform adapter paths,
+etc.). If a commit adds a platform-specific command, CI fails before it reaches
+the runtime.
+
+The current surface is entirely cross-agent compatible — zero platform
+references in any shipped skill file or reference.
+
+---
 
 ## Verify
 
@@ -64,6 +115,8 @@ python3 scripts/validate.py
 python3 scripts/verify-urls.py
 python3 -m ruff check scripts
 ```
+
+---
 
 ## Layout
 
