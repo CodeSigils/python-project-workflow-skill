@@ -52,7 +52,7 @@ Before giving advice, inspect the repository to understand its current state and
 
 ### Agent and Developer Documentation
 
-- `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/*`, `.continue/rules/*`, `.github/copilot-instructions.md`, `CONVENTIONS.md`,
+- `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/*` # portability: allow-platform-ref, `.continue/rules/*`, `.github/copilot-instructions.md`, `CONVENTIONS.md`,
   `.aider*`
 - `README.md`, `CONTRIBUTING.md`, `DEVELOPMENT.md`
 - Documentation directories: `docs/`, `doc/`, `documentation/`

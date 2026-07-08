@@ -12,16 +12,14 @@ Editing files with dense backslash patterns (e.g. sed BRE capture groups `\(...\
 
 ## Safe Workflow (Ranked by Reliability)
 
-### 1. First Resort: `write_file` with `terminal("cat")` input
+### 1. First Resort: Python stdlib read/write
 
-Use `execute_code` with `terminal("cat")` to read raw bytes, then `write_file` — zero escaping layers:
+Use Python stdlib — open the file, read, replace, write — zero escaping layers:
 
 ```python
-from hermes_tools import terminal, write_file
-
 # Read raw file (no escaping, no format wrapping)
-r = terminal(["cat", "/path/to/file"])
-content = r["output"]
+with open("/path/to/file") as f:
+    content = f.read()
 
 # Python string replacement — backslashes in your replacement are literal
 content = content.replace(
@@ -29,8 +27,9 @@ content = content.replace(
     'new_backslash_pattern'    # literal bytes you want
 )
 
-# Write_file accepts raw content with no escaping
-write_file("/path/to/file", content)
+# Write back
+with open("/path/to/file", "w") as f:
+    f.write(content)
 ```
 
 Use raw strings `r'...'` so Python doesn't process the backslashes. Verify the result with `od -A x -t x1z | grep '5c'` (see Diagnostic below).
