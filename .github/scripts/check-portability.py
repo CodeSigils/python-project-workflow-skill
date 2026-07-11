@@ -15,7 +15,7 @@ SKILLS_DIR = Path("skills")
 
 FORBIDDEN_PATTERNS = (
     ("Hermes tool name", re.compile(r"\bskill_(?:view|manage)\b", re.IGNORECASE)),
-    ("Hermes config path", re.compile(r"~/\.hermes(?:/|\b)", re.IGNORECASE)),
+    ("Hermes config path", re.compile(r"~/\\.hermes(?:/|\b)", re.IGNORECASE)),
     (
         "Hermes CLI command",
         re.compile(
@@ -26,6 +26,7 @@ FORBIDDEN_PATTERNS = (
     ("Hermes Python import", re.compile(r"from hermes_tools\b", re.IGNORECASE)),
     ("Claude Code agent reference", re.compile(r"\bClaude\(\)", re.IGNORECASE)),
     ("Gemini CLI command", re.compile(r"\bgemini\s+skills?\b", re.IGNORECASE)),
+    ("Codex CLI command", re.compile(r"\bcodex\s+run\b", re.IGNORECASE)),
     (
         "Platform-specific path",
         re.compile(r"\.(?:claude|cursor|codex|opencode|gemini)/"),
@@ -36,8 +37,14 @@ FORBIDDEN_PATTERNS = (
 def scan_file(path: Path) -> list[tuple[Path, int, str, str]]:
     violations: list[tuple[Path, int, str, str]] = []
     text = path.read_text(encoding="utf-8")
-    for line_no, line in enumerate(text.splitlines(), start=1):
-        # Exemption: lines with this comment are documentation references, not instructions
+    lines = text.splitlines()
+    # File-level exemption: if any of the first 3 lines contains the exemption
+    # marker, skip the entire file. This allows educational documents about
+    # portability to reference platform-specific patterns.
+    for i in range(min(3, len(lines))):
+        if "# portability: allow-platform-ref" in lines[i]:
+            return violations
+    for line_no, line in enumerate(lines, start=1):
         if "# portability: allow-platform-ref" in line:
             continue
         for label, pattern in FORBIDDEN_PATTERNS:
