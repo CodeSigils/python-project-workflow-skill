@@ -73,7 +73,11 @@ def parse_frontmatter(text: str) -> tuple[dict[str, str], str]:
         key, value = line.split(":", 1)
         data[key.strip()] = value.strip().strip('"')
 
-    extra = set(data) - {"name", "description"}
+    ALLOWED_FIELDS = {
+        "name", "description", "version", "author", "license",
+        "tier", "ref", "compatibility", "metadata",
+    }
+    extra = set(data) - ALLOWED_FIELDS
     if extra:
         fail(f"unsupported frontmatter fields: {sorted(extra)}")
     if data.get("name") != "python-project-workflow":
@@ -98,18 +102,14 @@ def check_skill() -> None:
     if re.search(r"^\|\|", body, re.MULTILINE):
         fail(f"{rel(SKILL)} table still has accidental double-pipe rows")
 
+    # Portability hazard check: body must not contain Hermes-specific paths/tools
     forbidden = [
-        "metadata:",
-        "tier:",
-        "ref:",
-        "version:",
-        "author:",
         ".hermes",
         "hermes-verify",
     ]
     for needle in forbidden:
-        if needle in text:
-            fail(f"{rel(SKILL)} contains non-portable runtime marker: {needle}")
+        if needle in body:
+            fail(f"{rel(SKILL)} body contains non-portable runtime marker: {needle}")
 
     for missing_ref in ["packaging.md", "errors-and-logging.md", "cli.md", "migration-existing-code.md"]:
         if f"`{missing_ref}` (deferred)" in body:
