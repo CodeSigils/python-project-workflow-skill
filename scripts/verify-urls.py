@@ -20,6 +20,28 @@ SEARCH_ROOTS = [
 ]
 
 
+# Template/placeholder patterns to skip (not real URLs)
+SKIP_PATTERNS = [
+    re.compile(r"\$[A-Za-z_]+"),           # $name, $pkg, etc.
+    re.compile(r"<[A-Za-z_]+>"),           # <repo>, <pkg>, etc.
+    re.compile(r"\{\{[^}]+\}\}"),          # {{variable}}
+    re.compile(r"%[A-Za-z_]+%"),           # %VAR%
+    re.compile(r"example\.com"),           # example.com placeholder
+    re.compile(r"github\.com/[^/]+/<"),    # github.com/user/<placeholder
+    re.compile(r"github\.com/[^/]+/\$"),   # github.com/user/$placeholder
+    re.compile(r"registry\.npmjs\.org/\$"), # registry.npmjs.org/$placeholder
+    re.compile(r"api\.npmjs\.org/.*[<$\{]"), # api.npmjs.org with placeholders
+]
+
+
+def is_template_url(url: str) -> bool:
+    """Check if URL contains template/placeholder patterns."""
+    for pattern in SKIP_PATTERNS:
+        if pattern.search(url):
+            return True
+    return False
+
+
 def iter_markdown_files() -> list[Path]:
     files: list[Path] = []
     for root in SEARCH_ROOTS:
@@ -35,7 +57,9 @@ def iter_urls() -> list[tuple[Path, str]]:
     for path in iter_markdown_files():
         text = path.read_text(encoding="utf-8")
         for match in URL_RE.finditer(text):
-            pairs.append((path, match.group(0).rstrip(".,;")))
+            url = match.group(0).rstrip(".,;")
+            if not is_template_url(url):
+                pairs.append((path, url))
     return pairs
 
 
