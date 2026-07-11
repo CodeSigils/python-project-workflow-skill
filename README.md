@@ -34,13 +34,20 @@ Make the skill discoverable by your agent.
 <details>
 <summary><b>Hermes Agent</b></summary>
 
+**Recommended for development — clone the repo and add to `external_dirs`:**
+```yaml
+skills:
+  external_dirs:
+    - /path/to/python-project-workflow/skills
+```
+Every commit is immediately reflected without reinstalling.
+
+**For end users — install from hub:**
 ```bash
 hermes skills install CodeSigils/python-project-workflow-skill
-# Or add to external_dirs in ~/.hermes/config.yaml:
-# skills:
-#   external_dirs:
-#     - /path/to/python-project-workflow/skills
 ```
+
+*Other agents: see sections below for their native setup commands.*
 </details>
 
 <details>
