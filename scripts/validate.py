@@ -20,6 +20,7 @@ REQUIRED_REFS = {
     "safe-editing.md",
     "mature-repo-preservation.md",
     "eval-benchmark-hardening.md",
+    "drift-classes.md",
 }
 REQUIRED_SECTIONS = {
     "## Scope",
