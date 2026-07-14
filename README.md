@@ -6,6 +6,8 @@
 [![agentskills.io](https://img.shields.io/badge/agentskills.io-v1-blue)](https://agentskills.io/specification)
 
 Portable Python project workflow skill for agentskills.io-compatible agents.
+The Python 3.10+ badge covers both the project guidance and repository validation
+tooling; CI tests the lower bound on Python 3.10 and the current boundary on 3.13.
 
 This repo ships an adaptive skill that handles greenfield bootstrap, tooling
 configuration, CI setup, packaging, mature-repo preservation, and cross-platform

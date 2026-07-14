@@ -35,6 +35,10 @@ def main() -> int:
             )
         if "python3 scripts/validate-ci.py" not in validate:
             errors.append("ci.yml: validation matrix must run the CI policy check")
+        if 'python-version: ["3.10", "3.13"]' not in validate:
+            errors.append(
+                "ci.yml: Python matrix must test the advertised 3.10 lower bound and 3.13 upper bound"
+            )
 
     if external is None:
         errors.append("ci.yml: missing verify-urls job")
