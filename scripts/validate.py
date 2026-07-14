@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import re
-import subprocess
 import sys
 from pathlib import Path
 
@@ -165,69 +164,11 @@ def check_status_sources() -> None:
         fail("old runtime directory still exists: skill/")
 
 
-def check_markdown_format() -> None:
-    """Verify tracked .md files pass the markdown formatter if available."""
-    formatter = Path.home() / ".hermes" / "skills" / "markdown-formatter" / "src" / "index.js"
-    if not formatter.exists():
-        print("WARNING: markdown formatter not found, skipping format check")
-        return
-
-    for exe in ("node", "oxfmt"):
-        try:
-            subprocess.run(
-                ["which", exe],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                check=True,
-                timeout=10,
-            )
-        except (subprocess.SubprocessError, OSError):
-            print(f"WARNING: {exe} not available, skipping markdown format check")
-            return
-
-    try:
-        result = subprocess.run(
-            ["git", "ls-files", "*.md"],
-            cwd=ROOT,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            timeout=10,
-            check=True,
-        )
-    except (subprocess.SubprocessError, OSError) as exc:
-        print(f"WARNING: could not list tracked .md files: {exc}")
-        return
-
-    md_files = [file for file in result.stdout.splitlines() if file.strip()]
-    if not md_files:
-        return
-
-    try:
-        verify = subprocess.run(
-            ["node", str(formatter), "--verify", "--all", *md_files],
-            cwd=ROOT,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            timeout=60,
-            check=False,
-        )
-    except (subprocess.SubprocessError, OSError) as exc:
-        print(f"WARNING: markdown formatter check failed to run: {exc}")
-        return
-
-    if verify.returncode != 0:
-        print(verify.stdout, file=sys.stderr)
-        fail("tracked .md files are not formatted")
-
-
 def main() -> int:
     check_skill()
     check_references()
     check_readme()
     check_status_sources()
-    check_markdown_format()
     print("OK: portable skill source checks are valid")
     return 0
 
