@@ -9,6 +9,7 @@ on:
       - "README.md"
       - "CITATION.cff"
       - "SECURITY.md"
+      - "references/**"
       - "scripts/**"
       - "skills/**"
   pull_request:
@@ -19,6 +20,7 @@ on:
       - "README.md"
       - "CITATION.cff"
       - "SECURITY.md"
+      - "references/**"
       - "scripts/**"
       - "skills/**"
   schedule:
@@ -58,6 +60,9 @@ jobs:
 
       - name: Verify referenced URLs
         run: python3 scripts/verify-urls.py
+
+      - name: Test payload sync behavior
+        run: python3 scripts/test-sync-payload.py
 
       - name: Payload sync check
         run: bash scripts/sync-payload.sh --ci

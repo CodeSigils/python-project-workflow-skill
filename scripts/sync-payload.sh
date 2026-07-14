@@ -14,6 +14,36 @@ CI_MODE=false
 
 echo "Syncing skill payload..."
 DRIFT=false
+CHANGED=false
+SYNC_ERROR=false
+
+sync_file() {
+    local source="$1"
+    local target="$2"
+    local label="$3"
+    local mode="${4:-644}"
+
+    if [ ! -f "$source" ]; then
+        echo "  MISSING source: $label"
+        DRIFT=true
+        SYNC_ERROR=true
+        return
+    fi
+
+    if $CI_MODE; then
+        if [ ! -f "$target" ] || ! cmp -s "$source" "$target"; then
+            echo "  DRIFTED: $label"
+            DRIFT=true
+        fi
+        return
+    fi
+
+    if [ ! -f "$target" ] || ! cmp -s "$source" "$target"; then
+        CHANGED=true
+    fi
+    mkdir -p "$(dirname "$target")"
+    install -m "$mode" "$source" "$target"
+}
 
 is_covered() {
     local rel="$1"
@@ -30,7 +60,9 @@ is_covered() {
     local ref_mode
     ref_mode=$(python3 -c "import json; d=json.load(open('$MANIFEST')); r=d.get('references',''); print(r if isinstance(r,str) else '')" 2>/dev/null)
     if [ "$ref_mode" = "*" ]; then
-        case "$rel" in references/*) return 0 ;; esac
+        case "$rel" in
+            references/*) [ -f "$ROOT/$rel" ] && return 0 ;;
+        esac
     fi
     return 1
 }
@@ -39,47 +71,62 @@ is_covered() {
 for f in $(python3 -c "import json; d=json.load(open('$MANIFEST')); print('\n'.join(str(x) for x in d.get('files',[])))" 2>/dev/null); do
     source="$ROOT/$f"
     target="$PAYLOAD_DIR/$f"
-    if [ ! -f "$source" ]; then echo "  MISSING source: $f"; DRIFT=true; continue; fi
-    mkdir -p "$(dirname "$target")"
-    install -m 644 "$source" "$target"
+    sync_file "$source" "$target" "$f"
 done
 
 # Scripts
 for s in $(python3 -c "import json; d=json.load(open('$MANIFEST')); print('\n'.join(str(x) for x in d.get('scripts',[])))" 2>/dev/null); do
     source="$ROOT/scripts/$s"
     target="$PAYLOAD_DIR/scripts/$s"
-    if [ ! -f "$source" ]; then echo "  MISSING source: scripts/$s"; DRIFT=true; continue; fi
-    mkdir -p "$(dirname "$target")"
-    if [ -x "$source" ]; then install -m 755 "$source" "$target"; else install -m 644 "$source" "$target"; fi
+    mode=644
+    [ -x "$source" ] && mode=755
+    sync_file "$source" "$target" "scripts/$s" "$mode"
 done
 
 # References (mirror)
 ref_mode=$(python3 -c "import json; d=json.load(open('$MANIFEST')); r=d.get('references',''); print(r if isinstance(r,str) else '')" 2>/dev/null)
 if [ "$ref_mode" = "*" ]; then
-    mkdir -p "$PAYLOAD_DIR/references"
-    find "$PAYLOAD_DIR/references" -type f -delete 2>/dev/null || true
-    cp "$ROOT/references/"*.md "$PAYLOAD_DIR/references/"
+    for source in "$ROOT/references/"*.md; do
+        if [ ! -f "$source" ]; then
+            echo "  MISSING source: references/*.md"
+            DRIFT=true
+            SYNC_ERROR=true
+            break
+        fi
+        name="$(basename "$source")"
+        sync_file "$source" "$PAYLOAD_DIR/references/$name" "references/$name"
+    done
 fi
 
 # Orphan cleanup
-orphans=0
 while IFS= read -r -d '' f; do
     relpath="$f"
     # shellcheck disable=SC2295
     rel="${relpath#$PAYLOAD_DIR/}"
     if ! is_covered "$rel"; then
         echo "  ORPHANED: $rel"
-        rm -f "$f"
-        orphans=$((orphans + 1))
+        if ! $CI_MODE; then
+            rm -f "$f"
+            CHANGED=true
+        else
+            DRIFT=true
+        fi
     fi
 done < <(find "$PAYLOAD_DIR" -type f -print0)
-find "$PAYLOAD_DIR" -type d -empty -delete 2>/dev/null || true
+if ! $CI_MODE; then
+    find "$PAYLOAD_DIR" -type d -empty -delete 2>/dev/null || true
+fi
 
-[ "$orphans" -gt 0 ] && DRIFT=true
-if $DRIFT; then
+if $SYNC_ERROR; then
+    echo ""
+    echo "SYNC FAILED"
+    exit 1
+elif $DRIFT; then
     echo ""
     echo "DRIFT DETECTED"
-    $CI_MODE && exit 1
+    exit 1
+elif $CHANGED; then
+    echo "Payload synchronized"
 else
     echo "Payload in sync"
 fi

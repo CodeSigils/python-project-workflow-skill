@@ -120,6 +120,8 @@ references in any shipped skill file or reference.
 python3 .github/scripts/check-portability.py
 python3 scripts/validate.py
 python3 scripts/verify-urls.py
+python3 scripts/test-sync-payload.py
+bash scripts/sync-payload.sh --ci
 python3 -m ruff check scripts
 ```
 
@@ -139,6 +141,9 @@ python-project-workflow/
 │   ├── workflows/ci.yml
 │   └── scripts/check-portability.py
 ├── scripts/
+│   ├── payload-manifest.json
+│   ├── sync-payload.sh
+│   ├── test-sync-payload.py
 │   ├── validate.py
 │   └── verify-urls.py
 └── skills/
@@ -150,11 +155,15 @@ python-project-workflow/
             ├── core-footguns.md
             ├── safe-editing.md
             ├── mature-repo-preservation.md
-            └── eval-benchmark-hardening.md
+            ├── eval-benchmark-hardening.md
+            └── drift-classes.md
 ```
 
-Shipping boundary: `skills/python-project-workflow/` is the runtime payload and
-source of truth. Everything else is repository-only development infrastructure.
+Shipping boundary: `skills/python-project-workflow/` is the runtime payload.
+Its `SKILL.md` is authored in place, while root `references/` is the canonical
+source for mirrored payload references. `scripts/payload-manifest.json` declares
+what is mirrored, and `scripts/sync-payload.sh --ci` verifies the boundary without
+modifying it. Everything else is repository-only development infrastructure.
 
 ## References
 
@@ -166,6 +175,7 @@ source of truth. Everything else is repository-only development infrastructure.
 | `safe-editing.md` | Safe edit workflow for backslash-heavy content |
 | `mature-repo-preservation.md` | Preservation-first workflow for established repos |
 | `eval-benchmark-hardening.md` | Benchmark and eval hardening guidance |
+| `drift-classes.md` | Payload drift and installed-mirror staleness detection and remediation |
 
 The Orientation Checklist is now inlined in SKILL.md § Orientation Checklist.
 
