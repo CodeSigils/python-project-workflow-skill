@@ -118,6 +118,7 @@ references in any shipped skill file or reference.
 
 ```bash
 python3 .github/scripts/check-portability.py
+python3 scripts/validate-ci.py
 python3 scripts/validate.py
 python3 scripts/verify-urls.py
 python3 scripts/test-sync-payload.py
@@ -144,6 +145,7 @@ python-project-workflow/
 │   ├── payload-manifest.json
 │   ├── sync-payload.sh
 │   ├── test-sync-payload.py
+│   ├── validate-ci.py
 │   ├── validate.py
 │   └── verify-urls.py
 └── skills/
