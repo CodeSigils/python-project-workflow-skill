@@ -17,4 +17,11 @@ The shipped payload is a single `SKILL.md` and seven reference files with no
 runtime scripts, no config files, and no dependencies. Shipped instructions
 are checked for agent-specific references by CI.
 
-Last reviewed: 2026-07-14.
+The orientation checklist directs agents to inspect structured configuration
+files (pyproject.toml, .gitignore, CI YAML) through the agent's native reading
+capability — it does not use content-extraction shell commands (`cat`,
+`git log`, `grep`) that could expose credentials. The primary security concern
+is correctness of generated project files and CI templates, not runtime
+scanning of repository content.
+
+Last reviewed: 2026-07-15.
