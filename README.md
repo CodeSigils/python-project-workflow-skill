@@ -7,12 +7,14 @@
 
 Portable Python project workflow skill for agentskills.io-compatible agents.
 The Python 3.10+ badge covers both the project guidance and repository validation
-tooling; CI tests the lower bound on Python 3.10 and the current boundary on 3.13.
+tooling; CI tests the lower bound on Python 3.10 and the current stable boundary
+on 3.14.
 
 This repo ships an adaptive skill that handles greenfield bootstrap, tooling
 configuration, CI setup, packaging, mature-repo preservation, and cross-platform
-verification. No agent-specific commands or paths — compatible with Hermes,
-Claude Code, Codex CLI, Gemini CLI, OpenCode, and any agentskills.io client.
+verification. The runtime payload contains no agent-specific commands or paths,
+so it remains compatible with Hermes, Claude Code, Codex, Gemini CLI, OpenCode,
+and any agentskills.io client.
 
 - **Greenfield projects** — scaffold `pyproject.toml` (PEP 621), `src/` layout,
   uv, Ruff, mypy, pytest, and Google-style docstrings
@@ -24,8 +26,56 @@ Claude Code, Codex CLI, Gemini CLI, OpenCode, and any agentskills.io client.
   ad-hoc verification when no gate exists
 - **Packaging** — build, publish, entry points, lockfile policy
 
-It is not a Python code-review rule set. For code-review findings, use a
-dedicated review skill such as `py-review-skill`.
+It is not a Python code-review rule set. Pair it with
+[`py-review-skill`](https://github.com/CodeSigils/py-review-skill) when you want
+a focused review of Python correctness, maintainability, typing, testing, and
+common language pitfalls.
+
+---
+
+## What It Does in Practice
+
+Suppose you ask your agent:
+
+> Create a Python 3.10+ command-line project named `invoice-checker`. Use a
+> `src/` layout, add tests and GitHub Actions, and leave it ready to build.
+
+The workflow guides the agent to:
+
+1. classify the directory as a greenfield Python project;
+2. establish one consistent Python-version contract across packaging, tools,
+   and CI;
+3. create PEP 621 project metadata, the package and CLI entry point, tests,
+   Ruff, mypy, and pytest configuration;
+4. add an appropriate GitHub Actions matrix and lockfile policy;
+5. run the relevant lint, format, type, test, and build gates; and
+6. report exactly what was created, what passed, and any remaining decisions.
+
+A typical result looks like:
+
+```text
+invoice-checker/
+├── pyproject.toml
+├── uv.lock
+├── src/invoice_checker/
+│   ├── __init__.py
+│   └── cli.py
+├── tests/
+│   └── test_cli.py
+└── .github/workflows/ci.yml
+```
+
+For an established project, the behavior is deliberately different: the skill
+first discovers the existing package manager, layout, version floor, formatter,
+test runner, and native CI gate. It works within those conventions instead of
+replacing Poetry with uv, Black with Ruff, or tox with a new workflow merely to
+match the greenfield defaults.
+
+After implementation, use
+[`py-review-skill`](https://github.com/CodeSigils/py-review-skill) for the
+complementary code-review pass. The workflow skill answers “how should this
+project be structured and verified?”; the review skill answers “what is wrong or
+risky in this Python code?”
 
 ---
 
@@ -44,10 +94,9 @@ skills:
 ```
 Every commit is immediately reflected without reinstalling.
 
-**For end users — install from hub:**
-```bash
-hermes skills install CodeSigils/python-project-workflow-skill
-```
+The repository is not currently indexed in the Hermes hub, so no hub-install
+command is advertised. Clone plus `external_dirs` is the verified Hermes path
+until registration.
 
 *Other agents: see sections below for their native setup commands.*
 </details>
@@ -61,10 +110,10 @@ cp -r skills/python-project-workflow ~/.claude/skills/
 </details>
 
 <details>
-<summary><b>Codex CLI</b></summary>
+<summary><b>Codex</b></summary>
 
 ```bash
-cp -r skills/python-project-workflow ~/.codex/skills/
+cp -r skills/python-project-workflow ~/.agents/skills/
 ```
 </details>
 
@@ -111,8 +160,9 @@ Each shipped file in `skills/` is checked by CI for agent-specific references
 etc.). If a commit adds a platform-specific command, CI fails before it reaches
 the runtime.
 
-The current surface is entirely cross-agent compatible — zero platform
-references in any shipped skill file or reference.
+The current runtime surface is entirely cross-agent compatible. Platform setup
+commands remain in this repository README; shipped skill files and references
+use portable paths and client-neutral operations.
 
 ---
 
