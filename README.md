@@ -70,11 +70,11 @@ risky in this Python code?”
 
 ## Python Frameworks
 
-> **Framework projects (Django, FastAPI, Flask, etc.):** This skill provides a
-> solid generic Python foundation — uv, ruff, mypy, pytest, CI matrix,
-> `.gitignore` — but framework-specific conventions are out of its scope. This
-> is by design. For those, use a dedicated skill or add the framework's steps to
-> the CI template it generates.
+> **Framework projects (Django, FastAPI, Flask, etc.):** This skill does NOT
+> support frameworks. It provides a solid generic Python foundation — uv, ruff,
+> mypy, pytest, CI matrix, `.gitignore` — but framework-specific conventions are
+> out of its scope. This is by design. For those, use a dedicated skill or add
+> the framework's steps to the CI template it generates.
 
 ## Quick Start
 
