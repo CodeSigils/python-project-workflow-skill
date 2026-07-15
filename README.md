@@ -68,6 +68,13 @@ risky in this Python code?”
 
 ---
 
+> **Framework projects (Django, FastAPI, Flask, etc.):** This skill provides a
+> solid generic Python foundation — uv, ruff, mypy, pytest, CI matrix,
+> `.gitignore` — but does not know framework-specific conventions (project
+> structure, settings patterns, migration management, test database setup).
+> For those, pair this skill with a framework-specific skill or add the
+> framework's steps to the CI template it generates.
+
 ## Quick Start
 
 Make the skill discoverable by your agent.
