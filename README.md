@@ -17,8 +17,8 @@ It does **not** review Python code. Pair it with
 [`py-review-skill`](https://github.com/CodeSigils/py-review-skill) for that.
 
 The shipped payload is portable — no agent-specific commands or paths — so it
-works with Hermes, Claude Code, Codex, Gemini CLI, OpenCode, and any
-agentskills.io client.
+works with Hermes, Claude Code, Codex, Gemini CLI, OpenCode. It is
+agentskills.io-compatible.
 
 ---
 
