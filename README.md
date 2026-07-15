@@ -5,31 +5,20 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![agentskills.io](https://img.shields.io/badge/agentskills.io-v1-blue)](https://agentskills.io/specification)
 
-Portable Python project workflow skill for agentskills.io-compatible agents.
-The Python 3.10+ badge covers both the project guidance and repository validation
-tooling; CI tests the lower bound on Python 3.10 and the current stable boundary
-on 3.14.
+**Python Project Workflow** — guides an AI agent through Python project setup,
+tooling, CI, packaging, and preservation.
 
-This repo ships an adaptive skill that handles greenfield bootstrap, tooling
-configuration, CI setup, packaging, mature-repo preservation, and cross-platform
-verification. The runtime payload contains no agent-specific commands or paths,
-so it remains compatible with Hermes, Claude Code, Codex, Gemini CLI, OpenCode,
-and any agentskills.io client.
+This skill handles greenfield scaffolds (src layout, PEP 621, uv/Ruff/mypy/pytest),
+existing-project orientation, mature-repo preservation, CI configuration, packaging,
+and project hygiene — `.gitignore` presets, `__pycache__`/coverage/venv artifact
+handling, and preserving local ignore rules.
 
-- **Greenfield projects** — scaffold `pyproject.toml` (PEP 621), `src/` layout,
-  uv, Ruff, mypy, pytest, and Google-style docstrings
-- **Existing projects** — discover the project's own tooling, work within its
-  conventions. No forced migration.
-- **Mature repositories** — preservation-first workflow; find the native gate,
-  respect conventions, avoid broad defaults, and report before editing
-- **CI/verification** — project-native gates, cross-platform tool patterns,
-  ad-hoc verification when no gate exists
-- **Packaging** — build, publish, entry points, lockfile policy
+It does **not** review Python code. Pair it with
+[`py-review-skill`](https://github.com/CodeSigils/py-review-skill) for that.
 
-It is not a Python code-review rule set. Pair it with
-[`py-review-skill`](https://github.com/CodeSigils/py-review-skill) when you want
-a focused review of Python correctness, maintainability, typing, testing, and
-common language pitfalls.
+The shipped payload is portable — no agent-specific commands or paths — so it
+works with Hermes, Claude Code, Codex, Gemini CLI, OpenCode, and any
+agentskills.io client.
 
 ---
 
