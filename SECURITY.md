@@ -5,9 +5,9 @@ Report security issues privately through the
 rather than opening a public issue.
 
 Security concerns in this repository include scaffolding instructions that could
-generate insecure project configurations or expose secrets, supply-chain risks
-in CI scripts and workflows, or credentials in test fixtures. Do not include
-exploit details in public reports.
+generate insecure project configurations or expose secrets, or supply-chain
+risks in CI scripts and workflows. Do not include exploit details in public
+reports.
 
 Issues that do not involve the CI pipeline or credential material can be opened
 as public GitHub issues. Report CI-related vulnerabilities through the advisory
