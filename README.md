@@ -172,7 +172,7 @@ python3 scripts/validate.py
 python3 scripts/verify-urls.py
 python3 scripts/test-sync-payload.py
 bash scripts/sync-payload.sh --ci
-python3 -m ruff check scripts
+python3 -m ruff check scripts .github/scripts
 ```
 
 ---

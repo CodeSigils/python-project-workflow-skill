@@ -139,7 +139,10 @@ Always determine the project's declared and tested Python version range:
    - Ruff: `[tool.ruff].target-version` (e.g., `py311`)
    - MyPy: `[tool.mypy].python_version` (e.g., `python_version = 3.10`)
    - Pyright: `pyrightconfig.json` `pythonVersion`
-   - These should be within or equal to the declared `requires-python` range
+   - For a project that supports a range of Python versions, target the minimum
+     supported version. A newer target can allow syntax that fails on the
+     declared minimum. Use a newer target only when configuration explicitly
+     scopes it to code that does not support the project-wide minimum.
 
 4. **Risk indicators**:
    - Code uses syntax newer than declared minimum (e.g., `match`/`case` in 3.8 project)

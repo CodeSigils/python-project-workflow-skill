@@ -17,6 +17,17 @@ DRIFT=false
 CHANGED=false
 SYNC_ERROR=false
 
+mode_matches() {
+    local target="$1"
+    local mode="$2"
+
+    if [ "$mode" = "755" ]; then
+        [ -x "$target" ]
+    else
+        [ ! -x "$target" ]
+    fi
+}
+
 sync_file() {
     local source="$1"
     local target="$2"
@@ -31,14 +42,14 @@ sync_file() {
     fi
 
     if $CI_MODE; then
-        if [ ! -f "$target" ] || ! cmp -s "$source" "$target"; then
+        if [ ! -f "$target" ] || ! cmp -s "$source" "$target" || ! mode_matches "$target" "$mode"; then
             echo "  DRIFTED: $label"
             DRIFT=true
         fi
         return
     fi
 
-    if [ ! -f "$target" ] || ! cmp -s "$source" "$target"; then
+    if [ ! -f "$target" ] || ! cmp -s "$source" "$target" || ! mode_matches "$target" "$mode"; then
         CHANGED=true
     fi
     mkdir -p "$(dirname "$target")"
