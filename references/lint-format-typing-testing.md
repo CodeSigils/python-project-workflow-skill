@@ -6,8 +6,6 @@ adopting strictness incrementally.
 ## Default Commands (Greenfield or when no project-native commands exist)
 
 Assuming you have `uv` installed and a `pyproject.toml` with the modern baseline.
-If `uv` is not available, substitute `pip` for `uv sync` and `pip install` commands
-throughout — the tool commands (ruff, mypy, pytest) are the same either way.
 
 ```bash
 # Synchronize the virtual environment and install dependencies (including dev)
@@ -28,6 +26,21 @@ python -m pytest
 # Build the package (if packaging metadata was touched)
 python -m build
 ```
+
+If `uv` is unavailable, create and activate a virtual environment using the
+platform-appropriate activation command, then install the project and its dev
+extra explicitly:
+
+```bash
+python -m venv .venv
+# Activate .venv for the current shell, then run:
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
+```
+
+If the project does not define a `dev` extra, install its project-native
+development requirements instead. The Ruff, mypy, pytest, and build commands
+above remain unchanged.
 
 ## Cross-Platform Testing Considerations
 
@@ -89,7 +102,11 @@ Use `# type: ignore` sparingly, always with a comment.
 
 ## Verifying Tool Alignment
 
-Ensure `requires-python` aligns with tool targets: `[tool.ruff].target-version`, `[tool.mypy].python_version`, `pyrightconfig.json` `pythonVersion`. Mismatches cause false positives or negatives.
+Ensure `requires-python` aligns with tool targets: `[tool.ruff].target-version`,
+`[tool.mypy].python_version`, and `pyrightconfig.json` `pythonVersion`. For a
+supported range, these should normally target its minimum version; targeting a
+newer version can miss syntax incompatibilities. Mismatches cause false
+positives or negatives.
 
 ## Special Cases
 

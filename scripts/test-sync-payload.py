@@ -68,7 +68,24 @@ def main() -> int:
         if final_check.returncode != 0:
             raise AssertionError(f"repaired payload failed --ci:\n{final_check.stdout}")
 
-    print("PASS: payload CI mode detects drift without modifying files")
+        target.chmod(0o755)
+        mode_check = run_sync(fixture, "--ci")
+        if mode_check.returncode == 0:
+            raise AssertionError("--ci accepted payload permission drift")
+        if not target.stat().st_mode & 0o111:
+            raise AssertionError("--ci modified drifted payload permissions")
+        if "DRIFTED: references/core-footguns.md" not in mode_check.stdout:
+            raise AssertionError(
+                f"--ci did not report permission drift:\n{mode_check.stdout}"
+            )
+
+        mode_sync = run_sync(fixture)
+        if mode_sync.returncode != 0:
+            raise AssertionError(f"normal sync failed to repair mode:\n{mode_sync.stdout}")
+        if target.stat().st_mode & 0o111:
+            raise AssertionError("normal sync did not repair payload permissions")
+
+    print("PASS: payload CI mode detects content, orphan, and permission drift")
     return 0
 
 
