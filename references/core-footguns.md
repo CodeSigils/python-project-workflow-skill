@@ -1,6 +1,6 @@
 # Core Python Footguns
 
-Common Python pitfalls, ordered by frequency. This is a quick reference for awareness —
+Common Python pitfalls in a compact awareness reference —
 not a code review checklist. For structured code review rules with impact levels and
 code examples, install a dedicated Python code-review skill.
 
@@ -32,7 +32,8 @@ for i in range(5):
 
 - `is` is identity (same object in memory)
 - `==` is equality (value comparison)
-- Use `is` for `None`, `True`, `False`, and sentinels
+- Use `is` for `None` and identity-based sentinels
+- For booleans, normally test truthiness directly; use `is True` or `is False` only when exact boolean identity matters
 - Use `==` for value comparison (numbers, strings, etc.)
 
 ## Float Equality
@@ -68,7 +69,7 @@ Before CPython 3.6 / Python 3.7, dict insertion order was not guaranteed. If ord
 ## String Concatenation in Loops
 
 ```python
-# WRONG - O(n^2)
+# Repeated concatenation can become quadratic and create many intermediate strings
 s = ""
 for chunk in chunks:
     s += chunk

@@ -2,7 +2,7 @@
 
 This file provides a minimal, modern `pyproject.toml` using PEP 621 metadata. Adjust the values to fit your project.
 
-> **Freshness:** Tool versions and Python EOL dates below are point-in-time snapshots from 2026-07-07.
+> **Freshness:** Packaging metadata and Python EOL guidance were reviewed on 2026-07-16.
 > Verify against official docs before using in production.
 > See [ruff docs](https://docs.astral.sh/ruff/), [mypy docs](https://mypy.readthedocs.io/),
 > [pytest docs](https://docs.pytest.org/), [uv docs](https://docs.astral.sh/uv/) for current versions.
@@ -11,11 +11,11 @@ This file provides a minimal, modern `pyproject.toml` using PEP 621 metadata. Ad
 
 ```toml
 [build-system]
-# setuptools>=61.0 needed for PEP 621/660 support (editable installs, etc.)
+# setuptools>=77.0.3 supports the PEP 639 license metadata used below
 # If the project uses an older build backend (hatchling, flit_core, pdm-backend),
 # keep its existing build-system config instead of migrating to setuptools.
 # Check official documentation for latest compatible version
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=77.0.3", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -27,15 +27,15 @@ requires-python = ">=3.10"  # or >=3.12 for controlled applications; preserve ec
 authors = [
     {name = "Your Name", email = "you@example.com"}
 ]
-# License (optional but recommended)
-license = {text = "MIT"}
+# SPDX license expression and included license files (PEP 639)
+license = "MIT"
+license-files = ["LICENSE*"]
 # Keywords for discoverability
 keywords = ["python", "package"]
 # Classifiers help users find your package on PyPI
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 # Runtime dependencies
@@ -94,7 +94,7 @@ quote-style = "double"
 
 ```toml
 [tool.mypy]
-python_version = "3.10"  # Should match or be within requires-python
+python_version = "3.10"  # Target the minimum version in requires-python
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -141,7 +141,7 @@ When authoring cross-platform Python packages:
 - Aim for broad compatibility: `>=3.10` is the current default when no ecosystem constraint says otherwise.
 - Only go lower than 3.10 if you have a specific need to support older systems (for example enterprise, distro-bound, or
   plugin ecosystems).
-- Avoid `>=3.8` unless absolutely necessary; Python 3.8 reached end-of-life in September 2024.
+- Avoid `>=3.8` unless absolutely necessary; Python 3.8 reached end-of-life in October 2024.
 - Review this floor as Python 3.10 approaches end-of-life in October 2026.
 
 ### Dependency Floor

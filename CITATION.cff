@@ -2,11 +2,9 @@ cff-version: 1.2.0
 message: "If you use this work in your research, please cite it as below."
 authors:
   - family-names: "CodeSigils"
-    given-names: ""
     email: "toolsoftrade.web@gmail.com"
 title: "Python Project Workflow"
-version: 1.2.8
-date-released: 2026-06-05
 license: MIT
 type: software
+repository-code: https://github.com/CodeSigils/python-project-workflow-skill
 description: "An agentskills.io-compatible skill that provides adaptive guidance for Python project setup, tooling configuration, CI, packaging, mature-repo preservation, and cross-platform verification."

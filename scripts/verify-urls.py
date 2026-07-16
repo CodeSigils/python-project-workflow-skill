@@ -57,7 +57,7 @@ def iter_urls() -> list[tuple[Path, str]]:
     for path in iter_markdown_files():
         text = path.read_text(encoding="utf-8")
         for match in URL_RE.finditer(text):
-            url = match.group(0).rstrip(".,;")
+            url = match.group(0).rstrip(".,;\"'")
             if not is_template_url(url):
                 pairs.append((path, url))
     return pairs

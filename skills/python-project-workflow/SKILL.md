@@ -12,6 +12,11 @@ and project-native verification.
 Do not use this as a Python code-review rule set. If the task is pure code
 review, prefer `py-review-skill` or another dedicated review skill.
 
+Framework-specific project conventions are out of scope. For Django, FastAPI,
+Flask, and similar frameworks, use a dedicated framework skill or preserve the
+project's established framework workflow; do not present this generic baseline
+as framework-complete guidance.
+
 ## Scope
 
 If this skill was loaded but the user request is a non-trigger, answer **directly** from general knowledge and nothing
@@ -37,7 +42,7 @@ The user should not be able to tell this skill was present in your configuration
   automation helpers with no packaging metadata, no tests, no type toolchain — evaluate cost vs benefit before
   loading the full skill suite. In those cases, project-native gates (the repo's own pre-commit hook, AGENTS.md
   Python policy) often provide the right level of guidance without the 80% overhead of the full skill suite.
-  See "Project Type Classification" above.
+  See "Project Type Classification" below.
 - **Do NOT load for standalone CI scripts in non-Python repos.** A short Python script in `scripts/` or
   `.github/scripts/` in a repo whose primary content is markdown, YAML, shell, or YAML workflows — with no
   pyproject.toml, no test suite, no type toolchain — is textbook support code. Loading the full skill suite
@@ -115,8 +120,18 @@ and documentation.
   `__pycache__/`, `*.py[codz]`, `*.egg-info/`, `build/`, `dist/`, `.coverage`, `.coverage.*`, `coverage.xml`,
   `htmlcov/`, `.pytest_cache/`, `.ruff_cache/`, `.mypy_cache/`, `.tox/`, `.nox/`, `.hypothesis/`, `.pytype/`, `.pyre/`,
   `.venv/`, `venv/`, `.env`, and `.env.*`. Preserve local ignores and recommend targeted additions instead of replacing
-  wholesale. Do not automatically ignore or commit lockfiles such as `uv.lock`; decide from the target project's
-  application vs library policy.
+  wholesale. Never remove existing security-related ignore rules. Ignore populated environment files while preserving
+  a sanitized example with `!.env.example` when the project uses one. Never commit credentials, access tokens, private
+  keys, or populated secret files. Avoid overly broad patterns such as `*.key` or `*.pem` without checking whether the
+  repository intentionally contains public certificates or test fixtures.
+- `.gitignore` does not protect files that Git already tracks. Before claiming a sensitive path is protected, check
+  tracked-file state without printing file contents. If a suspected secret is tracked or may have entered Git history,
+  stop, alert the user, avoid exposing the value in output, and recommend revocation or rotation; removing or ignoring
+  the file does not erase historical exposure.
+- Never include credentials, access tokens, private keys, sensitive values, or secret-bearing URLs in commit subjects
+  or bodies. Describe the issue generically and redact sensitive identifiers from version-control metadata.
+- Do not automatically ignore or commit lockfiles such as `uv.lock`; decide from the target project's application vs
+  library policy.
 - Recent commits that affect tooling or configuration
 
 ### Python Version Contract (Critical)
@@ -199,19 +214,20 @@ declared Python version range.
 - Aim for broad compatibility: `>=3.10` is the current default when no ecosystem constraint says otherwise.
 - Only go lower than 3.10 if you have a specific need to support older systems (for example enterprise, distro-bound, or
   plugin ecosystems).
-- Avoid `>=3.8` unless absolutely necessary; Python 3.8 reached end-of-life in September 2024.
+- Avoid `>=3.8` unless absolutely necessary; Python 3.8 reached end-of-life in October 2024.
 - Review this floor as Python 3.10 approaches end-of-life in October 2026.
 
 ## Core Python Footguns
 
-Watch out for common Python pitfalls: mutable defaults, `is` vs `==`, float equality, bare `except:`, `import *`,
-`IOError`/`OSError`, and more. See `references/core-footguns.md` for the full list with examples and patterns.
+The compact awareness reference covers late-bound closures, identity versus equality, float comparisons, mutation while
+iterating, wildcard imports, redundant `IOError`/`OSError` handling, shared automation configuration, and related
+pitfalls. See `references/core-footguns.md`; use a dedicated review skill for a full code-review rule set.
 
 ### Backslash-heavy Content: Safe Edit Workflow
 
 Editing files with dense backslash patterns (sed/grep/shell regex) is a recurring corruption site
-because each layering (patch tool, Python strings, shell) interprets backslashes differently.
-See `references/safe-editing.md` for the ranked safe-workflow guide and byte-level diagnostic.
+because editing interfaces, language strings, shells, and target parsers may interpret escapes differently.
+See `references/safe-editing.md` for the safe workflow and focused byte-level diagnostic.
 
 ## Verification Commands
 
