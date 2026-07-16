@@ -212,9 +212,11 @@ declared Python version range.
 ### For Libraries
 
 - Aim for broad compatibility: `>=3.10` is the current default when no ecosystem constraint says otherwise.
-- Only go lower than 3.10 if you have a specific need to support older systems (for example enterprise, distro-bound, or
-  plugin ecosystems).
-- Avoid `>=3.8` unless absolutely necessary; Python 3.8 reached end-of-life in October 2024.
+- For new projects, do not select Python 3.8: it reached end-of-life in October 2024 and no longer receives security
+  fixes. Use `>=3.10` or a newer floor that fits the deployment environment.
+- For an existing project that still declares Python 3.8, preserve the current contract unless the user authorizes a
+  compatibility-breaking change. Warn that 3.8 is unsupported upstream, identify the constraint keeping it in scope,
+  and recommend a tested migration plan. Do not silently raise `requires-python` or remove 3.8 from CI.
 - Review this floor as Python 3.10 approaches end-of-life in October 2026.
 
 ## Core Python Footguns

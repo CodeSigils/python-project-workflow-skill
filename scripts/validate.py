@@ -125,6 +125,15 @@ def check_skill() -> None:
     if not contains_markdown_phrase(body, "Framework-specific project conventions are out of scope."):
         fail(f"{rel(SKILL)} missing framework scope boundary")
 
+    python_floor_directives = [
+        "For new projects, do not select Python 3.8",
+        "preserve the current contract unless the user authorizes a compatibility-breaking change",
+        "Do not silently raise `requires-python` or remove 3.8 from CI.",
+    ]
+    for directive in python_floor_directives:
+        if not contains_markdown_phrase(body, directive):
+            fail(f"{rel(SKILL)} missing Python 3.8 EOL policy: {directive}")
+
     for missing_ref in ["packaging.md", "errors-and-logging.md", "cli.md", "migration-existing-code.md"]:
         if f"`{missing_ref}` (deferred)" in body:
             fail(
