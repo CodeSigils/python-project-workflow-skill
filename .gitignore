@@ -49,10 +49,6 @@ ENV/
 .DS_Store
 .vscode/
 
-# Local transcript benchmark workspace
-python-best-practices-workspace/
-# ^ this ignore entry is stale (skill was renamed). Kept to not break existing clones.
-
 # Local agent/tool state
 .omo/
 .open-mem/

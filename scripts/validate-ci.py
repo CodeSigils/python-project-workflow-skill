@@ -29,6 +29,8 @@ def main() -> int:
     if validate is None:
         errors.append("ci.yml: missing validate job")
     else:
+        if '".gitignore"' not in workflow:
+            errors.append("ci.yml: validation workflow must trigger on .gitignore changes")
         if "python3 scripts/verify-urls.py" in validate:
             errors.append(
                 "ci.yml: live URL checks must not run in the validation matrix"
