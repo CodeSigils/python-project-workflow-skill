@@ -139,9 +139,11 @@ When authoring cross-platform Python packages:
 ### For Libraries
 
 - Aim for broad compatibility: `>=3.10` is the current default when no ecosystem constraint says otherwise.
-- Only go lower than 3.10 if you have a specific need to support older systems (for example enterprise, distro-bound, or
-  plugin ecosystems).
-- Avoid `>=3.8` unless absolutely necessary; Python 3.8 reached end-of-life in October 2024.
+- For new projects, do not select Python 3.8: it reached end-of-life in October 2024 and no longer receives security
+  fixes. Use `>=3.10` or a newer floor that fits the deployment environment.
+- For existing projects that still declare 3.8, preserve the contract unless a compatibility-breaking migration is in
+  scope. Document the legacy constraint, warn that 3.8 is unsupported upstream, and plan a tested migration before
+  changing `requires-python` or the CI matrix.
 - Review this floor as Python 3.10 approaches end-of-life in October 2026.
 
 ### Dependency Floor
@@ -155,6 +157,7 @@ When authoring cross-platform Python packages:
 - The `requires-python` field is critical for telling installers (pip, uv) which Python versions are supported.
 - Keep `requires-python`, tool configuration (`target-version`, `python_version`), and CI matrix in sync.
 - For existing projects, do not change `requires-python` without understanding the impact on users.
-- When in doubt, inherit the existing `requires-python` and align tooling to it.
+- When in doubt, preserve the existing `requires-python`, align tooling to it, and flag unsupported Python versions for
+  an explicit migration decision.
 - **Version Maintenance**: Tool version recommendations in this template represent current best practices at time of
   writing. Check official documentation for latest compatible versions and update periodically.
