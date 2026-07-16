@@ -150,6 +150,33 @@ environment variables required.
 
 ---
 
+## Skill Payload — What Ships to the User
+
+Only `skills/python-project-workflow/` is the runtime payload. Everything else
+is development infrastructure — canonical reference sources, maintenance
+scripts, CI, and repository documentation.
+
+```text
+skills/
+└── python-project-workflow/
+    ├── SKILL.md                          # Runtime workflow and orientation guidance
+    └── references/
+        ├── pyproject-template.md         # PEP 621 project and tooling baseline
+        ├── lint-format-typing-testing.md # Lint, format, type, test, and CI guidance
+        ├── core-footguns.md              # Common Python correctness pitfalls
+        ├── safe-editing.md               # Safe editing of escape-heavy content
+        ├── mature-repo-preservation.md   # Preservation-first existing-repo workflow
+        ├── eval-benchmark-hardening.md   # Reliable evaluation and benchmark practices
+        └── drift-classes.md              # Payload and installed-copy drift handling
+```
+
+The payload contains Markdown instructions only: one `SKILL.md` and seven
+reference files. It includes no runtime scripts, configuration files, or
+dependencies. Copy `skills/python-project-workflow/` to the agent's skill
+directory, as described in Quick Start above.
+
+---
+
 ## Portability
 
 Each shipped file in `skills/` is checked by CI for agent-specific references
@@ -177,7 +204,7 @@ python3 -m ruff check scripts .github/scripts
 
 ---
 
-## Layout
+## Repo Layout
 
 ```text
 python-project-workflow/
