@@ -111,6 +111,20 @@ def check_skill() -> None:
         if needle in body:
             fail(f"{rel(SKILL)} body contains non-portable runtime marker: {needle}")
 
+    security_directives = [
+        "Never commit credentials, access tokens, private keys, or populated secret files.",
+        "`!.env.example`",
+        "`.gitignore` does not protect files that Git already tracks.",
+        "recommend revocation or rotation",
+        "Never include credentials, access tokens, private keys, sensitive values, or secret-bearing URLs in commit subjects or bodies.",
+    ]
+    for directive in security_directives:
+        if not contains_markdown_phrase(body, directive):
+            fail(f"{rel(SKILL)} missing .gitignore security directive: {directive}")
+
+    if not contains_markdown_phrase(body, "Framework-specific project conventions are out of scope."):
+        fail(f"{rel(SKILL)} missing framework scope boundary")
+
     for missing_ref in ["packaging.md", "errors-and-logging.md", "cli.md", "migration-existing-code.md"]:
         if f"`{missing_ref}` (deferred)" in body:
             fail(
@@ -139,6 +153,25 @@ def check_references() -> None:
             fail(f"reference file looks too small: {rel(path)} ({size} bytes)")
         if len(read_text_checked(path).splitlines()) > 250:
             fail(f"reference file exceeds 250-line budget: {rel(path)}")
+
+    pyproject = read_text_checked(REF_DIR / "pyproject-template.md")
+    for obsolete in ('license = {text = "MIT"}', '"License :: OSI Approved :: MIT License"'):
+        if obsolete in pyproject:
+            fail(f"pyproject template contains deprecated license metadata: {obsolete}")
+    for required in ('license = "MIT"', 'license-files = ["LICENSE*"]', 'setuptools>=77.0.3'):
+        if required not in pyproject:
+            fail(f"pyproject template missing current packaging metadata: {required}")
+
+    drift = read_text_checked(REF_DIR / "drift-classes.md")
+    if "Edit source (root `SKILL.md`" in drift:
+        fail("drift guide points to nonexistent root SKILL.md")
+    if "Its `SKILL.md` is authored in place" not in drift:
+        fail("drift guide does not describe mixed payload ownership")
+
+    safe_editing = read_text_checked(REF_DIR / "safe-editing.md")
+    for platform_marker in ('terminal("cat")', "write_file", "sed -i 's/"):
+        if platform_marker in safe_editing:
+            fail(f"safe-editing guide contains obsolete recipe: {platform_marker}")
 
 
 def check_readme() -> None:

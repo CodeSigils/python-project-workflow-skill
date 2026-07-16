@@ -1,81 +1,74 @@
 # Backslash-Heavy Content: Safe Edit Workflow
 
-Editing files with dense backslash patterns (e.g. sed BRE capture groups `\(...\)`, grep ERE, or shell regex) is a recurring corruption site. Three independent layers each interpret backslashes differently:
+Backslash-heavy regular expressions, shell fragments, and configuration strings
+are easy to corrupt when text passes through multiple parsers. The risk depends
+on the editing interface, shell, programming language, and target syntax; do not
+assume that any one tool always adds or removes escapes.
 
-| Layer | `\(` becomes | Mechanism |
-|-------|-------------|-----------|
-| `patch` tool `old_string`/`new_string` | `\\(` (doubled) | Tool applies its own escape pass |
-| Python regular string `"\\([^}]*\\)"` | `\([^}]*\)` (correct) | `\\\\` -> `\\`, `\(` -> `(` |
-| Python raw string `r"\([^}]*\)"` | `\([^}]*\)` (correct) | Raw = literal |
+## Safe Workflow
 
-**The core problem:** no single reliable escape-free path through `patch` or Python strings for backslash-heavy content.
+1. **Inspect the exact target text.** Read the smallest useful region and
+   identify which layers will interpret it: edit interface, shell, language
+   literal, and regex or replacement engine.
+2. **Prefer a structured patch or editor operation.** Match surrounding context
+   and change only the intended lines. Avoid whole-file rewrites for a small
+   escape-sensitive change.
+3. **Use literal-safe quoting.** In Python, raw strings help with regex patterns
+   but cannot end in a single backslash. In POSIX shells, single quotes preserve
+   literal characters except a single quote itself. Account separately for the
+   target regex or replacement syntax.
+4. **Avoid in-place `sed` for portable automation.** GNU and BSD `sed -i` use
+   different syntax. Prefer a project-native formatter, a structured edit, or a
+   small reviewed script when portability matters.
+5. **Review the diff immediately.** Confirm that only intended bytes and lines
+   changed before running broader verification.
 
-## Safe Workflow (Ranked by Reliability)
+## Focused Python Transformation
 
-### 1. First Resort: Python stdlib read/write
-
-Use Python stdlib — open the file, read, replace, write — zero escaping layers:
+When a structured edit is unavailable and an exact transformation is clearer in
+Python, keep the operation explicit and fail if the expected input is absent or
+ambiguous:
 
 ```python
-# Read raw file (no escaping, no format wrapping)
-with open("/path/to/file") as f:
-    content = f.read()
+from pathlib import Path
 
-# Python string replacement — backslashes in your replacement are literal
-content = content.replace(
-    'old_backslash_pattern',   # literal bytes from the file
-    'new_backslash_pattern'    # literal bytes you want
-)
+path = Path("path/to/file")
+text = path.read_text(encoding="utf-8")
+old = r"expected literal text"
+new = r"replacement literal text"
 
-# Write back
-with open("/path/to/file", "w") as f:
-    f.write(content)
+if text.count(old) != 1:
+    raise SystemExit(f"expected exactly one match, found {text.count(old)}")
+
+path.write_text(text.replace(old, new), encoding="utf-8")
 ```
 
-Use raw strings `r'...'` so Python doesn't process the backslashes. Verify the result with `od -A x -t x1z | grep '5c'` (see Diagnostic below).
+Use this only when file writes are authorized by the active environment and the
+repository has no preferred editing mechanism. Preserve the original encoding
+and line-ending policy.
 
-### 2. Second Resort: `sed -i` in Single Quotes
+## Byte-Level Diagnostic
 
-Bash single quotes preserve backslashes literally — zero unexpected escaping:
+If visual review is ambiguous, inspect a narrow region as bytes with Python:
 
-```bash
-# Replace `\(` with `\(` (correct BRE capture group)
-sed -i 's/\(/\(/g' file
+```python
+from pathlib import Path
+
+data = Path("path/to/file").read_bytes()
+start = data.find(b"nearby unique marker")
+if start < 0:
+    raise SystemExit("marker not found")
+print(data[start : start + 80].hex(" "))
 ```
 
-### 3. Third Resort: Python Byte-Level (Binary Mode)
+Useful byte values include `5c` for backslash, `28` for `(`, and `29` for `)`.
+Do not dump an entire file that may contain credentials or other sensitive
+content.
 
-When the edit is too complex for `sed` but `write_file` from `terminal("cat")` has issues, use binary I/O with explicit hex escapes:
+## Verification Checklist
 
-```python3 << 'PYEOF'
-data = open('file', 'rb').read()
-data = data.replace(b"\x5c\x28", b"\x5c\x29")  # \( and \)
-open('file', 'wb').write(data)
-PYEOF
-```
-
-Note: `b"\x5c\x28"` is hex value 0x5c (backslash), 0x28 (open paren) — no backslash escaping confusion.
-
-### 4. Diagnostic: Verify Bytes Before and After Every Backslash Edit
-
-```bash
-# Before editing
-sed -n '<LINE_NUM>p' <file> | od -A x -t x1z | grep '5c'
-
-# After editing — confirm single not doubled:
-#   5c 28 = \( (correct)
-#   5c 5c 28 = two backslashes + paren (doubled)
-sed -n '<LINE_NUM>p' <file> | od -A x -t x1z | grep '5c'
-```
-
-> **Note:** `xxd` (Linux vim package) is not available on all systems.
-> `od -A x -t x1z` is POSIX and works on Linux, macOS, and other Unix systems.
-
-### sed -i Portability
-
-The `sed -i` flag differs between GNU sed (Linux) and BSD sed (macOS):
-
-- GNU: `sed -i 's/old/new/g' file` (in-place, no backup)
-- BSD: `sed -i '' 's/old/new/g' file` (requires empty backup extension)
-
-Portable form: use `sed -i.bak` (creates a `file.bak` backup on both), or use Python for in-place edits.
+- The expected source text existed exactly where intended.
+- The resulting diff contains no doubled, dropped, or newly interpreted escapes.
+- The file still follows its repository line-ending and encoding policy.
+- The smallest relevant parser, syntax, or project-native test passes.
+- No temporary backup or generated file remains in the working tree.

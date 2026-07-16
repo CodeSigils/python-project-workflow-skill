@@ -10,7 +10,7 @@ difference is critical because they require fundamentally different fixes.
 
 | Class | Name | What Drifts | Root Cause | Detection | Fix |
 |-------|------|-------------|------------|-----------|-----|
-| **A** | **Payload drift** | Derived copy (payload) out of sync with canonical source | Human edited source but forgot to run sync script; CI gate missing or bypassed | Payload sync check (`sync-payload.sh --ci`) fails | Run `bash scripts/sync-payload.sh` to regenerate payload from manifest |
+| **A** | **Payload drift** | Mirrored payload references differ from their canonical root sources, or an undeclared payload file appears | Human edited a canonical reference but forgot to run sync, edited a mirrored reference directly, or left an orphan | Payload sync check (`sync-payload.sh --ci`) fails | Run `bash scripts/sync-payload.sh` to synchronize declared mirrors and remove orphans |
 | **B** | **Mirror staleness** | Installed copy predates a restructuring | Agent loads a static copy that does not auto-update | `diff -rq <repo>/skills/<name>/ <installed>/skills/<name>/` shows mismatch | Re-install from source or use a client-supported live source directory |
 
 ---
@@ -20,31 +20,33 @@ difference is critical because they require fundamentally different fixes.
 ### Mechanism
 
 ```
-Source of truth (repo)          Payload (shipped to hub)
-├── SKILL.md                    ├── SKILL.md
-├── references/                 ├── references/
-│   ├── a.md                    │   ├── a.md
-│   └── b.md                    │   └── b.md
-└── scripts/                    └── scripts/
-    └── check.py                    └── check.py
+Canonical references           Runtime payload
+references/                    skills/python-project-workflow/
+├── a.md ─────────────────────▶├── SKILL.md  (authored in place)
+└── b.md ─────────────────────▶└── references/
+                                  ├── a.md  (mirrored)
+                                  └── b.md  (mirrored)
 ```
 
-The payload directory (`skills/python-project-workflow/`) is a **derived artifact**.
-It is generated from the canonical source by `scripts/sync-payload.sh` reading
-`scripts/payload-manifest.json`.
+The payload directory (`skills/python-project-workflow/`) has mixed ownership.
+Its `SKILL.md` is authored in place. Root `references/*.md` files are canonical
+sources mirrored into the payload by `scripts/sync-payload.sh`. The script reads
+`scripts/payload-manifest.json` for mirrored membership and treats `SKILL.md` as
+an explicitly allowed authored-in-place file. No scripts currently ship.
 
 ### Common Causes
 
-1. Edited `SKILL.md` or a reference file but didn't run the sync script
-2. Added a new reference file but didn't update the manifest (when using explicit array)
-3. Renamed/deleted a source file but the old copy remains in payload
-4. CI payload sync check was disabled or bypassed
+1. Edited a canonical root reference but didn't run the sync script
+2. Edited a mirrored reference under `skills/python-project-workflow/references/` directly
+3. Added a new source type without updating the manifest or sync policy
+4. Renamed/deleted a source file but the old copy remains in payload
+5. CI payload sync check was disabled or bypassed
 
 ### Detection
 
 - **CI gate**: `bash scripts/sync-payload.sh --ci` exits 1 on any drift
 - **Local check**: Run the same command locally before committing
-- **Manifest validation**: Script also verifies every manifest entry exists at source
+- **Manifest validation**: the script verifies declared sources and flags payload orphans
 
 ### Remediation
 
@@ -59,8 +61,8 @@ bash scripts/sync-payload.sh --ci  # should print "Payload in sync" and exit 0
 ### Prevention
 
 - The `--ci` mode in CI makes drift a blocking failure
-- Path-restricted CI triggers mean only changes to shipping-surface files run the gate
-- Payload manifest (`scripts/payload-manifest.json`) is the single source of truth for what ships
+- Path-restricted CI triggers run the gate for payload, canonical reference, maintenance-script, workflow, and key repository-documentation changes
+- The manifest declares mirrored members; the sync script also records the authored-in-place `SKILL.md` exception
 
 ---
 
@@ -130,8 +132,8 @@ prevention for mirror staleness.**
 | **What diverges** | Source ↔ Payload (both in repo) | Repo payload ↔ Agent installed copy |
 | **Who observes** | CI / maintainer running sync | Agent at runtime / reviewer comparing |
 | **Fix location** | Run sync script in repo | Re-install or use `external_dirs` |
-| **Prevention** | CI gate on every push | Live source directory (dev) or re-install (prod) |
-| **Risk if ignored** | Hub publishes stale skill | Agent behaves differently than repo source |
+| **Prevention** | CI gate on relevant main-branch and pull-request changes | Live source directory (dev) or re-install (prod) |
+| **Risk if ignored** | Distributed payload contains stale references | Agent behaves differently than repo source |
 
 ---
 
@@ -139,9 +141,10 @@ prevention for mirror staleness.**
 
 | Anti-pattern | Why it's wrong | Correct approach |
 |--------------|----------------|------------------|
-| Editing files directly in `skills/python-project-workflow/` | Bypasses manifest; changes lost on next sync | Edit source (root `SKILL.md`, root `references/`, `scripts/`), then run sync |
+| Editing mirrored files under `skills/python-project-workflow/references/` | Changes are overwritten by the next sync | Edit the corresponding root `references/` source, then run sync |
+| Looking for a root `SKILL.md` | No such canonical file exists in this repository | Edit `skills/python-project-workflow/SKILL.md` in place |
 | Adding files to payload without manifest entry | Creates orphans that CI will flag | Add to `scripts/payload-manifest.json` first |
-| Committing payload changes without source changes | Drift by definition | Source is truth; payload is derived |
+| Committing a mirrored reference change without its root source | Creates reference drift | Keep canonical and mirrored reference content identical through the sync command |
 | Installing skill once and never updating | Mirror staleness guaranteed | Use a live source directory for development; schedule re-installs for production |
 | Linking individual files instead of the skill directory | Fragile; breaks on restructure | Link or configure the complete `skills/` directory when the client supports it |
 
@@ -151,9 +154,10 @@ prevention for mirror staleness.**
 
 Before marking a skill repo change as complete:
 
-- [ ] Source files edited (root `SKILL.md`, `references/`, `scripts/`)
+- [ ] Edited `skills/python-project-workflow/SKILL.md` in place or changed canonical root `references/` as appropriate
 - [ ] `bash scripts/sync-payload.sh` runs cleanly
 - [ ] `bash scripts/sync-payload.sh --ci` exits 0
 - [ ] If developing locally: using a client-supported live source directory (no mirror to go stale)
 - [ ] If testing installed copy: verified `diff -rq` shows no differences
-- [ ] CI passes (includes both drift gates)
+- [ ] Repository CI passes, including the payload drift gate
+- [ ] Installed-copy staleness was checked separately when an installed copy is in scope

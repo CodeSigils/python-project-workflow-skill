@@ -17,11 +17,12 @@ The shipped payload is a single `SKILL.md` and seven reference files with no
 runtime scripts, no config files, and no dependencies. Shipped instructions
 are checked for agent-specific references by CI.
 
-The orientation checklist directs agents to inspect structured configuration
-files (pyproject.toml, .gitignore, CI YAML) through the agent's native reading
-capability — it does not use content-extraction shell commands (`cat`,
-`git log`, `grep`) that could expose credentials. The primary security concern
-is correctness of generated project files and CI templates, not runtime
-scanning of repository content.
+The orientation checklist directs agents to inspect project configuration,
+version-control state, and recent tooling changes. These checks should use
+metadata-oriented commands and targeted reads without printing suspected secret
+contents. If credentials may already be tracked or present in Git history, the
+skill directs the agent to stop, alert the user, redact output, and recommend
+revocation or rotation. The primary security concern is correctness of generated
+project files and CI templates while avoiding disclosure during inspection.
 
-Last reviewed: 2026-07-15.
+Last reviewed: 2026-07-16.
