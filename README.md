@@ -167,10 +167,11 @@ skills/
         ├── safe-editing.md               # Safe editing of escape-heavy content
         ├── mature-repo-preservation.md   # Preservation-first existing-repo workflow
         ├── eval-benchmark-hardening.md   # Reliable evaluation and benchmark practices
-        └── drift-classes.md              # Payload and installed-copy drift handling
+        ├── drift-classes.md              # Payload and installed-copy drift handling
+        └── security-and-gitignore.md     # Secret-safe ignore and Git procedures
 ```
 
-The payload contains Markdown instructions only: one `SKILL.md` and seven
+The payload contains Markdown instructions only: one `SKILL.md` and eight
 reference files. It includes no runtime scripts, configuration files, or
 dependencies. Copy `skills/python-project-workflow/` to the agent's skill
 directory, as described in Quick Start above.
@@ -224,7 +225,8 @@ python-project-workflow/
 │   ├── safe-editing.md                   # Safe handling of escape-heavy content
 │   ├── mature-repo-preservation.md       # Preservation-first workflow for existing repos
 │   ├── eval-benchmark-hardening.md       # Reliable benchmark and evaluation practices
-│   └── drift-classes.md                  # Payload and installed-copy drift handling
+│   ├── drift-classes.md                  # Payload and installed-copy drift handling
+│   └── security-and-gitignore.md         # Secret-safe ignore and Git procedures
 ├── scripts/                             # Repository maintenance and validation tools
 │   ├── payload-manifest.json             # Declares canonical files copied into the payload
 │   ├── sync-payload.sh                   # Synchronizes or checks the runtime payload mirror
@@ -236,7 +238,7 @@ python-project-workflow/
     └── python-project-workflow/
         ├── SKILL.md                      # Runtime instructions and orientation checklist
         └── references/                   # Shipped mirrors of the canonical references
-            └── *.md                      # Same seven guides listed under references/
+            └── *.md                      # Same eight guides listed under references/
 ```
 
 Shipping boundary: `skills/python-project-workflow/` is the runtime payload.
@@ -256,6 +258,7 @@ modifying it. Everything else is repository-only development infrastructure.
 | `mature-repo-preservation.md` | Preservation-first workflow for established repos |
 | `eval-benchmark-hardening.md` | Benchmark and eval hardening guidance |
 | `drift-classes.md` | Payload drift and installed-mirror staleness detection and remediation |
+| `security-and-gitignore.md` | Secret-safe `.gitignore`, tracked-file, scanner, and commit-metadata procedures |
 
 The Orientation Checklist is now inlined in SKILL.md § Orientation Checklist.
 

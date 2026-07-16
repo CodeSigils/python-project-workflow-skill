@@ -20,6 +20,7 @@ REQUIRED_REFS = {
     "mature-repo-preservation.md",
     "eval-benchmark-hardening.md",
     "drift-classes.md",
+    "security-and-gitignore.md",
 }
 REQUIRED_SECTIONS = {
     "## Scope",
@@ -111,12 +112,33 @@ def check_skill() -> None:
         if needle in body:
             fail(f"{rel(SKILL)} body contains non-portable runtime marker: {needle}")
 
+    unsafe_probe_patterns = {
+        "unredacted commit body output": re.compile(
+            r"git\s+log[^\n]*(?:--format\s*=\s*[\"']?%B|--pretty\s*=\s*[\"']?%B)"
+            r"[^\n]*(?:\|\s*(?:head|tail|sed|cat|tee|less|more)\b|$)"
+        ),
+        "secret file content output": re.compile(r"\bcat\s+(?:\.env(?:\.[^\s]+)?|[^\s]*credential[^\s]*)"),
+        "destructive git reset": re.compile(r"\bgit\s+reset\s+--hard\b"),
+        "forced git push": re.compile(r"\bgit\s+push\b[^\n]*(?:--force|-f\b)"),
+    }
+    runtime_files = [(SKILL, body)]
+    runtime_files.extend(
+        (path, read_text_checked(path)) for path in sorted(REF_DIR.glob("*.md"))
+    )
+    for path, runtime_text in runtime_files:
+        for label, pattern in unsafe_probe_patterns.items():
+            if pattern.search(runtime_text):
+                fail(f"{rel(path)} contains unsafe security probe: {label}")
+
     security_directives = [
         "Never commit credentials, access tokens, private keys, or populated secret files.",
         "`!.env.example`",
         "`.gitignore` does not protect files that Git already tracks.",
         "recommend revocation or rotation",
         "Never include credentials, access tokens, private keys, sensitive values, or secret-bearing URLs in commit subjects or bodies.",
+        "Do not print raw commit bodies.",
+        "Report existence or location only.",
+        "`references/security-and-gitignore.md`",
     ]
     for directive in security_directives:
         if not contains_markdown_phrase(body, directive):
@@ -182,6 +204,18 @@ def check_references() -> None:
         if platform_marker in safe_editing:
             fail(f"safe-editing guide contains obsolete recipe: {platform_marker}")
 
+    security = read_text_checked(REF_DIR / "security-and-gitignore.md")
+    required_security_procedures = (
+        "git check-ignore --no-index",
+        "tracked_sensitive_env_files",
+        "capture only its exit status",
+        "do not prove a repository is secret-free",
+        "History rewriting requires separate authorization",
+    )
+    for procedure in required_security_procedures:
+        if not contains_markdown_phrase(security, procedure):
+            fail(f"security reference missing required procedure: {procedure}")
+
 
 def check_readme() -> None:
     readme = read_text_checked(ROOT / "README.md")
@@ -197,6 +231,20 @@ def check_readme() -> None:
         fail("README.md should not frame the project as Hermes-only")
 
 
+def check_security() -> None:
+    security = read_text_checked(ROOT / "SECURITY.md")
+    required = [
+        "## Skill Trust Checklist",
+        "does not print raw commit bodies",
+        "effective `.gitignore` behavior",
+        "tracked sensitive files",
+        "redact sensitive values from reports",
+    ]
+    for phrase in required:
+        if not contains_markdown_phrase(security, phrase):
+            fail(f"SECURITY.md missing trust contract: {phrase}")
+
+
 def check_status_sources() -> None:
     removed_summary = ROOT / "IMPLEMENTATION_SUMMARY.md"
     if removed_summary.exists():
@@ -210,6 +258,7 @@ def main() -> int:
     check_skill()
     check_references()
     check_readme()
+    check_security()
     check_status_sources()
     print("OK: portable skill source checks are valid")
     return 0

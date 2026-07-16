@@ -114,16 +114,9 @@ and documentation.
 
 ### Version Control State (Actionable)
 
-- `.gitignore`: inspect existing project-specific rules before suggesting changes. Compare against the
-  [official GitHub Python template](https://github.com/github/gitignore/blob/main/Python.gitignore) and
-  [Toptal Python template](https://www.toptal.com/developers/gitignore/api/python). Check common artifacts:
-  `__pycache__/`, `*.py[codz]`, `*.egg-info/`, `build/`, `dist/`, `.coverage`, `.coverage.*`, `coverage.xml`,
-  `htmlcov/`, `.pytest_cache/`, `.ruff_cache/`, `.mypy_cache/`, `.tox/`, `.nox/`, `.hypothesis/`, `.pytype/`, `.pyre/`,
-  `.venv/`, `venv/`, `.env`, and `.env.*`. Preserve local ignores and recommend targeted additions instead of replacing
-  wholesale. Never remove existing security-related ignore rules. Ignore populated environment files while preserving
-  a sanitized example with `!.env.example` when the project uses one. Never commit credentials, access tokens, private
-  keys, or populated secret files. Avoid overly broad patterns such as `*.key` or `*.pem` without checking whether the
-  repository intentionally contains public certificates or test fixtures.
+- `.gitignore`: inspect existing project-specific rules before suggesting changes. Preserve local and security-related
+  rules; make targeted additions instead of replacing the file wholesale. Preserve a sanitized `!.env.example` when
+  used. Never commit credentials, access tokens, private keys, or populated secret files.
 - `.gitignore` does not protect files that Git already tracks. Before claiming a sensitive path is protected, check
   tracked-file state without printing file contents. If a suspected secret is tracked or may have entered Git history,
   stop, alert the user, avoid exposing the value in output, and recommend revocation or rotation; removing or ignoring
@@ -132,7 +125,11 @@ and documentation.
   or bodies. Describe the issue generically and redact sensitive identifiers from version-control metadata.
 - Do not automatically ignore or commit lockfiles such as `uv.lock`; decide from the target project's application vs
   library policy.
-- Recent commits that affect tooling or configuration
+- Inspect recent tooling/configuration commits through bounded metadata or counts. Do not print raw commit bodies. If
+  suspected secret-bearing metadata is encountered, stop and report only its existence or location.
+- For `.gitignore`, secret-file, tracked-sensitive-file, credential-exposure, or commit-metadata work, load
+  `references/security-and-gitignore.md` before advising or editing. It owns executable checks and detailed pattern
+  guidance; the safety rules above always apply.
 
 ### Python Version Contract (Critical)
 
@@ -188,6 +185,7 @@ Classify the task so the skill loads only what is useful:
 | Test work                                         | `lint-format-typing-testing.md` |
 | Packaging/release                                 | `pyproject-template.md` |
 | CI / verification setup                           | `lint-format-typing-testing.md` |
+| `.gitignore` / secret-safe Git workflow            | `security-and-gitignore.md` |
 | CLI development                                   | `pyproject-template.md` for entry points |
 | Migration from existing code                      | Orientation Checklist above |
 | General Python tooling (lint, format, type, test) | `lint-format-typing-testing.md` |
@@ -283,6 +281,10 @@ When the skill triggered (you loaded references and gave workflow guidance), str
 - verification commands and results,
 - remaining risks or skipped checks,
 - concise next step.
+
+Redact credentials, tokens, private keys, connection strings, sensitive URLs, and secret values from reports, command
+output excerpts, generated documentation, and examples. Report existence or location only. Do not claim a repository is
+secret-free from filename checks or absence of a regex match.
 
 When the skill did **not** trigger, skip this Reporting section entirely. End with a direct answer to the user's
 question without workflow scaffolding.
