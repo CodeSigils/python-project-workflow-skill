@@ -181,33 +181,35 @@ python3 -m ruff check scripts .github/scripts
 
 ```text
 python-project-workflow/
-├── LICENSE
-├── CITATION.cff
-├── SECURITY.md
-├── README.md
-├── .gitignore
-├── .gitattributes
+├── README.md                            # Project overview, setup, usage, and verification
+├── LICENSE                              # MIT license terms
+├── CITATION.cff                         # Citation metadata for research and tooling
+├── SECURITY.md                          # Vulnerability reporting policy and security scope
+├── .gitignore                           # Local Python, editor, and agent-state exclusions
+├── .gitattributes                       # Cross-platform text and line-ending policy
 ├── .github/
-│   ├── workflows/ci.yml
-│   └── scripts/check-portability.py
-├── scripts/
-│   ├── payload-manifest.json
-│   ├── sync-payload.sh
-│   ├── test-sync-payload.py
-│   ├── validate-ci.py
-│   ├── validate.py
-│   └── verify-urls.py
+│   ├── workflows/ci.yml                 # Validation matrix and scheduled URL checks
+│   └── scripts/check-portability.py      # Rejects agent-specific runtime references
+├── references/                          # Canonical sources mirrored into the payload
+│   ├── pyproject-template.md             # PEP 621 project and tool configuration baseline
+│   ├── lint-format-typing-testing.md     # Tool commands and staged adoption guidance
+│   ├── core-footguns.md                  # Common Python correctness pitfalls
+│   ├── safe-editing.md                   # Safe handling of escape-heavy content
+│   ├── mature-repo-preservation.md       # Preservation-first workflow for existing repos
+│   ├── eval-benchmark-hardening.md       # Reliable benchmark and evaluation practices
+│   └── drift-classes.md                  # Payload and installed-copy drift handling
+├── scripts/                             # Repository maintenance and validation tools
+│   ├── payload-manifest.json             # Declares canonical files copied into the payload
+│   ├── sync-payload.sh                   # Synchronizes or checks the runtime payload mirror
+│   ├── test-sync-payload.py              # Regression tests for payload drift behavior
+│   ├── validate-ci.py                    # Enforces CI routing and toolchain policy
+│   ├── validate.py                       # Checks skill structure, metadata, and references
+│   └── verify-urls.py                    # Checks documented external links on a schedule
 └── skills/
     └── python-project-workflow/
-        ├── SKILL.md                         # orientation inlined
-        └── references/
-            ├── pyproject-template.md
-            ├── lint-format-typing-testing.md
-            ├── core-footguns.md
-            ├── safe-editing.md
-            ├── mature-repo-preservation.md
-            ├── eval-benchmark-hardening.md
-            └── drift-classes.md
+        ├── SKILL.md                      # Runtime instructions and orientation checklist
+        └── references/                   # Shipped mirrors of the canonical references
+            └── *.md                      # Same seven guides listed under references/
 ```
 
 Shipping boundary: `skills/python-project-workflow/` is the runtime payload.
