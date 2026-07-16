@@ -7,7 +7,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MANIFEST="$ROOT/scripts/payload-manifest.json"
 PAYLOAD_DIR="$ROOT/skills/python-project-workflow"
 CI_MODE=false
-declare -a MANIFEST_FILES MANIFEST_SCRIPTS
+MANIFEST_FILES=()
+MANIFEST_SCRIPTS=()
 
 [ "${1:-}" = "--ci" ] && CI_MODE=true
 
@@ -48,9 +49,10 @@ sys.stdout.write(value if isinstance(value, str) else "")
 PY
 }
 
-# Portable newline-delimited read (compatible with bash 3.2 on macOS)
-while IFS= read -r item; do MANIFEST_FILES+=("$item"); done < <(manifest_entries files)
-while IFS= read -r item; do MANIFEST_SCRIPTS+=("$item"); done < <(manifest_entries scripts)
+# Portable newline-delimited read (compatible with bash 3.2 on macOS).
+# The ;echo guarantees at least one line so arrays are never empty under set -u.
+while IFS= read -r item; do MANIFEST_FILES+=("$item"); done < <(manifest_entries files; echo)
+while IFS= read -r item; do MANIFEST_SCRIPTS+=("$item"); done < <(manifest_entries scripts; echo)
 REF_MODE="$(manifest_scalar references)"
 
 mode_matches() {
@@ -94,14 +96,17 @@ sync_file() {
 
 is_covered() {
     local rel="$1"
+    local f s
     # Authored-in-place files (written directly in payload, not copied)
     case "$rel" in
         SKILL.md) return 0 ;;
     esac
     for f in "${MANIFEST_FILES[@]}"; do
+        [ -z "$f" ] && continue
         [ "$rel" = "$f" ] && return 0
     done
     for s in "${MANIFEST_SCRIPTS[@]}"; do
+        [ -z "$s" ] && continue
         [ "$rel" = "scripts/$s" ] && return 0
     done
     if [ "$REF_MODE" = "*" ]; then
@@ -114,6 +119,7 @@ is_covered() {
 
 # Files
 for f in "${MANIFEST_FILES[@]}"; do
+    [ -z "$f" ] && continue
     source="$ROOT/$f"
     target="$PAYLOAD_DIR/$f"
     sync_file "$source" "$target" "$f"
@@ -121,6 +127,7 @@ done
 
 # Scripts
 for s in "${MANIFEST_SCRIPTS[@]}"; do
+    [ -z "$s" ] && continue
     source="$ROOT/scripts/$s"
     target="$PAYLOAD_DIR/scripts/$s"
     mode=644
