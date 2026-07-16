@@ -48,8 +48,9 @@ sys.stdout.write(value if isinstance(value, str) else "")
 PY
 }
 
-mapfile -d '' -t MANIFEST_FILES < <(manifest_entries files)
-mapfile -d '' -t MANIFEST_SCRIPTS < <(manifest_entries scripts)
+# Portable null-delimited read (compatible with bash 3.2 on macOS)
+while IFS= read -r -d '' item; do MANIFEST_FILES+=("$item"); done < <(manifest_entries files)
+while IFS= read -r -d '' item; do MANIFEST_SCRIPTS+=("$item"); done < <(manifest_entries scripts)
 REF_MODE="$(manifest_scalar references)"
 
 mode_matches() {
