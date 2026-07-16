@@ -7,6 +7,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MANIFEST="$ROOT/scripts/payload-manifest.json"
 PAYLOAD_DIR="$ROOT/skills/python-project-workflow"
 CI_MODE=false
+MANIFEST_FILES=()
+MANIFEST_SCRIPTS=()
 
 [ "${1:-}" = "--ci" ] && CI_MODE=true
 
@@ -16,6 +18,42 @@ echo "Syncing skill payload..."
 DRIFT=false
 CHANGED=false
 SYNC_ERROR=false
+
+manifest_entries() {
+    local key="$1"
+
+    python3 - "$MANIFEST" "$key" <<'PY'
+import json
+import sys
+
+path, key = sys.argv[1], sys.argv[2]
+with open(path, encoding="utf-8") as fh:
+    data = json.load(fh)
+for item in data.get(key, []):
+    print(item)
+PY
+}
+
+manifest_scalar() {
+    local key="$1"
+
+    python3 - "$MANIFEST" "$key" <<'PY'
+import json
+import sys
+
+path, key = sys.argv[1], sys.argv[2]
+with open(path, encoding="utf-8") as fh:
+    data = json.load(fh)
+value = data.get(key, "")
+sys.stdout.write(value if isinstance(value, str) else "")
+PY
+}
+
+# Portable newline-delimited read (compatible with bash 3.2 on macOS).
+# The ;echo guarantees at least one line so arrays are never empty under set -u.
+while IFS= read -r item; do MANIFEST_FILES+=("$item"); done < <(manifest_entries files; echo)
+while IFS= read -r item; do MANIFEST_SCRIPTS+=("$item"); done < <(manifest_entries scripts; echo)
+REF_MODE="$(manifest_scalar references)"
 
 mode_matches() {
     local target="$1"
@@ -58,19 +96,20 @@ sync_file() {
 
 is_covered() {
     local rel="$1"
+    local f s
     # Authored-in-place files (written directly in payload, not copied)
     case "$rel" in
         SKILL.md) return 0 ;;
     esac
-    for f in $(python3 -c "import json; d=json.load(open('$MANIFEST')); print('\n'.join(str(x) for x in d.get('files',[])))" 2>/dev/null); do
+    for f in "${MANIFEST_FILES[@]}"; do
+        [ -z "$f" ] && continue
         [ "$rel" = "$f" ] && return 0
     done
-    for s in $(python3 -c "import json; d=json.load(open('$MANIFEST')); print('\n'.join(str(x) for x in d.get('scripts',[])))" 2>/dev/null); do
+    for s in "${MANIFEST_SCRIPTS[@]}"; do
+        [ -z "$s" ] && continue
         [ "$rel" = "scripts/$s" ] && return 0
     done
-    local ref_mode
-    ref_mode=$(python3 -c "import json; d=json.load(open('$MANIFEST')); r=d.get('references',''); print(r if isinstance(r,str) else '')" 2>/dev/null)
-    if [ "$ref_mode" = "*" ]; then
+    if [ "$REF_MODE" = "*" ]; then
         case "$rel" in
             references/*) [ -f "$ROOT/$rel" ] && return 0 ;;
         esac
@@ -79,14 +118,16 @@ is_covered() {
 }
 
 # Files
-for f in $(python3 -c "import json; d=json.load(open('$MANIFEST')); print('\n'.join(str(x) for x in d.get('files',[])))" 2>/dev/null); do
+for f in "${MANIFEST_FILES[@]}"; do
+    [ -z "$f" ] && continue
     source="$ROOT/$f"
     target="$PAYLOAD_DIR/$f"
     sync_file "$source" "$target" "$f"
 done
 
 # Scripts
-for s in $(python3 -c "import json; d=json.load(open('$MANIFEST')); print('\n'.join(str(x) for x in d.get('scripts',[])))" 2>/dev/null); do
+for s in "${MANIFEST_SCRIPTS[@]}"; do
+    [ -z "$s" ] && continue
     source="$ROOT/scripts/$s"
     target="$PAYLOAD_DIR/scripts/$s"
     mode=644
@@ -95,8 +136,7 @@ for s in $(python3 -c "import json; d=json.load(open('$MANIFEST')); print('\n'.j
 done
 
 # References (mirror)
-ref_mode=$(python3 -c "import json; d=json.load(open('$MANIFEST')); r=d.get('references',''); print(r if isinstance(r,str) else '')" 2>/dev/null)
-if [ "$ref_mode" = "*" ]; then
+if [ "$REF_MODE" = "*" ]; then
     for source in "$ROOT/references/"*.md; do
         if [ ! -f "$source" ]; then
             echo "  MISSING source: references/*.md"
