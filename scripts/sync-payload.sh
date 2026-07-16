@@ -29,7 +29,7 @@ path, key = sys.argv[1], sys.argv[2]
 with open(path, encoding="utf-8") as fh:
     data = json.load(fh)
 for item in data.get(key, []):
-    sys.stdout.write(f"{item}\0")
+    print(item)
 PY
 }
 
@@ -48,9 +48,9 @@ sys.stdout.write(value if isinstance(value, str) else "")
 PY
 }
 
-# Portable null-delimited read (compatible with bash 3.2 on macOS)
-while IFS= read -r -d '' item; do MANIFEST_FILES+=("$item"); done < <(manifest_entries files)
-while IFS= read -r -d '' item; do MANIFEST_SCRIPTS+=("$item"); done < <(manifest_entries scripts)
+# Portable newline-delimited read (compatible with bash 3.2 on macOS)
+while IFS= read -r item; do MANIFEST_FILES+=("$item"); done < <(manifest_entries files)
+while IFS= read -r item; do MANIFEST_SCRIPTS+=("$item"); done < <(manifest_entries scripts)
 REF_MODE="$(manifest_scalar references)"
 
 mode_matches() {
