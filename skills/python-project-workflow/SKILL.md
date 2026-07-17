@@ -59,12 +59,16 @@ On load, classify the project to load only relevant guidance:
 
 | Signal | Classification | Load |
 |--------|---------------|------|
-| No pyproject.toml, no setup.py, no tests directory | Greenfield | `pyproject-template.md`, then Orientation Checklist below |
+| Empty/new directory, or an explicit request for a new scaffold, with no established source or tooling conventions | Greenfield | `pyproject-template.md`, then Orientation Checklist below |
 | pyproject.toml or setup.py present, coherent tooling | Existing | Orientation Checklist below, then tool-specific guidance |
 | Python only in scripts/, no packaging metadata, governance scripts | Automation / mature | `mature-repo-preservation.md`, skip packaging refs |
 | Eval/benchmark runners present | Automation with benchmarks | Also load `eval-benchmark-hardening.md` |
 
 **Support-code heuristic:** if all Python files are under `scripts/`, there are zero `.py` files in the repo root besides `__init__.py` stubs, and there is no `src/` layout, assume support code. The skill's `mature-repo-preservation.md` reference covers this case.
+
+Apply the Existing and Automation rows before inferring Greenfield. Missing packaging metadata or a tests directory does
+not make a repository greenfield when it already contains meaningful source, scripts, documentation, or project history.
+Only classify such a repository as Greenfield when the user explicitly requests a new scaffold.
 
 When in doubt, load only `mature-repo-preservation.md` — the smallest reference. You can always load more later.
 
@@ -253,23 +257,23 @@ Freshness pitfall: ad-hoc verification is scoped to the files and behavior it ch
 For ordinary Python projects:
 
 ```bash
-# Synchronize the virtual environment and install dependencies (including dev)
-python -m uv sync
+# Synchronize the virtual environment and install the default dev dependency group
+uv sync
 
 # Check code style and linting (Ruff)
-python -m ruff check .
+uv run ruff check .
 
 # Check formatting (Ruff formatter)
-python -m ruff format --check .
+uv run ruff format --check .
 
 # Type checking (MyPy)
-python -m mypy .
+uv run mypy .
 
 # Run tests (pytest)
-python -m pytest
+uv run pytest
 
 # Build the package (if packaging metadata was touched)
-python -m build
+uv build
 ```
 
 ## Reporting

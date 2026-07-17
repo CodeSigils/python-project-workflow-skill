@@ -85,7 +85,47 @@ def main() -> int:
         if target.stat().st_mode & 0o111:
             raise AssertionError("normal sync did not repair payload permissions")
 
-    print("PASS: payload CI mode detects content, orphan, and permission drift")
+        target.unlink()
+        target.symlink_to(fixture / "references/core-footguns.md")
+        orphan.symlink_to(fixture / "scripts/validate.py")
+
+        link_check = run_sync(fixture, "--ci")
+        if link_check.returncode == 0:
+            raise AssertionError("--ci accepted symlinked payload entries")
+        if not target.is_symlink() or not orphan.is_symlink():
+            raise AssertionError("--ci modified symlinked payload entries")
+        if "SYMLINKED: references/core-footguns.md" not in link_check.stdout:
+            raise AssertionError(
+                f"--ci did not report the declared symlink:\n{link_check.stdout}"
+            )
+        if "SYMLINKED: references/orphan.md" not in link_check.stdout:
+            raise AssertionError(
+                f"--ci did not report the orphan symlink:\n{link_check.stdout}"
+            )
+
+        link_sync = run_sync(fixture)
+        if link_sync.returncode != 0:
+            raise AssertionError(f"normal sync failed to repair links:\n{link_sync.stdout}")
+        if target.is_symlink() or target.read_bytes() != source.read_bytes():
+            raise AssertionError("normal sync did not replace the declared symlink")
+        if orphan.exists() or orphan.is_symlink():
+            raise AssertionError("normal sync did not remove the orphan symlink")
+
+        source.unlink()
+        source.symlink_to(target)
+        source_link_check = run_sync(fixture, "--ci")
+        if source_link_check.returncode == 0:
+            raise AssertionError("--ci accepted a symlinked canonical source")
+        invalid_source = (
+            "INVALID source (must be a regular file): references/core-footguns.md"
+        )
+        if invalid_source not in source_link_check.stdout:
+            raise AssertionError(
+                "--ci did not report the symlinked canonical source:\n"
+                f"{source_link_check.stdout}"
+            )
+
+    print("PASS: payload CI mode detects content, orphan, permission, and symlink drift")
     return 0
 
 

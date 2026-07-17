@@ -197,6 +197,7 @@ use portable paths and client-neutral operations.
 python3 .github/scripts/check-portability.py
 python3 scripts/validate-ci.py
 python3 scripts/validate.py
+python3 scripts/test-validate-ci.py
 python3 scripts/verify-urls.py
 python3 scripts/test-sync-payload.py
 bash scripts/sync-payload.sh --ci
@@ -230,6 +231,7 @@ python-project-workflow/
 ├── scripts/                             # Repository maintenance and validation tools
 │   ├── payload-manifest.json             # Declares canonical files copied into the payload
 │   ├── sync-payload.sh                   # Synchronizes or checks the runtime payload mirror
+│   ├── test-validate-ci.py                # Regression tests for CI policy enforcement
 │   ├── test-sync-payload.py              # Regression tests for payload drift behavior
 │   ├── validate-ci.py                    # Enforces CI routing and toolchain policy
 │   ├── validate.py                       # Checks skill structure, metadata, and references
