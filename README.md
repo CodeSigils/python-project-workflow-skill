@@ -26,7 +26,7 @@ agentskills.io-compatible.
 
 Suppose you ask your agent:
 
-> Create a Python 3.10+ command-line project named `invoice-checker`. Use a
+> Create a Python 3.11+ command-line project named `invoice-checker`. Use a
 > `src/` layout, add tests and GitHub Actions, and leave it ready to build.
 
 The workflow guides the agent to:
@@ -83,17 +83,18 @@ Make the skill discoverable by your agent.
 <details>
 <summary><b>Hermes Agent</b></summary>
 
-**Recommended for development — clone the repo and add to `external_dirs`:**
+**Install directly from GitHub:**
+```bash
+hermes skills install CodeSigils/python-project-workflow-skill/skills/python-project-workflow
+```
+
+**For development, clone the repo and add its `skills/` directory to `external_dirs`:**
 ```yaml
 skills:
   external_dirs:
     - /path/to/python-project-workflow/skills
 ```
 Every commit is immediately reflected without reinstalling.
-
-The repository is not currently indexed in the Hermes hub, so no hub-install
-command is advertised. Clone plus `external_dirs` is the verified Hermes path
-until registration.
 
 *Other agents: see sections below for their native setup commands.*
 </details>
@@ -102,6 +103,7 @@ until registration.
 <summary><b>Claude Code</b></summary>
 
 ```bash
+mkdir -p ~/.claude/skills
 cp -r skills/python-project-workflow ~/.claude/skills/
 ```
 </details>
@@ -110,6 +112,7 @@ cp -r skills/python-project-workflow ~/.claude/skills/
 <summary><b>Codex</b></summary>
 
 ```bash
+mkdir -p ~/.agents/skills
 cp -r skills/python-project-workflow ~/.agents/skills/
 ```
 </details>
@@ -118,6 +121,7 @@ cp -r skills/python-project-workflow ~/.agents/skills/
 <summary><b>Gemini CLI / .agents/ path</b></summary>
 
 ```bash
+mkdir -p .agents/skills
 cp -r skills/python-project-workflow .agents/skills/
 ```
 </details>
@@ -126,6 +130,7 @@ cp -r skills/python-project-workflow .agents/skills/
 <summary><b>OpenCode</b></summary>
 
 ```bash
+mkdir -p .opencode/skills
 cp -r skills/python-project-workflow .opencode/skills/
 ```
 </details>
@@ -233,7 +238,7 @@ python-project-workflow/
 │   ├── sync-payload.sh                   # Synchronizes or checks the runtime payload mirror
 │   ├── test-validate-ci.py                # Regression tests for CI policy enforcement
 │   ├── test-sync-payload.py              # Regression tests for payload drift behavior
-│   ├── validate-ci.py                    # Enforces CI routing and toolchain policy
+│   ├── validate-ci.py                    # Enforces CI routing, required gates, toolchain policy, and action pins
 │   ├── validate.py                       # Checks skill structure, metadata, and references
 │   └── verify-urls.py                    # Checks documented external links on a schedule
 └── skills/

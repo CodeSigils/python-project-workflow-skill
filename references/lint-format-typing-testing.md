@@ -50,7 +50,7 @@ When testing cross-platform compatibility:
 
 - Use `nox` or `tox` with matrices covering different Python versions and operating systems
 - GitHub Actions example:
-  `strategy.matrix: {os: [ubuntu-latest, windows-latest, macos-latest], python-version: [\"3.10\", \"3.11\", \"3.12\", \"3.13\", \"3.14\"]}`
+  `strategy.matrix: {os: [ubuntu-latest, windows-latest, macos-latest], python-version: [\"3.11\", \"3.12\", \"3.13\", \"3.14\"]}`
 - Test console scripts/installation on all target platforms
 - Consider using `cibuildwheel` for building wheels across platforms
 - Test path handling with `pathlib` to avoid platform-specific issues
@@ -112,7 +112,8 @@ positives or negatives.
 
 ## Special Cases
 
-- **Jupyter notebooks**: use `nbqa ruff check notebook.ipynb`. Keep core logic in `.py` files.
+- **Jupyter notebooks**: Ruff supports notebooks directly; use `ruff check notebook.ipynb` and
+  `ruff format --check notebook.ipynb`. Keep core logic in `.py` files.
 - **Cython**: MyPy may need config to understand `.pyx` files; invoke build system before type checking.
 - **Generated files**: exclude from lint/format/type checking via `.ruffignore` or tool config. Document ownership.
 

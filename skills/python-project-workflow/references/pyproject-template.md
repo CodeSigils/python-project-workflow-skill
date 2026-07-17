@@ -2,7 +2,7 @@
 
 This file provides a minimal, modern `pyproject.toml` using PEP 621 metadata. Adjust the values to fit your project.
 
-> **Freshness:** Packaging metadata and Python EOL guidance were reviewed on 2026-07-16.
+> **Freshness:** Packaging metadata and Python EOL guidance were reviewed on 2026-07-17.
 > Verify against official docs before using in production.
 > See [ruff docs](https://docs.astral.sh/ruff/), [mypy docs](https://mypy.readthedocs.io/),
 > [pytest docs](https://docs.pytest.org/), [uv docs](https://docs.astral.sh/uv/) for current versions.
@@ -23,7 +23,7 @@ name = "your-package"
 version = "0.1.0"
 description = "A short description of your package."
 readme = "README.md"
-requires-python = ">=3.10"  # or >=3.12 for controlled applications; preserve ecosystem floors
+requires-python = ">=3.11"  # or >=3.12 for controlled applications; preserve ecosystem floors
 authors = [
     {name = "Your Name", email = "you@example.com"}
 ]
@@ -78,7 +78,7 @@ This tells setuptools to look for packages under the `src/` directory.
 
 ```toml
 [tool.ruff]
-target-version = "py310"  # Align with requires-python
+target-version = "py311"  # Align with requires-python
 line-length = 88
 
 [tool.ruff.lint]
@@ -94,7 +94,7 @@ quote-style = "double"
 
 ```toml
 [tool.mypy]
-python_version = "3.10"  # Target the minimum version in requires-python
+python_version = "3.11"  # Target the minimum version in requires-python
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -134,23 +134,30 @@ When authoring cross-platform Python packages:
 
 - If you control the deployment environment (e.g., internal tool, web service), consider `requires-python = ">=3.12"` to
   use the latest features.
-- If deploying to older LTS systems (e.g., Ubuntu 22.04 with Python 3.10), use `>=3.10`.
+- If deployment must use a distribution's system Python, set the floor to the oldest supported image you actually
+  deploy. For example, Ubuntu 26.04 LTS currently defaults to Python 3.14; older supported images may require a lower
+  floor.
 
 ### For Libraries
 
-- Aim for broad compatibility: `>=3.10` is the current default when no ecosystem constraint says otherwise.
+- Aim for broad compatibility without starting on a near-EOL interpreter: `>=3.11` is the current default when no
+  ecosystem constraint says otherwise.
+- For new projects, do not select Python 3.10 by default: it is in source-only security maintenance and reaches
+  end-of-life in October 2026. Use `>=3.11` or a newer floor that fits the deployment environment.
+- For existing projects that still declare 3.10, preserve the contract unless a compatibility-breaking migration is in
+  scope. Document the constraint and plan a tested migration before changing `requires-python` or the CI matrix.
 - For new projects, do not select Python 3.8: it reached end-of-life in October 2024 and no longer receives security
-  fixes. Use `>=3.10` or a newer floor that fits the deployment environment.
+  fixes. Use `>=3.11` or a newer floor that fits the deployment environment.
 - For existing projects that still declare 3.8, preserve the contract unless a compatibility-breaking migration is in
   scope. Document the legacy constraint, warn that 3.8 is unsupported upstream, and plan a tested migration before
   changing `requires-python` or the CI matrix.
-- Review this floor as Python 3.10 approaches end-of-life in October 2026.
 
 ### Dependency Floor
 
 - When choosing a dependency version, check its `requires-python` to ensure it doesn't declare a higher floor than your
   project.
-- Use tools like `pip-index-versions` or `pipdeptree` to audit dependency compatibility.
+- Use `python -m pip index versions <package>` to inspect available releases and `uv tree` or `pipdeptree` to audit the
+  resolved dependency graph.
 
 ## Notes
 
