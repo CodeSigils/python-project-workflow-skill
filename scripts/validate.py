@@ -166,6 +166,16 @@ def check_skill() -> None:
         if not contains_markdown_phrase(body, directive):
             fail(f"{rel(SKILL)} missing Python 3.8 EOL policy: {directive}")
 
+    python_310_directives = [
+        "For new projects, do not select Python 3.10 by default",
+        "reaches end-of-life in October 2026",
+        "For an existing project that still declares Python 3.10",
+        "do not silently raise `requires-python` or remove 3.10 from CI.",
+    ]
+    for directive in python_310_directives:
+        if not contains_markdown_phrase(body, directive):
+            fail(f"{rel(SKILL)} missing Python 3.10 EOL policy: {directive}")
+
     for command in UV_COMMANDS:
         if command not in body:
             fail(f"{rel(SKILL)} missing uv-managed verification command: {command}")
@@ -210,6 +220,9 @@ def check_references() -> None:
         'license-files = ["LICENSE*"]',
         "setuptools>=77.0.3",
         "[dependency-groups]",
+        'requires-python = ">=3.11"',
+        'target-version = "py311"',
+        'python_version = "3.11"',
     ):
         if required not in pyproject:
             fail(f"pyproject template missing current packaging metadata: {required}")
@@ -222,12 +235,16 @@ def check_references() -> None:
             fail(f"tooling reference missing uv-managed command: {command}")
     if "python -m uv" in tooling:
         fail("tooling reference must invoke the uv executable directly")
+    if "nbqa ruff check" in tooling:
+        fail("tooling reference must use Ruff's native notebook support")
 
     drift = read_text_checked(REF_DIR / "drift-classes.md")
     if "Edit source (root `SKILL.md`" in drift:
         fail("drift guide points to nonexistent root SKILL.md")
     if "Its `SKILL.md` is authored in place" not in drift:
         fail("drift guide does not describe mixed payload ownership")
+    if "flags payload symlinks and orphans" not in drift:
+        fail("drift guide does not describe regular-file payload enforcement")
 
     safe_editing = read_text_checked(REF_DIR / "safe-editing.md")
     for platform_marker in ('terminal("cat")', "write_file", "sed -i 's/"):
@@ -253,6 +270,7 @@ def check_readme() -> None:
         "agentskills.io-compatible",
         "skills/python-project-workflow/",
         "Shipping boundary: `skills/python-project-workflow/` is the runtime payload",
+        "hermes skills install CodeSigils/python-project-workflow-skill/skills/python-project-workflow",
     ]
     for phrase in required:
         if not contains_markdown_phrase(readme, phrase):
@@ -269,6 +287,7 @@ def check_security() -> None:
         "effective `.gitignore` behavior",
         "tracked sensitive files",
         "redact sensitive values from reports",
+        "regular-file-only canonical and runtime entries",
     ]
     for phrase in required:
         if not contains_markdown_phrase(security, phrase):

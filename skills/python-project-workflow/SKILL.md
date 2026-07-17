@@ -209,17 +209,24 @@ declared Python version range.
 
 - If you control the deployment environment (e.g., internal tool, web service), consider `requires-python = ">=3.12"` to
   use the latest features.
-- If deploying to older LTS systems (e.g., Ubuntu 22.04 with Python 3.10), use `>=3.10`.
+- If deployment must use a distribution's system Python, set the floor to the oldest supported image you actually
+  deploy. For example, Ubuntu 26.04 LTS currently defaults to Python 3.14; older supported images may require a lower
+  floor.
 
 ### For Libraries
 
-- Aim for broad compatibility: `>=3.10` is the current default when no ecosystem constraint says otherwise.
+- Aim for broad compatibility without starting on a near-EOL interpreter: `>=3.11` is the current default when no
+  ecosystem constraint says otherwise.
+- For new projects, do not select Python 3.10 by default: it is in source-only security maintenance and reaches
+  end-of-life in October 2026. Use `>=3.11` or a newer floor that fits the deployment environment.
+- For an existing project that still declares Python 3.10, preserve the current contract unless the user authorizes a
+  compatibility-breaking change. Identify the constraint keeping it in scope and recommend a tested migration plan; do
+  not silently raise `requires-python` or remove 3.10 from CI.
 - For new projects, do not select Python 3.8: it reached end-of-life in October 2024 and no longer receives security
-  fixes. Use `>=3.10` or a newer floor that fits the deployment environment.
+  fixes. Use `>=3.11` or a newer floor that fits the deployment environment.
 - For an existing project that still declares Python 3.8, preserve the current contract unless the user authorizes a
   compatibility-breaking change. Warn that 3.8 is unsupported upstream, identify the constraint keeping it in scope,
   and recommend a tested migration plan. Do not silently raise `requires-python` or remove 3.8 from CI.
-- Review this floor as Python 3.10 approaches end-of-life in October 2026.
 
 ## Core Python Footguns
 
