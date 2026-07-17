@@ -50,7 +50,11 @@ ENV/
 # Local editor/OS files
 .DS_Store
 .vscode/
+.idea/
 tmp/
+Thumbs.db
+*.swp
+*.swo
 
 # Local agent/tool state
 .hermes/
