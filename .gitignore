@@ -53,6 +53,11 @@ ENV/
 tmp/
 
 # Local agent/tool state
+.hermes/
+.claude/
+.cursor/
+.gemini/
+.codex/
 .omo/
 .open-mem/
 
