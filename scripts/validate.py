@@ -29,6 +29,14 @@ REQUIRED_SECTIONS = {
     "## Verification Commands",
     "## Preserve Local Conventions",
 }
+UV_COMMANDS = (
+    "uv sync",
+    "uv run ruff check .",
+    "uv run ruff format --check .",
+    "uv run mypy .",
+    "uv run pytest",
+    "uv build",
+)
 
 
 def rel(path: Path) -> str:
@@ -46,6 +54,8 @@ def fail(message: str, *, hint: str | None = None) -> None:
 
 
 def read_text_checked(path: Path) -> str:
+    if path.is_symlink():
+        fail(f"required file must not be a symlink: {rel(path)}")
     try:
         return path.read_text(encoding="utf-8")
     except FileNotFoundError:
@@ -156,6 +166,12 @@ def check_skill() -> None:
         if not contains_markdown_phrase(body, directive):
             fail(f"{rel(SKILL)} missing Python 3.8 EOL policy: {directive}")
 
+    for command in UV_COMMANDS:
+        if command not in body:
+            fail(f"{rel(SKILL)} missing uv-managed verification command: {command}")
+    if "python -m uv" in body:
+        fail(f"{rel(SKILL)} must invoke the uv executable directly")
+
     for missing_ref in ["packaging.md", "errors-and-logging.md", "cli.md", "migration-existing-code.md"]:
         if f"`{missing_ref}` (deferred)" in body:
             fail(
@@ -189,9 +205,23 @@ def check_references() -> None:
     for obsolete in ('license = {text = "MIT"}', '"License :: OSI Approved :: MIT License"'):
         if obsolete in pyproject:
             fail(f"pyproject template contains deprecated license metadata: {obsolete}")
-    for required in ('license = "MIT"', 'license-files = ["LICENSE*"]', 'setuptools>=77.0.3'):
+    for required in (
+        'license = "MIT"',
+        'license-files = ["LICENSE*"]',
+        "setuptools>=77.0.3",
+        "[dependency-groups]",
+    ):
         if required not in pyproject:
             fail(f"pyproject template missing current packaging metadata: {required}")
+    if "[project.optional-dependencies]\ndev = [" in pyproject:
+        fail("pyproject template must declare local dev tools as a dependency group")
+
+    tooling = read_text_checked(REF_DIR / "lint-format-typing-testing.md")
+    for command in UV_COMMANDS:
+        if command not in tooling:
+            fail(f"tooling reference missing uv-managed command: {command}")
+    if "python -m uv" in tooling:
+        fail("tooling reference must invoke the uv executable directly")
 
     drift = read_text_checked(REF_DIR / "drift-classes.md")
     if "Edit source (root `SKILL.md`" in drift:

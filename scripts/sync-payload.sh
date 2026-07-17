@@ -72,25 +72,27 @@ sync_file() {
     local label="$3"
     local mode="${4:-644}"
 
-    if [ ! -f "$source" ]; then
-        echo "  MISSING source: $label"
+    if [ -L "$source" ] || [ ! -f "$source" ]; then
+        echo "  INVALID source (must be a regular file): $label"
         DRIFT=true
         SYNC_ERROR=true
         return
     fi
 
     if $CI_MODE; then
-        if [ ! -f "$target" ] || ! cmp -s "$source" "$target" || ! mode_matches "$target" "$mode"; then
+        if [ -L "$target" ] || [ ! -f "$target" ] || ! cmp -s "$source" "$target" || ! mode_matches "$target" "$mode"; then
             echo "  DRIFTED: $label"
             DRIFT=true
         fi
         return
     fi
 
-    if [ ! -f "$target" ] || ! cmp -s "$source" "$target" || ! mode_matches "$target" "$mode"; then
+    if [ -L "$target" ] || [ ! -f "$target" ] || ! cmp -s "$source" "$target" || ! mode_matches "$target" "$mode"; then
         CHANGED=true
     fi
     mkdir -p "$(dirname "$target")"
+    # Never let install follow a payload symlink outside the shipping boundary.
+    [ ! -L "$target" ] || rm -f "$target"
     install -m "$mode" "$source" "$target"
 }
 
@@ -154,7 +156,15 @@ while IFS= read -r -d '' f; do
     relpath="$f"
     # shellcheck disable=SC2295
     rel="${relpath#$PAYLOAD_DIR/}"
-    if ! is_covered "$rel"; then
+    if [ -L "$f" ]; then
+        echo "  SYMLINKED: $rel"
+        if ! $CI_MODE; then
+            rm -f "$f"
+            CHANGED=true
+        else
+            DRIFT=true
+        fi
+    elif ! is_covered "$rel"; then
         echo "  ORPHANED: $rel"
         if ! $CI_MODE; then
             rm -f "$f"
@@ -163,7 +173,7 @@ while IFS= read -r -d '' f; do
             DRIFT=true
         fi
     fi
-done < <(find "$PAYLOAD_DIR" -type f -print0)
+done < <(find "$PAYLOAD_DIR" \( -type f -o -type l \) -print0)
 if ! $CI_MODE; then
     find "$PAYLOAD_DIR" -type d -empty -delete 2>/dev/null || true
 fi
