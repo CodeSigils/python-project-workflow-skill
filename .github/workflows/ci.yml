@@ -57,6 +57,9 @@ jobs:
       - name: Check cross-agent portability
         run: python3 .github/scripts/check-portability.py
 
+      - name: Check version consistency
+        run: python3 scripts/check-version-consistency.py
+
       - name: Validate CI policy
         run: python3 scripts/validate-ci.py
 
