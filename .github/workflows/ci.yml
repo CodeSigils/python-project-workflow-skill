@@ -60,6 +60,9 @@ jobs:
       - name: Check version consistency
         run: python3 scripts/check-version-consistency.py
 
+      - name: Check README tree matches tracked files
+        run: python3 scripts/check-readme-tree.py
+
       - name: Validate CI policy
         run: python3 scripts/validate-ci.py
 

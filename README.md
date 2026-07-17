@@ -236,6 +236,8 @@ python-project-workflow/
 ├── scripts/                             # Repository maintenance and validation tools
 │   ├── payload-manifest.json             # Declares canonical files copied into the payload
 │   ├── sync-payload.sh                   # Synchronizes or checks the runtime payload mirror
+│   ├── check-version-consistency.py      # Validates version alignment across manifests and tags
+│   ├── check-readme-tree.py              # Ensures README repo-layout tree matches tracked files
 │   ├── test-validate-ci.py                # Regression tests for CI policy enforcement
 │   ├── test-sync-payload.py              # Regression tests for payload drift behavior
 │   ├── validate-ci.py                    # Enforces CI routing, required gates, toolchain policy, and action pins
