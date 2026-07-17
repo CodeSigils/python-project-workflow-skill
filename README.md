@@ -258,6 +258,38 @@ source for mirrored payload references. `scripts/payload-manifest.json` declares
 what is mirrored, and `scripts/sync-payload.sh --ci` verifies the boundary without
 modifying it. Everything else is repository-only development infrastructure.
 
+### Maintainer note: the canonical/mirror architecture
+
+This repository uses a **canonical-source + mirrored-payload** pattern for reference
+files:
+
+- **Root `references/`** — the single source of truth. You edit these files. They are
+  never shipped directly to agents.
+
+- **`skills/python-project-workflow/references/`** — a mirror of the canonical
+  files, included in the shipped payload. Agents load this copy at runtime.
+
+- **`scripts/sync-payload.sh`** — the synchronization tool. In normal mode it
+  copies root `references/` into the payload directory. In `--ci` mode it
+  validates that the mirror matches the canonical source (fails on drift).
+
+- **`scripts/payload-manifest.json`** — declares which files are mirrored. Add a
+  new reference file to this manifest *and* to root `references/`; the sync script
+  handles the rest.
+
+**Workflow for editing a reference:**
+
+1. Edit the file in root `references/`.
+2. Run `bash scripts/sync-payload.sh` (or push and let CI catch drift).
+3. The `sync-payload.sh --ci` gate in CI will fail if the mirror is out of sync.
+
+This pattern keeps the agent's runtime payload lean and portable, while giving
+maintainers a single canonical location to edit. It also scales: if this repo
+grows a second skill, both skills can mirror the same root `references/`
+without duplication.
+
+---
+
 ## References
 
 | Reference | Purpose |
