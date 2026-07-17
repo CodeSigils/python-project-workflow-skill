@@ -28,8 +28,9 @@ metadata, and the canonical-to-payload mirror process. These components must
 preserve the declared shipping boundary, avoid exposing credentials, and prevent
 unreviewed content from entering the runtime payload.
 
-CI validates payload structure, canonical-reference parity, portable
-instructions, security directives, and the absence of known unsafe probes. A
+CI validates payload structure, regular-file-only canonical and runtime entries,
+canonical-reference parity, portable instructions, security directives, and the
+absence of known unsafe probes. A
 passing validator is evidence for these defined checks, not a claim that the
 repository or generated projects are free of vulnerabilities.
 
@@ -64,4 +65,4 @@ summarizes the trust boundary; it does not replace those runtime instructions.
   from heuristic or filename checks.
 - [x] The shipped payload contains no destructive reset, forced-push, or secret-file dumping commands.
 
-Last reviewed: 2026-07-16.
+Last reviewed: 2026-07-17.

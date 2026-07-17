@@ -10,7 +10,7 @@ difference is critical because they require fundamentally different fixes.
 
 | Class | Name | What Drifts | Root Cause | Detection | Fix |
 |-------|------|-------------|------------|-----------|-----|
-| **A** | **Payload drift** | Mirrored payload references differ from their canonical root sources, or an undeclared payload file appears | Human edited a canonical reference but forgot to run sync, edited a mirrored reference directly, or left an orphan | Payload sync check (`sync-payload.sh --ci`) fails | Run `bash scripts/sync-payload.sh` to synchronize declared mirrors and remove orphans |
+| **A** | **Payload drift** | Mirrored payload references differ from their canonical root sources, an undeclared payload entry appears, or a canonical/runtime entry is a symlink instead of a regular file | Human edited a canonical reference but forgot to run sync, edited a mirrored reference directly, left an orphan, or introduced a link across the shipping boundary | Payload sync check (`sync-payload.sh --ci`) fails | Run `bash scripts/sync-payload.sh` to synchronize declared mirrors and remove payload-side links/orphans; replace canonical source links manually |
 | **B** | **Mirror staleness** | Installed copy predates a restructuring | Agent loads a static copy that does not auto-update | `diff -rq <repo>/skills/<name>/ <installed>/skills/<name>/` shows mismatch | Re-install from source or use a client-supported live source directory |
 
 ---
@@ -41,12 +41,13 @@ an explicitly allowed authored-in-place file. No scripts currently ship.
 3. Added a new source type without updating the manifest or sync policy
 4. Renamed/deleted a source file but the old copy remains in payload
 5. CI payload sync check was disabled or bypassed
+6. Replaced a canonical source or payload entry with a symlink
 
 ### Detection
 
 - **CI gate**: `bash scripts/sync-payload.sh --ci` exits 1 on any drift
 - **Local check**: Run the same command locally before committing
-- **Manifest validation**: the script verifies declared sources and flags payload orphans
+- **Manifest validation**: the script requires regular canonical source files and flags payload symlinks and orphans
 
 ### Remediation
 
@@ -147,6 +148,7 @@ prevention for mirror staleness.**
 | Committing a mirrored reference change without its root source | Creates reference drift | Keep canonical and mirrored reference content identical through the sync command |
 | Installing skill once and never updating | Mirror staleness guaranteed | Use a live source directory for development; schedule re-installs for production |
 | Linking individual files instead of the skill directory | Fragile; breaks on restructure | Link or configure the complete `skills/` directory when the client supports it |
+| Committing symlinks inside the canonical or runtime payload trees | Can escape the shipping boundary or become broken after copying only the payload | Keep every shipped and canonical reference entry as a regular file; use client-level directory configuration only outside the payload |
 
 ---
 
