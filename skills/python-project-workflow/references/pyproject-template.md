@@ -42,8 +42,8 @@ classifiers = [
 dependencies = [
     # Example: "requests>=2.28.0",
 ]
-# Optional dependencies (e.g., for testing, docs)
-[project.optional-dependencies]
+# Local development dependencies (PEP 735); uv sync includes dev by default
+[dependency-groups]
 dev = [
     "pytest",
     "ruff",

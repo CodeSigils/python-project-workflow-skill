@@ -8,39 +8,41 @@ adopting strictness incrementally.
 Assuming you have `uv` installed and a `pyproject.toml` with the modern baseline.
 
 ```bash
-# Synchronize the virtual environment and install dependencies (including dev)
-python -m uv sync
+# Synchronize the virtual environment and install the default dev dependency group
+uv sync
 
 # Check code style and linting (Ruff)
-python -m ruff check .
+uv run ruff check .
 
 # Check formatting (Ruff formatter)
-python -m ruff format --check .
+uv run ruff format --check .
 
 # Type checking (MyPy)
-python -m mypy .
+uv run mypy .
 
 # Run tests (pytest)
-python -m pytest
+uv run pytest
 
 # Build the package (if packaging metadata was touched)
-python -m build
+uv build
 ```
 
 If `uv` is unavailable, create and activate a virtual environment using the
-platform-appropriate activation command, then install the project and its dev
-extra explicitly:
+platform-appropriate activation command, then install the project and its
+development tools explicitly:
 
 ```bash
 python -m venv .venv
 # Activate .venv for the current shell, then run:
 python -m pip install --upgrade pip
-python -m pip install -e ".[dev]"
+python -m pip install -e .
+python -m pip install pytest ruff mypy build
 ```
 
-If the project does not define a `dev` extra, install its project-native
-development requirements instead. The Ruff, mypy, pytest, and build commands
-above remain unchanged.
+If the project defines a project-native development extra or requirements file,
+install that instead of the generic tool list. After activation, run Ruff, mypy,
+pytest, and build through `python -m`; the `uv run` commands above apply only to
+the uv-managed environment.
 
 ## Cross-Platform Testing Considerations
 
