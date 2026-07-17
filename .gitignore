@@ -33,6 +33,7 @@ MANIFEST
 .nox/
 .pytype/
 .pyre/
+.pyright/
 
 # Virtual environments
 .venv/
@@ -44,10 +45,12 @@ ENV/
 .env
 .env.*
 !.env.example
+!.env.*.example
 
 # Local editor/OS files
 .DS_Store
 .vscode/
+tmp/
 
 # Local agent/tool state
 .omo/

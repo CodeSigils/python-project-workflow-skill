@@ -200,6 +200,8 @@ use portable paths and client-neutral operations.
 
 ```bash
 python3 .github/scripts/check-portability.py
+python3 scripts/check-version-consistency.py
+python3 scripts/check-readme-tree.py
 python3 scripts/validate-ci.py
 python3 scripts/validate.py
 python3 scripts/test-validate-ci.py
@@ -270,6 +272,11 @@ modifying it. Everything else is repository-only development infrastructure.
 | `security-and-gitignore.md` | Secret-safe `.gitignore`, tracked-file, scanner, and commit-metadata procedures |
 
 The Orientation Checklist is now inlined in SKILL.md § Orientation Checklist.
+
+## See also
+
+- [`py-review-skill`](https://github.com/CodeSigils/py-review-skill) — Python code review companion skill
+- [`repo-health-scan`](https://github.com/CodeSigils/repo-health-and-sync-skill) — Git repository health audit methodology
 
 ## License
 
