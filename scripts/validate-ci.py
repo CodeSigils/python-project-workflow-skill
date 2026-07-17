@@ -14,6 +14,7 @@ SHA_PIN_RE = re.compile(r"^[^@\s]+@[0-9a-f]{40}$")
 REQUIRED_VALIDATE_COMMANDS = (
     "python3 .github/scripts/check-portability.py",
     "python3 scripts/check-version-consistency.py",
+    "python3 scripts/check-readme-tree.py",
     "python3 scripts/validate-ci.py",
     "python3 scripts/validate.py",
     "python3 scripts/test-validate-ci.py",
