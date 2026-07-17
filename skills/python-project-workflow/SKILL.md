@@ -1,5 +1,6 @@
 ---
 name: python-project-workflow
+version: "0.1.0"
 description: Set up, inspect, preserve, and verify Python projects across greenfield bootstrap, tooling configuration, CI, packaging, mature-repo preservation, and project-native verification. Use for Python project workflow tasks, not for pure code review; use py-review-skill or another dedicated review skill for review findings.
 ---
 

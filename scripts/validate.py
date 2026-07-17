@@ -93,6 +93,8 @@ def parse_frontmatter(text: str) -> tuple[dict[str, str], str]:
         fail(f"unsupported frontmatter fields: {sorted(extra)}")
     if data.get("name") != "python-project-workflow":
         fail("frontmatter name must be python-project-workflow")
+    if not data.get("version"):
+        fail("frontmatter must include a version field")
     if len(data.get("description", "").split()) < 18:
         fail("frontmatter description is too short to trigger reliably")
     return data, body
