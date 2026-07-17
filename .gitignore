@@ -58,6 +58,7 @@ tmp/
 .cursor/
 .gemini/
 .codex/
+.opencode/
 .omo/
 .open-mem/
 
