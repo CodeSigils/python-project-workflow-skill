@@ -52,6 +52,8 @@ ENV/
 .vscode/
 .idea/
 tmp/
+.cache/
+*.log
 Thumbs.db
 *.swp
 *.swo
