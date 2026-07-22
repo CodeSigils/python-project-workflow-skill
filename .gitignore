@@ -49,17 +49,23 @@ ENV/
 
 # Local editor/OS files
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
 .vscode/
 .idea/
 tmp/
+.tmp/
 .cache/
 *.log
 Thumbs.db
+[Dd]esktop.ini
 *.swp
 *.swo
 *~
 
 # Local agent/tool state
+.agents/
 .hermes/
 .claude/
 .cursor/
