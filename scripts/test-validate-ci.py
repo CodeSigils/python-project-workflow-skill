@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import re
 from pathlib import Path
 from types import ModuleType
 
@@ -44,7 +45,41 @@ def main() -> int:
     assert_rejected(
         module,
         workflow.replace('- ".gitignore"', '# - ".gitignore"'),
-        "commented .gitignore path filters",
+        "commented .gitignore shared path filter",
+    )
+    assert_rejected(
+        module,
+        workflow.replace("paths: &ci_paths", "paths:", 1),
+        "missing shared path anchor",
+    )
+    assert_rejected(
+        module,
+        workflow.replace("paths: *ci_paths", "paths:", 1),
+        "pull request not reusing shared path anchor",
+    )
+    assert_rejected(
+        module,
+        re.sub(
+            r'RUFF_VERSION: "[^"]+"',
+            'RUFF_VERSION: "latest"',
+            workflow,
+            count=1,
+        ),
+        "unpinned Ruff version variable",
+    )
+    assert_rejected(
+        module,
+        workflow.replace('"ruff==$RUFF_VERSION"', "ruff==9.9.9", 1),
+        "literal Ruff version in install command",
+    )
+    assert_rejected(
+        module,
+        workflow.replace(
+            f"run: {module.RUFF_INSTALL_COMMAND}",
+            "run: python -m pip install --upgrade pip",
+            1,
+        ),
+        "unpinned latest pip installation",
     )
     assert_rejected(
         module,
@@ -61,7 +96,7 @@ def main() -> int:
         "live URL check in validation matrix",
     )
 
-    print("PASS: CI policy validator rejects missing gates and mutable action pins")
+    print("PASS: CI policy validator rejects missing gates, drift, and mutable pins")
     return 0
 
 

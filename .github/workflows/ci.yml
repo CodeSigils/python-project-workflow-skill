@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches: [main]
-    paths:
+    paths: &ci_paths
       - ".github/workflows/ci.yml"
       - ".github/scripts/**"
       - ".gitignore"
@@ -15,22 +15,16 @@ on:
       - "skills/**"
   pull_request:
     branches: [main]
-    paths:
-      - ".github/workflows/ci.yml"
-      - ".github/scripts/**"
-      - ".gitignore"
-      - "README.md"
-      - "CITATION.cff"
-      - "SECURITY.md"
-      - "references/**"
-      - "scripts/**"
-      - "skills/**"
+    paths: *ci_paths
   schedule:
     - cron: "0 9 * * 1"
   workflow_dispatch:
 
 permissions:
   contents: read
+
+env:
+  RUFF_VERSION: "0.12.4"
 
 jobs:
   validate:
@@ -50,9 +44,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install validation dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install ruff==0.12.4
+        run: python -m pip install "ruff==$RUFF_VERSION"
 
       - name: Check cross-agent portability
         run: python3 .github/scripts/check-portability.py
