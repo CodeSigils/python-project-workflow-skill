@@ -57,6 +57,7 @@ tmp/
 Thumbs.db
 *.swp
 *.swo
+*~
 
 # Local agent/tool state
 .hermes/
