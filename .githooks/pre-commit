@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# Pre-commit hook: runs fast local validation before every commit.
+# Install with: git config core.hooksPath .githooks
+#
+set -e
+
+echo "***REMOVED***= pre-commit: ruff check ***REMOVED***="
+python3 -m ruff check scripts .github/scripts
+
+echo "***REMOVED***= pre-commit: check portability ***REMOVED***="
+python3 .github/scripts/check-portability.py
+
+echo "***REMOVED***= pre-commit: validate skill structure ***REMOVED***="
+python3 scripts/validate.py
+
+echo "***REMOVED***= pre-commit: check expiry ***REMOVED***="
+python3 scripts/check-expiry.py
+
+echo "***REMOVED***= pre-commit: version consistency ***REMOVED***="
+python3 scripts/check-version-consistency.py
+
+echo "***REMOVED***= pre-commit: README tree ***REMOVED***="
+python3 scripts/check-readme-tree.py
