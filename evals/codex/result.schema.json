@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["skills_used", "classification", "changed_paths", "preserved_tools", "summary", "limitations"],
+  "properties": {
+    "skills_used": {"type": "array", "items": {"type": "string"}},
+    "classification": {"type": "string"},
+    "changed_paths": {"type": "array", "items": {"type": "string"}},
+    "preserved_tools": {"type": "array", "items": {"type": "string"}},
+    "summary": {"type": "string"},
+    "limitations": {"type": "array", "items": {"type": "string"}}
+  }
+}

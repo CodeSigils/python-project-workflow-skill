@@ -67,6 +67,12 @@ jobs:
       - name: Test payload sync behavior
         run: python3 scripts/test-sync-payload.py
 
+      - name: Test behavioral regression fixtures
+        run: python3 scripts/run-codex-regression.py --self-test
+
+      - name: Test behavioral regression grader
+        run: python3 scripts/grade-codex-regression.py --self-test
+
       - name: Payload sync check
         run: bash scripts/sync-payload.sh --ci
 
