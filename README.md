@@ -207,6 +207,8 @@ python3 scripts/validate.py
 python3 scripts/test-validate-ci.py
 python3 scripts/verify-urls.py
 python3 scripts/test-sync-payload.py
+python3 scripts/run-codex-regression.py --self-test
+python3 scripts/grade-codex-regression.py --self-test
 bash scripts/sync-payload.sh --ci
 python3 -m ruff check scripts .github/scripts
 ```
@@ -221,6 +223,12 @@ python-project-workflow/
 ├── LICENSE                              # MIT license terms
 ├── CITATION.cff                         # Citation metadata for research and tooling
 ├── SECURITY.md                          # Vulnerability reporting policy and security scope
+├── docs/
+│   └── behavior-evaluation-effort.md    # Prospective transfer effort and result ledger
+├── evals/
+│   └── codex/
+│       ├── cases.json                    # Positive and preservation behavior contracts
+│       └── result.schema.json            # Structured live-run output contract
 ├── .gitignore                           # Local Python, editor, and agent-state exclusions
 ├── .gitattributes                       # Cross-platform text and line-ending policy
 ├── .github/
@@ -242,6 +250,8 @@ python-project-workflow/
 │   ├── check-readme-tree.py              # Ensures README repo-layout tree matches tracked files
 │   ├── test-validate-ci.py                # Regression tests for CI policy enforcement
 │   ├── test-sync-payload.py              # Regression tests for payload drift behavior
+│   ├── run-codex-regression.py           # Optional isolated agent behavior runner
+│   ├── grade-codex-regression.py         # Deterministic behavior result grader
 │   ├── validate-ci.py                    # Enforces CI routing, required gates, toolchain policy, and action pins
 │   ├── validate.py                       # Checks skill structure, metadata, and references
 │   └── verify-urls.py                    # Checks documented external links on a schedule
