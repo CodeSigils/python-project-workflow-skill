@@ -54,7 +54,8 @@ jobs:
 
       - name: Check README tree matches tracked files
         run: python3 scripts/check-readme-tree.py
-
+      - name: Check expired freshness markers
+        run: python3 scripts/check-expiry.py
       - name: Validate CI policy
         run: python3 scripts/validate-ci.py
 
