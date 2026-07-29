@@ -1,0 +1,26 @@
+{
+  "version": 3,
+  "description": "Machine-readable evidence URL index for python-project-workflow documentation.",
+  "urls": [
+    {
+      "name": "Python packaging user guide",
+      "url": "https://packaging.python.org/en/latest/guides/",
+      "expected_statuses": [200],
+      "source_section": "README.md",
+      "domain_tag": "python-packaging",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "name": "Python project workflow repository",
+      "url": "https://github.com/CodeSigils/python-project-workflow-skill",
+      "expected_statuses": [200],
+      "source_section": "README.md",
+      "domain_tag": "repository",
+      "source_type": "pinned_snapshot",
+      "status": "active",
+      "last_verified": "2026-07-29"
+    }
+  ]
+}
