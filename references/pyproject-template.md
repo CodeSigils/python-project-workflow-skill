@@ -2,8 +2,9 @@
 
 This file provides a minimal, modern `pyproject.toml` using PEP 621 metadata. Adjust the values to fit your project.
 
-> **Freshness:** Packaging metadata and Python EOL guidance were reviewed on 2026-07-17.
-> Verify against official docs before using in production.
+> **Freshness:** Verify packaging metadata, build-backend compatibility, and
+> interpreter lifecycle status against current official documentation before
+> using this template.
 > See [ruff docs](https://docs.astral.sh/ruff/), [mypy docs](https://mypy.readthedocs.io/),
 > [pytest docs](https://docs.pytest.org/), [uv docs](https://docs.astral.sh/uv/) for current versions.
 
@@ -130,26 +131,18 @@ When authoring cross-platform Python packages:
 
 ## Version Recommendations
 
-### For Applications
+Choose the Python floor from current evidence rather than a durable hard-coded
+default:
 
-- If you control the deployment environment (e.g., internal tool, web service), consider `requires-python = ">=3.12"` to
-  use the latest features.
-- If deployment must use a distribution's system Python, set the floor to the oldest supported image you actually
-  deploy. For example, Ubuntu 26.04 LTS currently defaults to Python 3.14; older supported images may require a lower
-  floor.
-
-### For Libraries
-
-- Aim for broad compatibility without starting on a near-EOL interpreter: `>=3.11` is the current default when no
-  ecosystem constraint says otherwise.
-- For new projects, do not select Python 3.10 by default: it is in source-only security maintenance and reaches
-  end-of-life in October 2026. Use `>=3.11` or a newer floor that fits the deployment environment.
-- For existing projects that still declare 3.10, preserve the contract unless a compatibility-breaking migration is in
-  scope. Document the constraint and plan a tested migration before changing `requires-python` or the CI matrix.
-- For new projects, do not select Python 3.8: it reached end-of-life in October 2024 and no longer receives security
-  fixes. Use `>=3.11` or a newer floor that fits the deployment environment.
-- For existing projects that still declare 3.8, preserve the contract unless a compatibility-breaking migration is in
-  scope. Document the legacy constraint, warn that 3.8 is unsupported upstream, and plan a tested migration before
+- For applications, use the oldest interpreter actually deployed across
+  supported environments.
+- For libraries, balance ecosystem reach with upstream security support and the
+  Python requirements of runtime dependencies.
+- Verify interpreter lifecycle status and platform defaults from official
+  sources when creating or modernizing a project.
+- Exercise the declared minimum and intended upper boundary in CI.
+- Preserve an existing compatibility contract unless a breaking migration is
+  explicitly in scope. Document constraints and test the migration before
   changing `requires-python` or the CI matrix.
 
 ### Dependency Floor
@@ -166,5 +159,5 @@ When authoring cross-platform Python packages:
 - For existing projects, do not change `requires-python` without understanding the impact on users.
 - When in doubt, preserve the existing `requires-python`, align tooling to it, and flag unsupported Python versions for
   an explicit migration decision.
-- **Version Maintenance**: Tool version recommendations in this template represent current best practices at time of
-  writing. Check official documentation for latest compatible versions and update periodically.
+- **Version maintenance:** Treat concrete versions in this template as examples.
+  Check official documentation for compatible versions when applying them.

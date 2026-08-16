@@ -213,6 +213,13 @@ def check_references() -> None:
     ):
         if required not in pyproject:
             fail(f"pyproject template missing current packaging metadata: {required}")
+    for dated_claim in (
+        "Ubuntu 26.04",
+        "reaches end-of-life",
+        "is the current default",
+    ):
+        if dated_claim in pyproject:
+            fail(f"pyproject template contains point-in-time policy: {dated_claim}")
     if "[project.optional-dependencies]\ndev = [" in pyproject:
         fail("pyproject template must declare local dev tools as a dependency group")
 
@@ -255,7 +262,9 @@ def check_readme() -> None:
     readme = read_text_checked(ROOT / "README.md")
     required = [
         "agentskills.io-compatible",
+        "structurally portable",
         "skills/python-project-workflow/",
+        "reference-routing table",
         "Shipping boundary: `skills/python-project-workflow/` is the runtime payload",
         "hermes skills install CodeSigils/python-project-workflow-skill/skills/python-project-workflow",
     ]
@@ -264,6 +273,28 @@ def check_readme() -> None:
             fail(f"README.md missing required phrase: {phrase}")
     if "Hermes Skill" in readme:
         fail("README.md should not frame the project as Hermes-only")
+    if "task classification table" in readme.lower():
+        fail("README.md references the removed task classification table")
+
+
+def check_evidence_docs() -> None:
+    portability = read_text_checked(ROOT / "docs" / "portability-contract.md")
+    for phrase in (
+        "materially changed `SKILL.md` and started a new evidence baseline",
+        "| OpenAI Codex CLI | —       | `candidate`",
+        "| Hermes Agent     | —       | `candidate`",
+        "No current runtime is `workflow_verified`",
+    ):
+        if not contains_markdown_phrase(portability, phrase):
+            fail(f"portability contract missing current evidence boundary: {phrase}")
+
+    evaluation = read_text_checked(ROOT / "docs" / "behavior-evaluation-effort.md")
+    for phrase in (
+        "**Historical baseline:**",
+        "historical transfer evidence",
+    ):
+        if not contains_markdown_phrase(evaluation, phrase):
+            fail(f"behavior evaluation missing historical boundary: {phrase}")
 
 
 def check_security() -> None:
@@ -294,6 +325,7 @@ def main() -> int:
     check_skill()
     check_references()
     check_readme()
+    check_evidence_docs()
     check_security()
     check_status_sources()
     print("OK: portable skill source checks are valid")
