@@ -12,26 +12,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 LOCAL_VERSION_SOURCES: dict[str, Path] = {
-    "SKILL.md": ROOT / "skills" / "python-project-workflow" / "SKILL.md",
     "CITATION.cff": ROOT / "CITATION.cff",
 }
 
 
 def normalize_version(version: str) -> str:
     return version.removeprefix("v")
-
-
-def read_skill_version(path: Path) -> str | None:
-    """Extract metadata version from SKILL.md frontmatter."""
-    try:
-        content = path.read_text(encoding="utf-8")
-    except OSError:
-        return None
-    frontmatter = content.split("---", 2)
-    if len(frontmatter) < 3:
-        return None
-    match = re.search(r'(?m)^version:\s*["\']?([^"\'#\s]+)', frontmatter[1])
-    return match.group(1) if match else None
 
 
 def read_citation_version(path: Path) -> str | None:
@@ -101,8 +87,7 @@ def run_self_tests() -> int:
     errors, notes = validate_versions(aligned, "v0.1.0", None)
     assert errors == [] and notes == []
 
-    drifted = {**aligned, "CITATION.cff": "0.2.0"}
-    errors, _ = validate_versions(drifted, "v0.1.0", None)
+    errors, _ = validate_versions(aligned, "v0.2.0", None)
     assert any(error.startswith("Version drift:") for error in errors)
 
     errors, notes = validate_versions(aligned, None, None)
@@ -128,7 +113,6 @@ def main() -> int:
         return run_self_tests()
 
     local_versions = {
-        "SKILL.md": read_skill_version(LOCAL_VERSION_SOURCES["SKILL.md"]),
         "CITATION.cff": read_citation_version(LOCAL_VERSION_SOURCES["CITATION.cff"]),
     }
     latest_tag, tag_error = get_latest_tag()
