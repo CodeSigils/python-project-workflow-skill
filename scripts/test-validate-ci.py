@@ -44,24 +44,17 @@ def main() -> int:
 
     assert_rejected(
         module,
-        workflow.replace('- ".gitignore"', '# - ".gitignore"'),
-        "commented .gitignore shared path filter",
-    )
-    for required_path in ("CONTRIBUTING.md", "docs/**", "evals/**"):
-        assert_rejected(
-            module,
-            workflow.replace(f'- "{required_path}"', f'# - "{required_path}"'),
-            f"commented {required_path} shared path filter",
-        )
-    assert_rejected(
-        module,
-        workflow.replace("paths: &ci_paths", "paths:", 1),
-        "missing shared path anchor",
+        workflow.replace("    branches: [main]", "    branches: [main]\n    paths: [\"scripts/**\"]", 1),
+        "push path filter",
     )
     assert_rejected(
         module,
-        workflow.replace("paths: *ci_paths", "paths:", 1),
-        "pull request not reusing shared path anchor",
+        workflow.replace(
+            "  pull_request:\n    branches: [main]",
+            "  pull_request:\n    branches: [main]\n    paths-ignore: [\"docs/**\"]",
+            1,
+        ),
+        "pull request path filter",
     )
     assert_rejected(
         module,

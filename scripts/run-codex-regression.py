@@ -92,11 +92,20 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path, default=Path("artifacts/codex"))
     parser.add_argument("--model")
     parser.add_argument("--timeout", type=int, default=600)
+    parser.add_argument("--retain-fixtures", action="store_true")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
         return self_test()
-    fixtures = (args.fixture_dir or Path(tempfile.mkdtemp(prefix="python-workflow-codex-"))).resolve()
+    temporary: tempfile.TemporaryDirectory[str] | None = None
+    if args.fixture_dir:
+        fixtures = args.fixture_dir.resolve()
+    elif args.retain_fixtures:
+        fixtures = Path(tempfile.mkdtemp(prefix="python-workflow-codex-")).resolve()
+        print(f"retaining fixtures at {fixtures}")
+    else:
+        temporary = tempfile.TemporaryDirectory(prefix="python-workflow-codex-")
+        fixtures = Path(temporary.name).resolve()
     output = args.output_dir.resolve()
     fixtures.mkdir(parents=True, exist_ok=True)
     output.mkdir(parents=True, exist_ok=True)
@@ -122,10 +131,15 @@ def main() -> int:
     summary["ended_at"] = datetime.now(timezone.utc).isoformat()
     (output / "run-summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     if any(item["status"] != "completed" for item in summary["cases"]):
+        if temporary:
+            temporary.cleanup()
         return 1
-    return subprocess.run([sys.executable, str(GRADER), "--results-dir", str(output),
-                           "--fixtures-dir", str(fixtures), "--output", str(output / "grade.json")],
-                          cwd=ROOT, check=False).returncode
+    grade_code = subprocess.run([sys.executable, str(GRADER), "--results-dir", str(output),
+                                 "--fixtures-dir", str(fixtures), "--output", str(output / "grade.json")],
+                                cwd=ROOT, check=False).returncode
+    if temporary:
+        temporary.cleanup()
+    return grade_code
 
 
 if __name__ == "__main__":

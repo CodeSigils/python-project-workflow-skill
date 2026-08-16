@@ -3,22 +3,8 @@ name: CI
 on:
   push:
     branches: [main]
-    paths: &ci_paths
-      - ".github/workflows/ci.yml"
-      - ".github/scripts/**"
-      - ".gitignore"
-      - "README.md"
-      - "CONTRIBUTING.md"
-      - "CITATION.cff"
-      - "SECURITY.md"
-      - "docs/**"
-      - "evals/**"
-      - "references/**"
-      - "scripts/**"
-      - "skills/**"
   pull_request:
     branches: [main]
-    paths: *ci_paths
   schedule:
     - cron: "0 9 * * 1"
   workflow_dispatch:

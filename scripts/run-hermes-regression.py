@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -16,6 +18,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 CASES = ROOT / "evals/codex/cases.json"
 GRADER = ROOT / "scripts/grade-codex-regression.py"
+PAYLOAD = ROOT / "skills/python-project-workflow"
 
 
 def read_json(path: Path) -> Any:
@@ -27,6 +30,35 @@ def checked(command: list[str], cwd: Path) -> str:
     if result.returncode:
         raise RuntimeError(result.stderr or result.stdout)
     return result.stdout
+
+
+def payload_digest(path: Path) -> str:
+    digest = hashlib.sha256()
+    entries = list(path.rglob("*"))
+    files = sorted(item for item in entries if item.is_file())
+    if not files or any(item.is_symlink() for item in entries):
+        raise RuntimeError(f"invalid or empty skill payload: {path}")
+    for item in files:
+        relative = item.relative_to(path).as_posix()
+        digest.update(relative.encode("utf-8") + b"\0")
+        digest.update(item.read_bytes())
+    return digest.hexdigest()
+
+
+def verify_installed_payload(hermes_home: Path) -> tuple[Path, str]:
+    installed = hermes_home / "skills/python-project-workflow"
+    source_digest = payload_digest(PAYLOAD)
+    try:
+        installed_digest = payload_digest(installed)
+    except (OSError, RuntimeError) as exc:
+        raise RuntimeError(
+            f"Hermes must have the exact repository payload installed at {installed}"
+        ) from exc
+    if installed_digest != source_digest:
+        raise RuntimeError(
+            f"installed Hermes payload differs from repository payload at {installed}"
+        )
+    return installed, source_digest
 
 
 def prepare_fixture(root: Path, case: dict[str, Any]) -> None:
@@ -80,6 +112,18 @@ def extract_result(output: str) -> dict[str, Any]:
 
 def self_test() -> int:
     with tempfile.TemporaryDirectory() as directory:
+        hermes_home = Path(directory) / "hermes"
+        shutil.copytree(PAYLOAD, hermes_home / "skills/python-project-workflow")
+        _, digest = verify_installed_payload(hermes_home)
+        assert digest == payload_digest(PAYLOAD)
+        installed_skill = hermes_home / "skills/python-project-workflow/SKILL.md"
+        installed_skill.write_text(installed_skill.read_text(encoding="utf-8") + "\ndrift\n", encoding="utf-8")
+        try:
+            verify_installed_payload(hermes_home)
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError("drifted Hermes payload was accepted")
         cases = read_json(CASES)["cases"]
         for case in cases:
             fixture = Path(directory) / case["id"]
@@ -99,12 +143,24 @@ def main() -> int:
     parser.add_argument("--model")
     parser.add_argument("--provider")
     parser.add_argument("--timeout", type=int, default=600)
+    parser.add_argument("--hermes-home", type=Path)
+    parser.add_argument("--retain-fixtures", action="store_true")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
         return self_test()
 
-    fixtures = (args.fixture_dir or Path(tempfile.mkdtemp(prefix="python-workflow-hermes-"))).resolve()
+    hermes_home = (args.hermes_home or Path(os.environ.get("HERMES_HOME", Path.home() / ".hermes"))).resolve()
+    installed, installed_digest = verify_installed_payload(hermes_home)
+    temporary: tempfile.TemporaryDirectory[str] | None = None
+    if args.fixture_dir:
+        fixtures = args.fixture_dir.resolve()
+    elif args.retain_fixtures:
+        fixtures = Path(tempfile.mkdtemp(prefix="python-workflow-hermes-")).resolve()
+        print(f"retaining fixtures at {fixtures}")
+    else:
+        temporary = tempfile.TemporaryDirectory(prefix="python-workflow-hermes-")
+        fixtures = Path(temporary.name).resolve()
     output = args.output_dir.resolve()
     fixtures.mkdir(parents=True, exist_ok=True)
     output.mkdir(parents=True, exist_ok=True)
@@ -114,6 +170,8 @@ def main() -> int:
         "hermes_version": checked(["hermes", "--version"], ROOT).strip(),
         "requested_model": args.model,
         "requested_provider": args.provider,
+        "installed_skill": str(installed),
+        "payload_sha256": installed_digest,
         "cases": [],
     }
     for case in read_json(CASES)["cases"]:
@@ -145,12 +203,17 @@ def main() -> int:
     summary["ended_at"] = datetime.now(timezone.utc).isoformat()
     (output / "run-summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     if any(item["status"] != "completed" for item in summary["cases"]):
+        if temporary:
+            temporary.cleanup()
         return 1
-    return subprocess.run(
+    grade_code = subprocess.run(
         [sys.executable, str(GRADER), "--results-dir", str(output),
          "--fixtures-dir", str(fixtures), "--output", str(output / "grade.json")],
         cwd=ROOT, check=False,
     ).returncode
+    if temporary:
+        temporary.cleanup()
+    return grade_code
 
 
 if __name__ == "__main__":

@@ -2,7 +2,21 @@
 
 Started: 2026-07-28T08:36:17Z
 
-## Current baseline — 2026-08-16
+## Current baseline — behavioral contract version 3
+
+Contract version 3 verifies actual Git changes, requires and imports the CLI
+entry point, compiles generated Python, and hashes the exact Hermes payload.
+The fresh Codex CLI 0.133.0 run passed both strengthened cases. Hermes remains
+`install_verified`; its v0.20.1 behavioral attempt was blocked by provider HTTP
+429 and local preload resolution.
+
+| Case | Selection | Duration | Input | Cached input | Output | Result |
+|---|---|---:|---:|---:|---:|---|
+| Greenfield scaffold | Implicit | 111.078 s | 158,589 | 135,552 | 5,257 | Pass |
+| Mature preservation | Explicit | 36.741 s | 73,130 | 44,928 | 1,537 | Pass |
+| **Total** | — | **147.819 s** | **231,719** | **180,480** | **6,794** | **2/2 pass** |
+
+## Prior contract version 2 baseline — 2026-08-16
 
 The current payload and version 2 behavioral contract were evaluated through
 explicit and implicit selection paths.

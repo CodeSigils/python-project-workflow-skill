@@ -290,9 +290,9 @@ def check_readme() -> None:
 def check_evidence_docs() -> None:
     portability = read_text_checked(ROOT / "docs" / "portability-contract.md")
     for phrase in (
-        "materially changed `SKILL.md` and started a new evidence baseline",
+        "That material change started a new evidence baseline",
         "| OpenAI Codex CLI | 0.133.0 | `workflow_verified`",
-        "| Hermes Agent     | 0.19.0  | `install_verified`",
+        "| Hermes Agent     | 0.20.1  | `install_verified`",
         "| Claude Code      | —       | `candidate`",
         "| Gemini CLI       | —       | `candidate`",
         "| OpenCode         | —       | `candidate`",
@@ -304,7 +304,7 @@ def check_evidence_docs() -> None:
 
     evaluation = read_text_checked(ROOT / "docs" / "behavior-evaluation-effort.md")
     for phrase in (
-        "## Current baseline — 2026-08-16",
+        "## Current baseline — behavioral contract version 3",
         "## Historical baseline — 2026-07-28",
         "historical transfer evidence",
     ):

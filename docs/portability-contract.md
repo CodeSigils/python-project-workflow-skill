@@ -58,14 +58,15 @@ The canonical payload passes:
 - Portability marker check (`check-portability.py`, including `references/` scope)
 - Evaluation fixture and schema integrity
 
-The `8f96b25` refactor materially changed `SKILL.md` and started a new evidence
-baseline. The current Codex rerun below restores a bounded workflow claim;
-deterministic validation alone still establishes only payload portability.
+Behavioral contract version 3 added Git-state verification, executable CLI
+checks, and exact Hermes payload hashing. That material change started a new
+evidence baseline; deterministic validation alone establishes only payload
+portability.
 
 | Runtime          | Version | Status      | Current evidence boundary |
 | ---------------- | ------- | ----------- | ------------------------- |
-| OpenAI Codex CLI | 0.133.0 | `workflow_verified` | Exact payload discovered from fixture `.agents/skills`; implicit greenfield and explicit mature-preservation cases passed 2/2 on 2026-08-16 |
-| Hermes Agent     | 0.19.0  | `install_verified` | Exact payload appeared enabled in `hermes skills list`; behavioral run blocked by provider HTTP 429 and explicit preload failed to resolve the listed skill |
+| OpenAI Codex CLI | 0.133.0 | `workflow_verified` | Contract v3 implicit greenfield and explicit mature-preservation cases passed 2/2 on 2026-08-16 with Git-state and executable CLI grading |
+| Hermes Agent     | 0.20.1  | `install_verified` | Exact payload appeared enabled in `hermes skills list`; behavioral run remained blocked by provider HTTP 429 and explicit preload resolution |
 | Claude Code      | —       | `candidate` | Documented discovery path only; installation and workflow unverified |
 | Gemini CLI       | —       | `candidate` | Documented discovery path only; installation and workflow unverified |
 | OpenCode         | —       | `candidate` | Documented discovery path only; installation and workflow unverified |
