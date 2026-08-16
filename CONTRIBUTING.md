@@ -23,9 +23,9 @@ client access and may consume a subscription. Their `--self-test` modes are
 deterministic and remain part of normal validation.
 
 Live runners delete temporary fixtures by default; pass `--retain-fixtures`
-only when debugging. The Hermes runner also refuses to start unless the enabled
-`~/.hermes/skills/python-project-workflow` payload exactly matches this
-repository, preventing stale installations from producing runtime evidence.
+only when debugging. The Hermes runner also refuses to start unless the payload
+under the active `HERMES_HOME` exactly matches this repository, preventing stale
+installations from producing runtime evidence.
 
 When a change materially affects `SKILL.md`, an evaluation prompt, fixture,
 schema, or grader, reset affected runtime claims to `candidate`. Promote a
