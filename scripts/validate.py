@@ -23,10 +23,12 @@ REQUIRED_REFS = {
     "security-and-gitignore.md",
 }
 REQUIRED_SECTIONS = {
-    "## Scope",
+    "## Workflow",
+    "## Operation Modes",
     "## Orientation Checklist",
-    "## Task Classification Table",
-    "## Verification Commands",
+    "## Reference Routing",
+    "## Sensitive-Evidence Safety",
+    "## Verification",
     "## Preserve Local Conventions",
 }
 UV_COMMANDS = (
@@ -84,17 +86,12 @@ def parse_frontmatter(text: str) -> tuple[dict[str, str], str]:
         key, value = line.split(":", 1)
         data[key.strip()] = value.strip().strip('"')
 
-    ALLOWED_FIELDS = {
-        "name", "description", "version", "author", "license",
-        "tier", "ref", "compatibility", "metadata",
-    }
+    ALLOWED_FIELDS = {"name", "description"}
     extra = set(data) - ALLOWED_FIELDS
     if extra:
         fail(f"unsupported frontmatter fields: {sorted(extra)}")
     if data.get("name") != "python-project-workflow":
         fail("frontmatter name must be python-project-workflow")
-    if not data.get("version"):
-        fail("frontmatter must include a version field")
     if len(data.get("description", "").split()) < 18:
         fail("frontmatter description is too short to trigger reliably")
     return data, body
@@ -159,30 +156,18 @@ def check_skill() -> None:
     if not contains_markdown_phrase(body, "Framework-specific project conventions are out of scope."):
         fail(f"{rel(SKILL)} missing framework scope boundary")
 
-    python_floor_directives = [
-        "For new projects, do not select Python 3.8",
-        "preserve the current contract unless the user authorizes a compatibility-breaking change",
-        "Do not silently raise `requires-python` or remove 3.8 from CI.",
+    workflow_directives = [
+        "Do not use for pure code review, isolated support-script edits",
+        "Do not infer correctness from classification alone.",
+        "Do not install dependencies, synchronize environments, generate files, or edit configuration.",
+        "Run setup and mutating verification only when authorized and necessary.",
+        "Do not encode point-in-time lifecycle claims as durable policy.",
     ]
-    for directive in python_floor_directives:
-        if not contains_markdown_phrase(body, directive):
-            fail(f"{rel(SKILL)} missing Python 3.8 EOL policy: {directive}")
-
-    python_310_directives = [
-        "For new projects, do not select Python 3.10 by default",
-        "reaches end-of-life in October 2026",
-        "For an existing project that still declares Python 3.10",
-        "do not silently raise `requires-python` or remove 3.10 from CI.",
-    ]
-    for directive in python_310_directives:
-        if not contains_markdown_phrase(body, directive):
-            fail(f"{rel(SKILL)} missing Python 3.10 EOL policy: {directive}")
-
-    for command in UV_COMMANDS:
-        if command not in body:
-            fail(f"{rel(SKILL)} missing uv-managed verification command: {command}")
-    if "python -m uv" in body:
-        fail(f"{rel(SKILL)} must invoke the uv executable directly")
+    frontmatter, _ = parse_frontmatter(text)
+    combined = f"{frontmatter['description']}\n{body}"
+    for directive in workflow_directives:
+        if not contains_markdown_phrase(combined, directive):
+            fail(f"{rel(SKILL)} missing workflow boundary: {directive}")
 
     for missing_ref in ["packaging.md", "errors-and-logging.md", "cli.md", "migration-existing-code.md"]:
         if f"`{missing_ref}` (deferred)" in body:
