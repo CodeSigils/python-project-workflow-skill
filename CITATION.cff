@@ -3,7 +3,7 @@ message: "If you use this work in your research, please cite it as below."
 authors:
   - family-names: "CodeSigils"
 title: "Python Project Workflow"
-version: "0.1.0"
+version: "0.2.0"
 license: MIT
 type: software
 repository-code: https://github.com/CodeSigils/python-project-workflow-skill

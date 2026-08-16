@@ -47,6 +47,12 @@ def main() -> int:
         workflow.replace('- ".gitignore"', '# - ".gitignore"'),
         "commented .gitignore shared path filter",
     )
+    for required_path in ("CONTRIBUTING.md", "docs/**", "evals/**"):
+        assert_rejected(
+            module,
+            workflow.replace(f'- "{required_path}"', f'# - "{required_path}"'),
+            f"commented {required_path} shared path filter",
+        )
     assert_rejected(
         module,
         workflow.replace("paths: &ci_paths", "paths:", 1),

@@ -21,6 +21,9 @@ REQUIRED_VALIDATE_COMMANDS = (
     "python3 scripts/validate.py",
     "python3 scripts/test-validate-ci.py",
     "python3 scripts/test-sync-payload.py",
+    "python3 scripts/run-codex-regression.py --self-test",
+    "python3 scripts/run-hermes-regression.py --self-test",
+    "python3 scripts/grade-codex-regression.py --self-test",
     "bash scripts/sync-payload.sh --ci",
     "python3 -m ruff check scripts .github/scripts",
 )
@@ -69,8 +72,13 @@ def validate_workflow(workflow: str) -> list[str]:
     else:
         if not re.search(r"(?m)^\s*paths:\s*&ci_paths\s*$", push):
             errors.append("ci.yml: push paths must define the shared ci_paths anchor")
-        if not re.search(r'(?m)^\s+-\s+["\']?\.gitignore["\']?\s*$', push):
-            errors.append("ci.yml: shared workflow paths must include .gitignore")
+        for required_path in (".gitignore", "CONTRIBUTING.md", "docs/**", "evals/**"):
+            if not re.search(
+                rf'(?m)^\s+-\s+["\']?{re.escape(required_path)}["\']?\s*$', push
+            ):
+                errors.append(
+                    f"ci.yml: shared workflow paths must include {required_path}"
+                )
     if pull_request is None:
         errors.append("ci.yml: missing pull_request event")
     elif not re.search(r"(?m)^\s*paths:\s*\*ci_paths\s*$", pull_request):
