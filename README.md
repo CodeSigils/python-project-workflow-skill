@@ -85,6 +85,9 @@ Make the skill discoverable by your agent.
 <details>
 <summary><b>Hermes Agent</b></summary>
 
+Status: installation verified with Hermes Agent 0.19.0; workflow behavior is
+not verified. See [the portability contract](docs/portability-contract.md).
+
 **Install directly from GitHub:**
 ```bash
 hermes skills install CodeSigils/python-project-workflow-skill/skills/python-project-workflow
@@ -104,6 +107,9 @@ Every commit is immediately reflected without reinstalling.
 <details>
 <summary><b>Claude Code</b></summary>
 
+Status: documented discovery path; installation and workflow behavior have not
+been independently verified for this project.
+
 ```bash
 mkdir -p ~/.claude/skills
 cp -r skills/python-project-workflow ~/.claude/skills/
@@ -112,6 +118,9 @@ cp -r skills/python-project-workflow ~/.claude/skills/
 
 <details>
 <summary><b>Codex</b></summary>
+
+Status: workflow verified with Codex CLI 0.133.0 on the current evidence
+baseline. See [the portability contract](docs/portability-contract.md).
 
 ```bash
 mkdir -p ~/.agents/skills
@@ -122,6 +131,9 @@ cp -r skills/python-project-workflow ~/.agents/skills/
 <details>
 <summary><b>Gemini CLI / .agents/ path</b></summary>
 
+Status: documented discovery path; installation and workflow behavior have not
+been independently verified for this project.
+
 ```bash
 mkdir -p .agents/skills
 cp -r skills/python-project-workflow .agents/skills/
@@ -130,6 +142,9 @@ cp -r skills/python-project-workflow .agents/skills/
 
 <details>
 <summary><b>OpenCode</b></summary>
+
+Status: documented discovery path; installation and workflow behavior have not
+been independently verified for this project.
 
 ```bash
 mkdir -p .opencode/skills
@@ -194,9 +209,12 @@ Each shipped file in `skills/` is checked by CI for agent-specific references
 etc.). If a commit adds a platform-specific command, CI fails before it reaches
 the runtime.
 
-The current runtime surface is entirely cross-agent compatible. Platform setup
-commands remain in this repository README; shipped skill files and references
-use portable paths and client-neutral operations.
+The runtime payload is structurally portable under the repository's automated
+checks. That is narrower than claiming every client installs, selects, or
+executes it correctly. Platform setup commands remain in this README; shipped
+skill files and references use portable paths and client-neutral operations.
+See [the portability contract](docs/portability-contract.md) for evidence-bounded
+runtime status.
 
 ---
 
@@ -212,6 +230,7 @@ python3 scripts/test-validate-ci.py
 python3 scripts/verify-urls.py
 python3 scripts/test-sync-payload.py
 python3 scripts/run-codex-regression.py --self-test
+python3 scripts/run-hermes-regression.py --self-test
 python3 scripts/grade-codex-regression.py --self-test
 bash scripts/sync-payload.sh --ci
 python3 -m ruff check scripts .github/scripts
@@ -224,13 +243,15 @@ python3 -m ruff check scripts .github/scripts
 ```text
 python-project-workflow/
 ├── README.md                            # Project overview, setup, usage, and verification
+├── CONTRIBUTING.md                      # Contributor workflow and evidence policy
 ├── LICENSE                              # MIT license terms
 ├── CITATION.cff                         # Citation metadata for research and tooling
 ├── SECURITY.md                          # Vulnerability reporting policy and security scope
 ├── docs/
 │   ├── behavior-evaluation-effort.md    # Prospective transfer effort and result ledger
 │   ├── evidence-urls.json               # External evidence URL verification manifest
-│   └── portability-contract.md          # Cross-agent portability requirements
+│   ├── portability-contract.md          # Cross-agent portability requirements
+│   └── release-checklist.md              # Repeatable maintainer release procedure
 ├── evals/
 │   └── codex/
 │       ├── cases.json                    # Positive and preservation behavior contracts
@@ -260,6 +281,7 @@ python-project-workflow/
 │   ├── test-validate-ci.py                # Regression tests for CI policy enforcement
 │   ├── test-sync-payload.py              # Regression tests for payload drift behavior
 │   ├── run-codex-regression.py           # Optional isolated agent behavior runner
+│   ├── run-hermes-regression.py          # Optional isolated Hermes behavior runner
 │   ├── grade-codex-regression.py         # Deterministic behavior result grader
 │   ├── validate-ci.py                    # Enforces CI routing, required gates, toolchain policy, and action pins
 │   ├── validate.py                       # Checks skill structure, metadata, and references

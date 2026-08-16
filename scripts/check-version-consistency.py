@@ -20,6 +20,13 @@ def normalize_version(version: str) -> str:
     return version.removeprefix("v")
 
 
+def version_key(version: str) -> tuple[int, int, int] | None:
+    match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", normalize_version(version))
+    if not match:
+        return None
+    return tuple(int(part) for part in match.groups())
+
+
 def read_citation_version(path: Path) -> str | None:
     """Extract the version field from CITATION.cff."""
     try:
@@ -71,11 +78,22 @@ def validate_versions(
     else:
         notes.append("SKIP: no v-prefixed git tags found")
 
-    if comparable and len(set(comparable.values())) > 1:
+    local_values = {value for source, value in comparable.items() if source != "latest tag"}
+    if len(local_values) > 1:
         rendered = ", ".join(
             f"{source}={version}" for source, version in comparable.items()
         )
-        errors.append(f"Version drift: {rendered}")
+        errors.append(f"Local version drift: {rendered}")
+    elif latest_tag and local_values:
+        local = next(iter(local_values))
+        local_key = version_key(local)
+        tag_key = version_key(latest_tag)
+        if local_key is None or tag_key is None:
+            errors.append(f"Versions must use X.Y.Z: local={local}, latest tag={latest_tag}")
+        elif local_key < tag_key:
+            errors.append(f"Local version {local} is behind latest tag {latest_tag}")
+        elif local_key > tag_key:
+            notes.append(f"RELEASE PENDING: local version {local} is ahead of {latest_tag}")
 
     return errors, notes
 
@@ -88,7 +106,13 @@ def run_self_tests() -> int:
     assert errors == [] and notes == []
 
     errors, _ = validate_versions(aligned, "v0.2.0", None)
-    assert any(error.startswith("Version drift:") for error in errors)
+    assert any("behind latest tag" in error for error in errors)
+
+    ahead = {source: "0.2.0" for source in LOCAL_VERSION_SOURCES}
+    errors, notes = validate_versions(ahead, "v0.1.0", None)
+    assert errors == [] and notes == [
+        "RELEASE PENDING: local version 0.2.0 is ahead of v0.1.0"
+    ]
 
     errors, notes = validate_versions(aligned, None, None)
     assert errors == [] and notes == ["SKIP: no v-prefixed git tags found"]

@@ -275,22 +275,37 @@ def check_readme() -> None:
         fail("README.md should not frame the project as Hermes-only")
     if "task classification table" in readme.lower():
         fail("README.md references the removed task classification table")
+    if "entirely cross-agent compatible" in readme.lower():
+        fail("README.md overstates runtime compatibility")
+    for runtime in ("Claude Code", "Gemini CLI", "OpenCode"):
+        if not re.search(
+            rf"<summary><b>{re.escape(runtime)}(?: / \.agents/ path)?</b></summary>.*?"
+            r"installation and workflow behavior have not\s+been independently verified",
+            readme,
+            re.DOTALL,
+        ):
+            fail(f"README.md must bound unverified {runtime} claims")
 
 
 def check_evidence_docs() -> None:
     portability = read_text_checked(ROOT / "docs" / "portability-contract.md")
     for phrase in (
         "materially changed `SKILL.md` and started a new evidence baseline",
-        "| OpenAI Codex CLI | —       | `candidate`",
-        "| Hermes Agent     | —       | `candidate`",
-        "No current runtime is `workflow_verified`",
+        "| OpenAI Codex CLI | 0.133.0 | `workflow_verified`",
+        "| Hermes Agent     | 0.19.0  | `install_verified`",
+        "| Claude Code      | —       | `candidate`",
+        "| Gemini CLI       | —       | `candidate`",
+        "| OpenCode         | —       | `candidate`",
+        "does not by itself promote a runtime beyond `candidate`",
+        "provider HTTP 429",
     ):
         if not contains_markdown_phrase(portability, phrase):
             fail(f"portability contract missing current evidence boundary: {phrase}")
 
     evaluation = read_text_checked(ROOT / "docs" / "behavior-evaluation-effort.md")
     for phrase in (
-        "**Historical baseline:**",
+        "## Current baseline — 2026-08-16",
+        "## Historical baseline — 2026-07-28",
         "historical transfer evidence",
     ):
         if not contains_markdown_phrase(evaluation, phrase):

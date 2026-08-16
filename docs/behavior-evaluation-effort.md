@@ -2,11 +2,39 @@
 
 Started: 2026-07-28T08:36:17Z
 
-> **Historical baseline:** These results apply to the payload tested with Codex
+## Current baseline — 2026-08-16
+
+The current payload and version 2 behavioral contract were evaluated through
+explicit and implicit selection paths.
+
+| Runtime | Discovery or install evidence | Behavioral result | Status |
+|---|---|---|---|
+| Codex CLI 0.133.0 | Exact payload copied into each fixture's `.agents/skills/python-project-workflow` directory | Implicit greenfield and explicit mature-preservation cases passed deterministic grading, 2/2 | `workflow_verified` |
+| Hermes Agent 0.19.0 | Exact payload copied temporarily into `~/.hermes/skills/python-project-workflow`; `hermes skills list` showed it enabled | Not established: provider returned HTTP 429 for implicit selection, and explicit `--skills python-project-workflow` did not resolve the skill listed by the client | `install_verified` |
+
+The temporary Hermes payload was removed after the run. Hermes was 1,661
+upstream commits behind at evaluation time, so the preload discrepancy may be a
+client-version limitation. No behavioral claim is made from this run.
+
+Codex results:
+
+| Case | Selection | Duration | Input | Cached input | Output | Result |
+|---|---|---:|---:|---:|---:|---|
+| Greenfield scaffold | Implicit | 102.450 s | 236,452 | 190,976 | 4,114 | Pass |
+| Mature preservation | Explicit | 39.535 s | 73,581 | 64,384 | 1,581 | Pass |
+| **Total** | — | **141.985 s** | **310,033** | **255,360** | **5,695** | **2/2 pass** |
+
+The Codex client logged a model-catalog decoding warning involving an unknown
+reasoning level, but both executions completed and their structured outputs and
+fixture states passed the deterministic grader.
+
+## Historical baseline — 2026-07-28
+
+> These results apply to the payload tested with Codex
 > CLI 0.133.0 on 2026-07-28. The `8f96b25` `SKILL.md` refactor created a new
 > evidence baseline, so these results no longer establish current
 > `workflow_verified` status. Preserve them as historical transfer evidence
-> until the same cases are rerun and recorded against the current payload.
+> as a comparison point.
 
 ## Scope
 

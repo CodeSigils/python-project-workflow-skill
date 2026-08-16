@@ -1,9 +1,10 @@
 {
-  "version": 1,
+  "version": 2,
   "cases": [
     {
       "id": "greenfield-scaffold",
-      "prompt": "Use the python-project-workflow skill to create a minimal Python 3.11+ command-line project named invoice-checker with a src layout, tests, and GitHub Actions. Return only the requested JSON result.",
+      "invocation": "implicit",
+      "prompt": "Create a minimal Python 3.11+ command-line project named invoice-checker with a src layout, tests, and GitHub Actions. Return only the requested JSON result.",
       "expected_paths": [
         "pyproject.toml",
         "src/invoice_checker/__init__.py",
@@ -15,6 +16,7 @@
     },
     {
       "id": "mature-preservation",
+      "invocation": "explicit",
       "prompt": "Use the python-project-workflow skill to inspect this established Python project and report its existing workflow. Do not modify files or replace its tools. Return only the requested JSON result.",
       "expected_paths": [],
       "classification_terms": ["existing", "mature"],

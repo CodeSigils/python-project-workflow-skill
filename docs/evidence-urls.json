@@ -1,7 +1,73 @@
 {
-  "version": 3,
+  "version": 4,
   "description": "Machine-readable evidence URL index for python-project-workflow documentation.",
   "urls": [
+    {
+      "name": "Agent Skills specification",
+      "url": "https://agentskills.io/specification",
+      "expected_statuses": [200],
+      "required_text": ["name", "description", "SKILL.md"],
+      "source_section": "README.md",
+      "domain_tag": "skill-format",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-08-16"
+    },
+    {
+      "name": "Claude Code skill discovery",
+      "url": "https://code.claude.com/docs/en/skills",
+      "expected_statuses": [200],
+      "required_text": ["~/.claude/skills", "SKILL.md"],
+      "source_section": "README.md Quick Start",
+      "domain_tag": "claude-code",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-08-16"
+    },
+    {
+      "name": "Codex skill discovery",
+      "url": "https://learn.chatgpt.com/docs/build-skills.md",
+      "expected_statuses": [200],
+      "required_text": [".agents/skills", "SKILL.md"],
+      "source_section": "README.md Quick Start",
+      "domain_tag": "codex",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-08-16"
+    },
+    {
+      "name": "Gemini CLI skill discovery",
+      "url": "https://geminicli.com/docs/cli/using-agent-skills/",
+      "expected_statuses": [200],
+      "required_text": [".agents/skills", "Agent Skills"],
+      "source_section": "README.md Quick Start",
+      "domain_tag": "gemini-cli",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-08-16"
+    },
+    {
+      "name": "Hermes skill installation",
+      "url": "https://github.com/NousResearch/hermes-agent/blob/main/website/docs/guides/work-with-skills.md",
+      "expected_statuses": [200],
+      "required_text": ["hermes skills install", "SKILL.md"],
+      "source_section": "README.md Quick Start",
+      "domain_tag": "hermes-agent",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-08-16"
+    },
+    {
+      "name": "OpenCode skill discovery",
+      "url": "https://opencode.ai/v2/docs/skills",
+      "expected_statuses": [200],
+      "required_text": [".opencode/skills", "SKILL.md"],
+      "source_section": "README.md Quick Start",
+      "domain_tag": "opencode",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-08-16"
+    },
     {
       "name": "Python packaging user guide",
       "url": "https://packaging.python.org/en/latest/guides/",
@@ -10,7 +76,7 @@
       "domain_tag": "python-packaging",
       "source_type": "official_docs",
       "status": "active",
-      "last_verified": "2026-07-29"
+      "last_verified": "2026-08-16"
     },
     {
       "name": "Python project workflow repository",
@@ -20,7 +86,7 @@
       "domain_tag": "repository",
       "source_type": "pinned_snapshot",
       "status": "active",
-      "last_verified": "2026-07-29"
+      "last_verified": "2026-08-16"
     }
   ]
 }

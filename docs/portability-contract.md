@@ -42,6 +42,11 @@ Use `candidate`, `install_verified`, `workflow_verified`, `limited`, or
 `unsupported`. Record the runtime version, date, installation path, explicit and
 implicit selection, scenarios, evidence or grading criteria, and limitations.
 
+A vendor documentation page can establish a documented discovery path, but it
+does not by itself promote a runtime beyond `candidate`. `install_verified`
+requires a maintainer-observed installation or discovery of this exact payload;
+`workflow_verified` additionally requires passing behavioral cases.
+
 Do not extrapolate a result to untested runtimes or later versions. A material
 change to `SKILL.md`, the behavioral contract, prompt, or grader starts a new
 evidence baseline.
@@ -54,17 +59,19 @@ The canonical payload passes:
 - Evaluation fixture and schema integrity
 
 The `8f96b25` refactor materially changed `SKILL.md` and started a new evidence
-baseline. Deterministic validation establishes payload portability, but it does
-not preserve prior runtime workflow-verification claims.
+baseline. The current Codex rerun below restores a bounded workflow claim;
+deterministic validation alone still establishes only payload portability.
 
-| Runtime          | Version | Status      | Evidence needed |
-| ---------------- | ------- | ----------- | --------------- |
-| OpenAI Codex CLI | —       | `candidate` | Re-run both behavioral cases against the current payload and record the CLI version |
-| Hermes Agent     | —       | `candidate` | Record installation/discovery evidence, runtime version, and both graded behavioral cases |
+| Runtime          | Version | Status      | Current evidence boundary |
+| ---------------- | ------- | ----------- | ------------------------- |
+| OpenAI Codex CLI | 0.133.0 | `workflow_verified` | Exact payload discovered from fixture `.agents/skills`; implicit greenfield and explicit mature-preservation cases passed 2/2 on 2026-08-16 |
+| Hermes Agent     | 0.19.0  | `install_verified` | Exact payload appeared enabled in `hermes skills list`; behavioral run blocked by provider HTTP 429 and explicit preload failed to resolve the listed skill |
+| Claude Code      | —       | `candidate` | Documented discovery path only; installation and workflow unverified |
+| Gemini CLI       | —       | `candidate` | Documented discovery path only; installation and workflow unverified |
+| OpenCode         | —       | `candidate` | Documented discovery path only; installation and workflow unverified |
 
-Historical Codex evidence and its limitations are recorded in
-`docs/behavior-evaluation-effort.md`. No current runtime is
-`workflow_verified` until new evidence is recorded against this baseline.
+Current and historical behavioral evidence, including client diagnostics and
+limitations, is recorded in `docs/behavior-evaluation-effort.md`.
 
 ## Adding runtime evidence
 
@@ -72,7 +79,8 @@ Historical Codex evidence and its limitations are recorded in
 2. Record its exact version and discovery or installation path.
 3. Test explicit and implicit selection with positive and negative scenarios.
 4. Preserve reproducible or raw evidence without exposing sensitive values.
-5. Grade against `evals/codex/cases.json`.
+5. Grade against `evals/codex/cases.json`; the directory name is retained for
+   compatibility, but the behavioral contract is client-neutral.
 6. Record limitations and the narrowest supported state.
 
 Keep model evaluation non-blocking. Reuse this contract and fixture vocabulary
