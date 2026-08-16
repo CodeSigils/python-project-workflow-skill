@@ -53,12 +53,18 @@ The canonical payload passes:
 - Portability marker check (`check-portability.py`, including `references/` scope)
 - Evaluation fixture and schema integrity
 
-| Runtime                  | Version    | Status             |
-| ------------------------ | ---------- | ------------------ |
-| OpenAI Codex CLI         | —          | `workflow_verified` |
-| Hermes Agent             | —          | `workflow_verified` |
+The `8f96b25` refactor materially changed `SKILL.md` and started a new evidence
+baseline. Deterministic validation establishes payload portability, but it does
+not preserve prior runtime workflow-verification claims.
 
-Compatibility evidence and limitations are recorded in `docs/behavior-evaluation-effort.md`.
+| Runtime          | Version | Status      | Evidence needed |
+| ---------------- | ------- | ----------- | --------------- |
+| OpenAI Codex CLI | —       | `candidate` | Re-run both behavioral cases against the current payload and record the CLI version |
+| Hermes Agent     | —       | `candidate` | Record installation/discovery evidence, runtime version, and both graded behavioral cases |
+
+Historical Codex evidence and its limitations are recorded in
+`docs/behavior-evaluation-effort.md`. No current runtime is
+`workflow_verified` until new evidence is recorded against this baseline.
 
 ## Adding runtime evidence
 

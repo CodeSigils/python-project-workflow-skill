@@ -2,6 +2,12 @@
 
 Started: 2026-07-28T08:36:17Z
 
+> **Historical baseline:** These results apply to the payload tested with Codex
+> CLI 0.133.0 on 2026-07-28. The `8f96b25` `SKILL.md` refactor created a new
+> evidence baseline, so these results no longer establish current
+> `workflow_verified` status. Preserve them as historical transfer evidence
+> until the same cases are rerun and recorded against the current payload.
+
 ## Scope
 
 Prospective transfer of the isolated-fixture, structured-output,

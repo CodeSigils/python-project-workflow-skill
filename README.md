@@ -16,9 +16,11 @@ handling, and preserving local ignore rules.
 It does **not** review Python code. Pair it with
 [`py-review-skill`](https://github.com/CodeSigils/py-review-skill) for that.
 
-The shipped payload is portable — no agent-specific commands or paths — so it
-works with Hermes, Claude Code, Codex, Gemini CLI, OpenCode. It is
-agentskills.io-compatible.
+The shipped payload is structurally portable: it uses agentskills.io-compatible
+frontmatter and contains no agent-specific runtime commands or paths. Discovery
+paths are documented below for Hermes, Claude Code, Codex, Gemini CLI, and
+OpenCode; runtime verification status is tracked separately in
+`docs/portability-contract.md`.
 
 ---
 
@@ -70,11 +72,11 @@ risky in this Python code?”
 
 ## Python Frameworks
 
-> **Framework projects (Django, FastAPI, Flask, etc.):** This skill does NOT
-> support frameworks. It provides a solid generic Python foundation — uv, ruff,
-> mypy, pytest, CI matrix, `.gitignore` — but framework-specific conventions are
-> out of its scope. This is by design. For those, use a dedicated skill or add
-> the framework's steps to the CI template it generates.
+> **Framework projects (Django, FastAPI, Flask, etc.):** Framework-specific
+> implementation is out of scope. Use this skill only when the request also
+> changes repository-wide Python tooling or workflow, preserve the framework's
+> established conventions, and use dedicated framework guidance for the
+> application itself.
 
 ## Quick Start
 
@@ -142,13 +144,15 @@ For agents that support external skill directories, point the config at
 
 ## How to Use
 
-1. **Load `python-project-workflow`** when working with a Python project.
-2. **The skill classifies your project** — greenfield, existing, mature, or
-   automation — and loads the relevant reference file automatically.
-3. **Review the orientation checklist** (in SKILL.md § Orientation Checklist) to understand
-   the project's Python version contract, tooling, and layout before editing.
-4. **Use the task classification table** in SKILL.md to load the right
-   reference for your task.
+1. **Load `python-project-workflow`** for repository-wide Python setup,
+   packaging, tooling, CI, compatibility, or verification work. Do not load it
+   for pure code review or an isolated support-script edit.
+2. **Classify the repository and operation** — greenfield, existing, mature
+   automation, or benchmark automation; then inspect, implement, verify, or
+   bootstrap as authorized.
+3. **Use the orientation checklist** to inspect only the project state relevant
+   to the task.
+4. **Use the reference-routing table** to load detailed guidance progressively.
 
 All references are self-contained. No external setup, config files, or
 environment variables required.
