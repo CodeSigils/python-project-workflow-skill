@@ -85,7 +85,7 @@ Make the skill discoverable by your agent.
 <details>
 <summary><b>Hermes Agent</b></summary>
 
-Status: installation verified with Hermes Agent 0.19.0; workflow behavior is
+Status: installation verified with Hermes Agent 0.20.1; workflow behavior is
 not verified. See [the portability contract](docs/portability-contract.md).
 
 **Install directly from GitHub:**

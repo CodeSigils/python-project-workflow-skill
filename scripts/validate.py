@@ -267,6 +267,7 @@ def check_readme() -> None:
         "reference-routing table",
         "Shipping boundary: `skills/python-project-workflow/` is the runtime payload",
         "hermes skills install CodeSigils/python-project-workflow-skill/skills/python-project-workflow",
+        "installation verified with Hermes Agent 0.20.1",
     ]
     for phrase in required:
         if not contains_markdown_phrase(readme, phrase):
@@ -285,6 +286,12 @@ def check_readme() -> None:
             re.DOTALL,
         ):
             fail(f"README.md must bound unverified {runtime} claims")
+
+    contributing = read_text_checked(ROOT / "CONTRIBUTING.md")
+    if not contains_markdown_phrase(
+        contributing, "payload under the active `HERMES_HOME` exactly matches"
+    ):
+        fail("CONTRIBUTING.md must describe profile-aware Hermes payload verification")
 
 
 def check_evidence_docs() -> None:
