@@ -224,7 +224,9 @@ python-project-workflow/
 ├── CITATION.cff                         # Citation metadata for research and tooling
 ├── SECURITY.md                          # Vulnerability reporting policy and security scope
 ├── docs/
-│   └── behavior-evaluation-effort.md    # Prospective transfer effort and result ledger
+│   ├── behavior-evaluation-effort.md    # Prospective transfer effort and result ledger
+│   ├── evidence-urls.json               # External evidence URL verification manifest
+│   └── portability-contract.md          # Cross-agent portability requirements
 ├── evals/
 │   └── codex/
 │       ├── cases.json                    # Positive and preservation behavior contracts
@@ -234,6 +236,8 @@ python-project-workflow/
 ├── .github/
 │   ├── workflows/ci.yml                 # Validation matrix and scheduled URL checks
 │   └── scripts/check-portability.py      # Rejects agent-specific runtime references
+├── .githooks/
+│   └── pre-commit                        # Local validation hook for staged changes
 ├── references/                          # Canonical sources mirrored into the payload
 │   ├── pyproject-template.md             # PEP 621 project and tool configuration baseline
 │   ├── lint-format-typing-testing.md     # Tool commands and staged adoption guidance
@@ -248,6 +252,7 @@ python-project-workflow/
 │   ├── sync-payload.sh                   # Synchronizes or checks the runtime payload mirror
 │   ├── check-version-consistency.py      # Validates version alignment across manifests and tags
 │   ├── check-readme-tree.py              # Ensures README repo-layout tree matches tracked files
+│   ├── check-expiry.py                   # Checks freshness markers for expired evidence
 │   ├── test-validate-ci.py                # Regression tests for CI policy enforcement
 │   ├── test-sync-payload.py              # Regression tests for payload drift behavior
 │   ├── run-codex-regression.py           # Optional isolated agent behavior runner
