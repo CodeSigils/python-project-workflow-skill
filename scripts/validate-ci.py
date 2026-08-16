@@ -69,20 +69,12 @@ def validate_workflow(workflow: str) -> list[str]:
     pull_request = section_body(active, "pull_request")
     if push is None:
         errors.append("ci.yml: missing push event")
-    else:
-        if not re.search(r"(?m)^\s*paths:\s*&ci_paths\s*$", push):
-            errors.append("ci.yml: push paths must define the shared ci_paths anchor")
-        for required_path in (".gitignore", "CONTRIBUTING.md", "docs/**", "evals/**"):
-            if not re.search(
-                rf'(?m)^\s+-\s+["\']?{re.escape(required_path)}["\']?\s*$', push
-            ):
-                errors.append(
-                    f"ci.yml: shared workflow paths must include {required_path}"
-                )
+    elif re.search(r"(?m)^\s*paths(?:-ignore)?:", push):
+        errors.append("ci.yml: push must not use path filters")
     if pull_request is None:
         errors.append("ci.yml: missing pull_request event")
-    elif not re.search(r"(?m)^\s*paths:\s*\*ci_paths\s*$", pull_request):
-        errors.append("ci.yml: pull_request paths must reuse the ci_paths anchor")
+    elif re.search(r"(?m)^\s*paths(?:-ignore)?:", pull_request):
+        errors.append("ci.yml: pull_request must not use path filters")
 
     environment = top_level_section_body(active, "env")
     ruff_version = None

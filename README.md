@@ -119,8 +119,8 @@ cp -r skills/python-project-workflow ~/.claude/skills/
 <details>
 <summary><b>Codex</b></summary>
 
-Status: workflow verified with Codex CLI 0.133.0 on the current evidence
-baseline. See [the portability contract](docs/portability-contract.md).
+Status: workflow verified with Codex CLI 0.133.0 under behavioral contract
+version 3. See [the portability contract](docs/portability-contract.md).
 
 ```bash
 mkdir -p ~/.agents/skills

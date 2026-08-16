@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "cases": [
     {
       "id": "greenfield-scaffold",
@@ -8,9 +8,12 @@
       "expected_paths": [
         "pyproject.toml",
         "src/invoice_checker/__init__.py",
+        "src/invoice_checker/cli.py",
         "tests/test_cli.py",
         ".github/workflows/ci.yml"
       ],
+      "required_scripts": {"invoice-checker": "invoice_checker.cli:main"},
+      "import_check": "from invoice_checker.cli import main; assert callable(main)",
       "classification_terms": ["greenfield"],
       "summary_terms": ["3.11", "src", "test"]
     },
