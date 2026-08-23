@@ -259,7 +259,9 @@ python-project-workflow/
 ├── .gitignore                           # Local Python, editor, and agent-state exclusions
 ├── .gitattributes                       # Cross-platform text and line-ending policy
 ├── .github/
+│   ├── release.yml                      # Generated release-note categories
 │   ├── workflows/ci.yml                 # Validation matrix and scheduled URL checks
+│   ├── workflows/release.yml             # Tag-triggered GitHub release creation
 │   └── scripts/check-portability.py      # Rejects agent-specific runtime references
 ├── .githooks/
 │   └── pre-commit                        # Local validation hook for staged changes
