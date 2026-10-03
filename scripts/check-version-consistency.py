@@ -7,6 +7,7 @@ import json
 import re
 import subprocess
 import sys
+from collections.abc import Mapping
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,7 +25,8 @@ def version_key(version: str) -> tuple[int, int, int] | None:
     match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", normalize_version(version))
     if not match:
         return None
-    return tuple(int(part) for part in match.groups())
+    major, minor, patch = match.groups()
+    return int(major), int(minor), int(patch)
 
 
 def read_citation_version(path: Path) -> str | None:
@@ -97,7 +99,7 @@ def validate_release(
 
 
 def validate_versions(
-    local_versions: dict[str, str | None],
+    local_versions: Mapping[str, str | None],
     latest_tag: str | None,
     tag_error: str | None,
 ) -> tuple[list[str], list[str]]:
