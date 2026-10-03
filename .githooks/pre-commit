@@ -5,16 +5,17 @@
 #
 set -e
 
-# Ruff is not vendored and this repository has no lockfile, so the
-# interpreter cannot provide it. Run whatever `ruff` is on PATH, and say
-# so when there is none rather than failing a commit over a tool this
-# repository does not install.
-if command -v ruff >/dev/null 2>&1; then
+# Lint through uv so this hook, the pre-push hook, and CI all run the
+# Ruff version pinned in uv.lock. A bare `ruff` resolves to whatever the
+# machine happens to have, which is how a commit hook can pass on code
+# that CI then rejects. Say so when uv is absent rather than failing a
+# commit over a tool this repository does not install.
+if command -v uv >/dev/null 2>&1; then
     echo "***REMOVED***= pre-commit: ruff check ***REMOVED***="
-    ruff check scripts .github/scripts
+    uv run --locked ruff check scripts .github/scripts
 else
-    echo "***REMOVED***= pre-commit: ruff not found, skipping ***REMOVED***="
-    echo "Install it to lint locally; CI always runs it." >&2
+    echo "***REMOVED***= pre-commit: uv not found, skipping lint ***REMOVED***="
+    echo "Install uv to lint locally; CI always runs it." >&2
 fi
 
 echo "***REMOVED***= pre-commit: check portability ***REMOVED***="
