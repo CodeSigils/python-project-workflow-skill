@@ -18,6 +18,18 @@ updates:
       routine-actions:
         update-types: ["minor", "patch"]
         patterns: ["*"]
+    # A major bump of a SHA-pinned action is a migration, not maintenance.
+    # Both actions below are pinned to revisions that CI exercises on every
+    # push, and moving to a new major means trusting an untested revision with
+    # no evidence that it behaves the same. Taking those as routine produces
+    # an open pull request per action per week, and an unmerged one is a
+    # branch that persists and a base that drifts. They are therefore declined
+    # here and taken deliberately, with CI as the evidence.
+    ignore:
+      - dependency-name: "actions/checkout"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "actions/setup-python"
+        update-types: ["version-update:semver-major"]
 
   # Ruff is the only dependency, and it is pinned in uv.lock rather than in a
   # workflow string. That distinction matters: Dependabot has no ecosystem for
