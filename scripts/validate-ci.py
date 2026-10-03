@@ -56,6 +56,72 @@ def has_run_command(body: str, command: str) -> bool:
     )
 
 
+BLOCK_SCALAR_SUFFIXES = ("|", ">", "|-", ">-", "|+", ">+")
+KEY_RE = re.compile(r"([A-Za-z0-9_-]+):(.*)$")
+
+
+def duplicate_keys(workflow: str) -> list[str]:
+    """Report mapping keys that repeat inside the same block.
+
+    GitHub refuses to load a workflow file whose mapping repeats a key, and
+    the failure is total and indirect: every run on the branch is marked
+    failed with "This run likely failed because of a workflow file issue" and
+    no step executes, so nothing names the offending line. A YAML loader does
+    not help either, because it accepts a repeated key and keeps the last
+    value silently. That is how a duplicated `with:` reached this repository's
+    main branch and stayed there unnoticed for a session.
+
+    Blocks are identified by their enclosing key path, and a list item
+    contributes its index so sibling steps never collide. Keys inside a
+    block scalar are not keys at all, so they are skipped.
+    """
+    errors: list[str] = []
+    stack: list[tuple[int, str]] = []
+    counters: dict[int, int] = {}
+    seen: dict[tuple[str, ...], int] = {}
+    block_indent = -1
+    for number, raw in enumerate(workflow.splitlines(), start=1):
+        if block_indent >= 0:
+            if raw.strip() and (len(raw) - len(raw.lstrip())) > block_indent:
+                continue
+            block_indent = -1
+        if not raw.strip() or raw.lstrip().startswith("#"):
+            continue
+        indent = len(raw) - len(raw.lstrip())
+        body = raw.lstrip()
+        item = body.startswith("- ")
+        if item:
+            body = body[2:]
+        match = KEY_RE.match(body)
+        if match is None:
+            continue
+        key, value = match.group(1), match.group(2).strip()
+        while stack and stack[-1][0] >= indent:
+            stack.pop()
+        path = tuple(entry[1] for entry in stack)
+        if item:
+            counters[indent] = counters.get(indent, 0) + 1
+            # A sentinel one column in from the dash keeps the item scope
+            # alive for the keys that follow it without being popped by them.
+            scope = f"[{counters[indent]}]"
+            path = path + (scope,)
+            stack.append((indent + 1, scope))
+        full = path + (key,)
+        first = seen.get(full)
+        if first is None:
+            seen[full] = number
+        else:
+            errors.append(
+                f"ci.yml: duplicate key {key!r} at line {number}, "
+                f"already set at line {first}"
+            )
+        if value in BLOCK_SCALAR_SUFFIXES:
+            block_indent = indent
+        elif not value:
+            stack.append((indent, key))
+    return errors
+
+
 def check_ruff_pin(root: Path, errors: list[str]) -> None:
     """The lockfile, not a workflow string, must pin the linter.
 
@@ -88,6 +154,8 @@ def validate_workflow(workflow: str, root: Path = ROOT) -> list[str]:
         errors.append("ci.yml: missing pull_request event")
     elif re.search(r"(?m)^\s*paths(?:-ignore)?:", pull_request):
         errors.append("ci.yml: pull_request must not use path filters")
+
+    errors.extend(duplicate_keys(workflow))
 
     check_ruff_pin(root, errors)
 
