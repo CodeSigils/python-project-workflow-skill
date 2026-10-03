@@ -7,7 +7,6 @@ import re
 import sys
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github/workflows/ci.yml"
 SHA_PIN_RE = re.compile(r"^[^@\s]+@[0-9a-f]{40}$")

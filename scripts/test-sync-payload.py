@@ -8,7 +8,6 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 REFERENCE = Path("skills/python-project-workflow/references/core-footguns.md")
 ORPHAN = Path("skills/python-project-workflow/references/orphan.md")

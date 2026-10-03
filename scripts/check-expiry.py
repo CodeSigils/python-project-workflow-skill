@@ -12,7 +12,10 @@ EXPIRES_RE = re.compile(r"^\*\*Expires:\*\* (?P<date>\d{4}-\d{2}-\d{2})$", re.MU
 
 
 def main() -> int:
-    today = date.today()
+    # Freshness markers are date-only strings carrying no timezone, so the
+    # local calendar date is the correct comparison basis. Reading UTC here
+    # to satisfy DTZ011 would move every expiry boundary by up to a day.
+    today = date.today()  # noqa: DTZ011
     expired: list[str] = []
     for path in sorted((ROOT / "skills").glob("*/SKILL.md")):
         text = path.read_text(encoding="utf-8")

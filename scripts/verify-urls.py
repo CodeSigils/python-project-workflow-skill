@@ -24,7 +24,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = ROOT / "docs" / "evidence-urls.json"
 
@@ -62,8 +61,11 @@ def validate_entry(entry: dict[str, Any]) -> None:
     if not isinstance(entry["expected_statuses"], list) or not entry["expected_statuses"]:
         raise ValueError("expected_statuses must be a non-empty list")
     for status in entry["expected_statuses"]:
+        # This validates a parsed manifest document, not a function
+        # signature, so ValueError is the accurate class; TRY004 assumes
+        # an API contract and wants TypeError here.
         if not isinstance(status, int):
-            raise ValueError("expected_statuses must contain integers")
+            raise ValueError("expected_statuses must contain integers")  # noqa: TRY004
     if "monitor" in entry and not isinstance(entry["monitor"], bool):
         raise ValueError("monitor must be a boolean")
     required_text = entry.get("required_text", [])
@@ -227,8 +229,8 @@ def main() -> int:
         marker = "  ← DRIFT" if note == "DRIFT" else ""
         marker = "  ← BROKEN" if note == "BROKEN" else marker
         print(
-            f"  {entry['name']:<30s} {str(result.status):<8s} {expected_text:<12s} "
-            f"{str(result.redirects):<9s} {content_label:<12s} {note:<10s}{marker}"
+            f"  {entry['name']:<30s} {result.status!s:<8s} {expected_text:<12s} "
+            f"{result.redirects!s:<9s} {content_label:<12s} {note:<10s}{marker}"
         )
 
     if drift_found:
