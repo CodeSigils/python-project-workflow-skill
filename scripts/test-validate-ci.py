@@ -8,7 +8,6 @@ import re
 from pathlib import Path
 from types import ModuleType
 
-
 ROOT = Path(__file__).resolve().parents[1]
 VALIDATOR = ROOT / "scripts/validate-ci.py"
 WORKFLOW = ROOT / ".github/workflows/ci.yml"
