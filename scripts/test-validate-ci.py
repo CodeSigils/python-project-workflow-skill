@@ -55,6 +55,24 @@ def main() -> int:
 
     assert_rejected(
         module,
+        workflow.replace(
+            "          fetch-depth: 0\n          persist-credentials: false\n",
+            "          fetch-depth: 0\n        with:\n          persist-credentials: false\n",
+            1,
+        ),
+        "a duplicated step mapping key",
+    )
+    assert_rejected(
+        module,
+        workflow.replace(
+            "    runs-on: ubuntu-latest\n",
+            "    runs-on: ubuntu-latest\n    runs-on: ubuntu-latest\n",
+            1,
+        ),
+        "a duplicated job mapping key",
+    )
+    assert_rejected(
+        module,
         workflow.replace("    branches: [main]", "    branches: [main]\n    paths: [\"scripts/**\"]", 1),
         "push path filter",
     )
