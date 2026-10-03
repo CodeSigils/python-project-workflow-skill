@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Check local release versions and git tags for consistency."""
+"""Check local release versions, git tags, and the published release."""
 
 from __future__ import annotations
 
+import json
 import re
 import subprocess
 import sys
@@ -51,6 +52,48 @@ def get_latest_tag() -> tuple[str | None, str | None]:
         return None, result.stderr.strip() or f"git exited {result.returncode}"
     tags = result.stdout.splitlines()
     return (tags[0], None) if tags else (None, None)
+
+
+def get_latest_release() -> tuple[str | None, str | None]:
+    """Return the newest published GitHub release tag and an optional error."""
+    try:
+        result = subprocess.run(
+            ["gh", "release", "list", "--limit", "1", "--json", "tagName"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError as exc:
+        return None, str(exc)
+    if result.returncode != 0:
+        return None, result.stderr.strip() or f"gh exited {result.returncode}"
+    try:
+        entries = json.loads(result.stdout or "[]")
+    except json.JSONDecodeError as exc:
+        return None, f"could not parse gh output: {exc}"
+    if not entries:
+        return None, None
+    return entries[0].get("tagName"), None
+
+
+def validate_release(
+    latest_tag: str | None,
+    latest_release: str | None,
+    release_error: str | None,
+) -> list[str]:
+    """Return errors when the latest tag has no matching published release."""
+    if release_error:
+        return [f"Could not query GitHub releases: {release_error}"]
+    if latest_tag is None:
+        return []
+    if latest_release is None:
+        return [f"GitHub has no published release, but tag {latest_tag} exists"]
+    if normalize_version(latest_release) != normalize_version(latest_tag):
+        return [
+            f"Latest GitHub release is {latest_release}, "
+            f"but the latest tag is {latest_tag}"
+        ]
+    return []
 
 
 def validate_versions(
@@ -121,6 +164,19 @@ def run_self_tests() -> int:
         "SKIP: could not query git tags: not a git repository"
     ]
 
+    assert validate_release("v0.2.0", "v0.2.0", None) ***REMOVED*** []
+    assert validate_release("v0.2.0", "0.2.0", None) ***REMOVED*** []
+    assert validate_release(None, None, None) ***REMOVED*** []
+    assert validate_release("v0.2.0", None, None) ***REMOVED*** [
+        "GitHub has no published release, but tag v0.2.0 exists"
+    ]
+    assert validate_release("v0.2.0", "v0.1.0", None) ***REMOVED*** [
+        "Latest GitHub release is v0.1.0, but the latest tag is v0.2.0"
+    ]
+    assert validate_release("v0.2.0", None, "gh is not installed") ***REMOVED*** [
+        "Could not query GitHub releases: gh is not installed"
+    ]
+
     print("PASS: check-version-consistency.py self-tests")
     return 0
 
@@ -129,6 +185,11 @@ def main() -> int:
     import argparse
 
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--require-github-release",
+        action="store_true",
+        help="also require a published GitHub release for the latest tag",
+    )
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
 
@@ -145,6 +206,12 @@ def main() -> int:
     print(f"Latest tag: {latest_tag or 'none'}")
 
     errors, notes = validate_versions(local_versions, latest_tag, tag_error)
+
+    if args.require_github_release:
+        latest_release, release_error = get_latest_release()
+        print(f"Latest GitHub release: {latest_release or 'none'}")
+        errors.extend(validate_release(latest_tag, latest_release, release_error))
+
     for note in notes:
         print(note)
     if errors:

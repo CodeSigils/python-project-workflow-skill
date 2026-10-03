@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import re
 import tempfile
 from pathlib import Path
 from types import ModuleType
@@ -100,6 +101,30 @@ def main() -> int:
             1,
         ),
         "live URL check in validation matrix",
+    )
+
+    dropped_job = re.sub(
+        r"(?ms)^  release-integrity:\n.*?(?=^  [A-Za-z0-9_-]+:\n|\Z)", "", workflow, count=1
+    )
+    assert dropped_job != workflow, "release-integrity job block not found"
+    assert_rejected(module, dropped_job, "a workflow with no published-release check")
+
+    assert_rejected(
+        module,
+        workflow.replace("          GH_TOKEN: ${{ github.token }}\n", "", 1),
+        "a published-release check with no token",
+    )
+
+    assert_rejected(
+        module,
+        workflow.replace(
+            "          # The tag comparison needs real history: a default shallow clone has\n"
+            "          # no tags, and the version check would silently pass on nothing.\n"
+            "          fetch-depth: 0\n",
+            "",
+            1,
+        ),
+        "a published-release check on a shallow clone",
     )
 
     print("PASS: CI policy validator rejects missing gates, drift, and mutable pins")
