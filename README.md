@@ -256,10 +256,9 @@ python-project-workflow/
 │   └── codex/
 │       ├── cases.json                    # Positive and preservation behavior contracts
 │       └── result.schema.json            # Structured live-run output contract
-├── .gitignore                           # Local Python, editor, and agent-state exclusions
-├── .gitattributes                       # Cross-platform text and line-ending policy
-├── ruff.toml                           # Pinned lint rule selection and line length
-├── pyproject.toml                      # Project metadata and the Ruff dependency pin
+├── .gitignore                          # Local Python, editor, and agent-state exclusions
+├── .gitattributes                      # Cross-platform text and line-ending policy
+├── pyproject.toml                      # Metadata, the Ruff pin, and the lint rules
 ├── uv.lock                             # Locked toolchain versions
 ├── .github/
 │   ├── dependabot.yml                   # Scheduled updates for actions and locked dependencies
