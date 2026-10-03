@@ -258,6 +258,7 @@ python-project-workflow/
 │       └── result.schema.json            # Structured live-run output contract
 ├── .gitignore                           # Local Python, editor, and agent-state exclusions
 ├── .gitattributes                       # Cross-platform text and line-ending policy
+├── ruff.toml                           # Pinned lint rule selection and line length
 ├── .github/
 │   ├── release.yml                      # Generated release-note categories
 │   ├── workflows/ci.yml                 # Validation matrix and scheduled URL checks
