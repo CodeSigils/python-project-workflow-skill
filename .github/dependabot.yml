@@ -1,0 +1,35 @@
+version: 2
+updates:
+  # Both checkout and setup-python are pinned by full commit SHA. A SHA pin
+  # never rots on its own: nothing warns that the tag it points at has moved,
+  # so an action can sit on a stale commit indefinitely unless a tool updates
+  # it. Dependabot rewrites both the SHA and the trailing version comment.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 2
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      routine-actions:
+        update-types: ["minor", "patch"]
+        patterns: ["*"]
+
+  # Ruff is the only dependency, and it is pinned in uv.lock rather than in a
+  # workflow string. That distinction matters: Dependabot has no ecosystem for
+  # a bare `env: RUFF_VERSION` value, so a linter pin kept there is invisible
+  # to every update mechanism and only ever changes by hand.
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 1
+    commit-message:
+      prefix: "chore(deps)"

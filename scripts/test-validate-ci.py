@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
-import re
+import tempfile
 from pathlib import Path
 from types import ModuleType
 
@@ -25,6 +25,17 @@ def load_validator() -> ModuleType:
 def assert_rejected(module: ModuleType, workflow: str, label: str) -> None:
     if not module.validate_workflow(workflow):
         raise AssertionError(f"CI validator accepted {label}")
+
+
+def assert_lockfile_rejected(module: ModuleType, lock_text: str | None, label: str) -> None:
+    """The linter pin must live in the lockfile, so mutate one and check."""
+    with tempfile.TemporaryDirectory() as tmp:
+        if lock_text is not None:
+            (Path(tmp) / "uv.lock").write_text(lock_text, encoding="utf-8")
+        errors: list[str] = []
+        module.check_ruff_pin(Path(tmp), errors)
+        if not errors:
+            raise AssertionError(f"CI validator accepted {label}")
 
 
 def main() -> int:
@@ -55,20 +66,17 @@ def main() -> int:
         ),
         "pull request path filter",
     )
-    assert_rejected(
+    lock = (ROOT / "uv.lock").read_text(encoding="utf-8")
+    assert_lockfile_rejected(module, None, "a missing uv.lock")
+    assert_lockfile_rejected(
         module,
-        re.sub(
-            r'RUFF_VERSION: "[^"]+"',
-            'RUFF_VERSION: "latest"',
-            workflow,
-            count=1,
-        ),
-        "unpinned Ruff version variable",
+        '[[package]]\nname = "unrelated"\nversion = "1.0.0"\n',
+        "a lockfile with no ruff entry",
     )
-    assert_rejected(
+    assert_lockfile_rejected(
         module,
-        workflow.replace('"ruff==$RUFF_VERSION"', "ruff==9.9.9", 1),
-        "literal Ruff version in install command",
+        lock.replace('version = "0.16.9"', 'version = "0.16.9rc1"', 1),
+        "a ruff version that is not an exact three-part release",
     )
     assert_rejected(
         module,

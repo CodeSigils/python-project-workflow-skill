@@ -30,11 +30,11 @@ run() {
     failed=1
 }
 
-if command -v ruff >/dev/null 2>&1; then
-    run "ruff check" ruff check scripts .github/scripts
+if command -v uv >/dev/null 2>&1; then
+    run "ruff check" uv run --locked ruff check scripts .github/scripts
 else
-    echo "=== pre-push: ruff not found, skipping ==="
-    echo "Install it to lint locally; CI always runs it." >&2
+    echo "=== pre-push: uv not found, skipping lint ==="
+    echo "Install uv to lint locally; CI always runs it." >&2
 fi
 
 run "shell script lint" shellcheck scripts/*.sh .githooks/*
