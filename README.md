@@ -265,7 +265,8 @@ python-project-workflow/
 │   ├── workflows/release.yml             # Tag-triggered GitHub release creation
 │   └── scripts/check-portability.py      # Rejects agent-specific runtime references
 ├── .githooks/
-│   └── pre-commit                        # Local validation hook for staged changes
+│   ├── pre-commit                       # Local validation hook for staged changes
+│   ├── pre-push                         # Local gate mirroring the CI validate job
 ├── references/                          # Canonical sources mirrored into the payload
 │   ├── pyproject-template.md             # PEP 621 project and tool configuration baseline
 │   ├── lint-format-typing-testing.md     # Tool commands and staged adoption guidance
