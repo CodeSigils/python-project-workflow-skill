@@ -75,7 +75,3 @@ Thumbs.db
 .opencode/
 .omo/
 .open-mem/
-
-# open-mem: Auto-generated folder context files.
-# Uncomment to exclude from version control (recommended for large projects):
-# **/AGENTS.md
