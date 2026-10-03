@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github/workflows/ci.yml"
 SHA_PIN_RE = re.compile(r"^[^@\s]+@[0-9a-f]{40}$")
 EXACT_VERSION_RE = re.compile(r"^[0-9]+(?:\.[0-9]+){2}$")
-RUFF_INSTALL_COMMAND = 'python -m pip install "ruff***REMOVED***$RUFF_VERSION"'
+RUFF_INSTALL_COMMAND = "uv sync --locked"
 REQUIRED_VALIDATE_COMMANDS = (
     "python3 .github/scripts/check-portability.py",
     "python3 scripts/check-version-consistency.py",
@@ -24,7 +24,7 @@ REQUIRED_VALIDATE_COMMANDS = (
     "python3 scripts/run-hermes-regression.py --self-test",
     "python3 scripts/grade-codex-regression.py --self-test",
     "bash scripts/sync-payload.sh --ci",
-    "python3 -m ruff check scripts .github/scripts",
+    "uv run --locked ruff check scripts .github/scripts",
     "shellcheck scripts/*.sh .githooks/*",
 )
 
@@ -32,14 +32,6 @@ REQUIRED_VALIDATE_COMMANDS = (
 def section_body(workflow: str, name: str) -> str | None:
     match = re.search(
         rf"(?ms)^  {re.escape(name)}:\n(?P<body>.*?)(?=^  [A-Za-z0-9_-]+:\n|\Z)",
-        workflow,
-    )
-    return match.group("body") if match else None
-
-
-def top_level_section_body(workflow: str, name: str) -> str | None:
-    match = re.search(
-        rf"(?ms)^{re.escape(name)}:\n(?P<body>.*?)(?=^[A-Za-z0-9_-]+:\n|\Z)",
         workflow,
     )
     return match.group("body") if match else None
@@ -61,7 +53,25 @@ def has_run_command(body: str, command: str) -> bool:
     )
 
 
-def validate_workflow(workflow: str) -> list[str]:
+def check_ruff_pin(root: Path, errors: list[str]) -> None:
+    """The lockfile, not a workflow string, must pin the linter.
+
+    Dependabot has no package ecosystem that reads a bare workflow variable,
+    so a version kept in one is invisible to every update mechanism and only
+    changes when a human edits the workflow.
+    """
+    lock = root / "uv.lock"
+    if not lock.is_file():
+        errors.append("uv.lock: missing; Ruff must be pinned in the lockfile")
+        return
+    match = re.search(r'(?m)^name = "ruff"\nversion = "([^"]+)"', lock.read_text(encoding="utf-8"))
+    if match is None:
+        errors.append("uv.lock: no ruff entry pinning the linter version")
+    elif not EXACT_VERSION_RE.fullmatch(match.group(1)):
+        errors.append(f"uv.lock: ruff version {match.group(1)!r} is not an exact three-part version")
+
+
+def validate_workflow(workflow: str, root: Path = ROOT) -> list[str]:
     active = active_workflow_lines(workflow)
     errors: list[str] = []
 
@@ -76,18 +86,7 @@ def validate_workflow(workflow: str) -> list[str]:
     elif re.search(r"(?m)^\s*paths(?:-ignore)?:", pull_request):
         errors.append("ci.yml: pull_request must not use path filters")
 
-    environment = top_level_section_body(active, "env")
-    ruff_version = None
-    if environment is not None:
-        match = re.search(
-            r'(?m)^\s*RUFF_VERSION:\s*["\']?([^"\'\s]+)["\']?\s*$', environment
-        )
-        if match:
-            ruff_version = match.group(1)
-    if ruff_version is None or not EXACT_VERSION_RE.fullmatch(ruff_version):
-        errors.append(
-            "ci.yml: workflow-level RUFF_VERSION must be an exact three-part version"
-        )
+    check_ruff_pin(root, errors)
 
     validate = section_body(active, "validate")
     external = section_body(active, "verify-urls")
@@ -105,7 +104,7 @@ def validate_workflow(workflow: str) -> list[str]:
                 )
         if not has_run_command(validate, RUFF_INSTALL_COMMAND):
             errors.append(
-                "ci.yml: validation matrix must install Ruff from RUFF_VERSION"
+                "ci.yml: validation matrix must install dependencies from the lockfile"
             )
         if re.search(r"\bpip\s+install\s+--upgrade\s+pip\b", validate):
             errors.append(

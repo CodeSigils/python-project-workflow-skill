@@ -17,6 +17,10 @@ scripts, CI, and root `references/` are maintainer infrastructure.
 
 ## Validate
 
+Install the toolchain first with `uv sync --locked`. Ruff is pinned in
+`uv.lock` rather than in a workflow variable, so local and CI runs lint with
+the same version; Dependabot updates that pin.
+
 Run the complete command list in the README's **Verify** section. The live
 Codex and Hermes runners are intentionally optional because they require local
 client access and may consume a subscription. Their `--self-test` modes are

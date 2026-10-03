@@ -259,7 +259,10 @@ python-project-workflow/
 ├── .gitignore                           # Local Python, editor, and agent-state exclusions
 ├── .gitattributes                       # Cross-platform text and line-ending policy
 ├── ruff.toml                           # Pinned lint rule selection and line length
+├── pyproject.toml                      # Project metadata and the Ruff dependency pin
+├── uv.lock                             # Locked toolchain versions
 ├── .github/
+│   ├── dependabot.yml                   # Scheduled updates for actions and locked dependencies
 │   ├── release.yml                      # Generated release-note categories
 │   ├── workflows/ci.yml                 # Validation matrix and scheduled URL checks
 │   ├── workflows/release.yml             # Tag-triggered GitHub release creation
