@@ -119,7 +119,9 @@ def validate_workflow(workflow: str, root: Path = ROOT) -> list[str]:
         errors.append("ci.yml: missing verify-urls job")
     else:
         required = (
-            "if: github.event_name ***REMOVED*** 'schedule' || github.event_name ***REMOVED*** 'workflow_dispatch'",
+            "if: github.event_name ***REMOVED*** 'schedule'"
+            " || github.event_name ***REMOVED*** 'workflow_dispatch'"
+            " || github.event_name ***REMOVED*** 'pull_request'",
             "runs-on: ubuntu-latest",
         )
         for line in required:
@@ -132,6 +134,7 @@ def validate_workflow(workflow: str, root: Path = ROOT) -> list[str]:
 
     if active.count("scripts/verify-urls.py") != 1:
         errors.append("ci.yml: URL verifier must appear exactly once")
+
 
     uses = re.findall(r"(?m)^\s*(?:-\s+)?uses:\s*([^#\s]+)", active)
     if not uses:

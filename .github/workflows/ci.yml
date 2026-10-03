@@ -98,7 +98,7 @@ jobs:
 
   verify-urls:
     name: Verify external references
-    if: github.event_name ***REMOVED*** 'schedule' || github.event_name ***REMOVED*** 'workflow_dispatch'
+    if: github.event_name ***REMOVED*** 'schedule' || github.event_name ***REMOVED*** 'workflow_dispatch' || github.event_name ***REMOVED*** 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -108,3 +108,4 @@ jobs:
 
       - name: Verify referenced URLs
         run: python3 scripts/verify-urls.py
+
