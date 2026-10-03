@@ -32,6 +32,7 @@ run() {
 
 if command -v uv >/dev/null 2>&1; then
     run "ruff check" uv run --locked ruff check scripts .github/scripts
+    run "type check" uv run --locked ty check scripts .github/scripts
 else
     echo "***REMOVED***= pre-push: uv not found, skipping lint ***REMOVED***="
     echo "Install uv to lint locally; CI always runs it." >&2

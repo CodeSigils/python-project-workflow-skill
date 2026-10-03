@@ -87,6 +87,9 @@ jobs:
       - name: Ruff check scripts
         run: uv run --locked ruff check scripts .github/scripts
 
+      - name: Type check scripts
+        run: uv run --locked ty check scripts .github/scripts
+
       - name: Shell script lint
         run: shellcheck scripts/*.sh .githooks/*
 
