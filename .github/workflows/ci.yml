@@ -36,12 +36,6 @@ jobs:
           # comparing anything.
           fetch-depth: 0
           persist-credentials: false
-        with:
-          # Tags are the subject of check-version-consistency.py. The default
-          # shallow clone has none, so the check silently passes without
-          # comparing anything.
-          fetch-depth: 0
-          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
