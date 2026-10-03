@@ -12,3 +12,30 @@ dev = [
 
 [tool.uv]
 package = false
+
+[tool.ruff]
+# The lint surface is pinned here on purpose. Ruff 0.16 widened its own
+# default selection from 59 rules to 413, so a version bump silently changed
+# what this repository enforces. Pinning `lint.select` makes a future bump
+# behaviour-preserving: new rules are adopted by editing this file, as a
+# reviewed change, instead of arriving with a toolchain update.
+#
+# `E4`, `E7`, `E9`, and `F` are the historical Ruff defaults, which is what CI
+# enforced before any explicit configuration existed. `I` is added because
+# import order is worth guarding and the tree already satisfies it.
+#
+# Broadening the selection is welcome, but do it deliberately: `UP`, `B`, `C4`,
+# `SIM`, `DTZ`, `TRY`, and `RUF` each surface real work in this tree. In
+# particular `RUF100` would reject the documented `noqa` suppressions in
+# `check-expiry.py` and `verify-urls.py` unless `DTZ` and `TRY` are selected at
+# the same time.
+#
+# This lives beside the dependency pin rather than in a standalone ruff.toml so
+# the version and the rules it selects are read together. Ruff silently prefers
+# a sibling ruff.toml over `[tool.ruff]` with no diagnostic, so two files could
+# drift apart with nothing reporting it.
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
