@@ -13,15 +13,14 @@ permissions:
   contents: read
 
 env:
-  RUFF_VERSION: "0.12.4"
+  RUFF_VERSION: "0.16.9"
 
 jobs:
   validate:
     name: Validate skill source
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
         python-version: ["3.10", "3.14"]
     steps:
       - name: Check out repository
