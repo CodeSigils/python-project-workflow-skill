@@ -224,6 +224,7 @@ runtime status.
 python3 .github/scripts/check-portability.py
 python3 scripts/check-version-consistency.py
 python3 scripts/check-readme-tree.py
+python3 scripts/check-expiry.py
 python3 scripts/validate-ci.py
 python3 scripts/validate.py
 python3 scripts/test-validate-ci.py
@@ -233,7 +234,8 @@ python3 scripts/run-codex-regression.py --self-test
 python3 scripts/run-hermes-regression.py --self-test
 python3 scripts/grade-codex-regression.py --self-test
 bash scripts/sync-payload.sh --ci
-python3 -m ruff check scripts .github/scripts
+uv run --locked ruff check scripts .github/scripts
+shellcheck scripts/*.sh .githooks/*
 ```
 
 ---
@@ -264,8 +266,8 @@ python-project-workflow/
 │   ├── dependabot.yml                   # Scheduled updates for actions and locked dependencies
 │   ├── release.yml                      # Generated release-note categories
 │   ├── workflows/ci.yml                 # Validation matrix and scheduled URL checks
-│   ├── workflows/release.yml             # Tag-triggered GitHub release creation
-│   └── scripts/check-portability.py      # Rejects agent-specific runtime references
+│   ├── workflows/release.yml            # Tag-triggered GitHub release creation
+│   └── scripts/check-portability.py     # Rejects agent-specific runtime references
 ├── .githooks/
 │   ├── pre-commit                       # Local validation hook for staged changes
 │   ├── pre-push                         # Local gate mirroring the CI validate job
