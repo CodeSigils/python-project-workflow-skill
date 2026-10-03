@@ -15,6 +15,7 @@ RUFF_INSTALL_COMMAND = "uv sync --locked"
 RELEASE_CHECK_COMMAND = (
     "python3 scripts/check-version-consistency.py --require-github-release"
 )
+HYGIENE_CHECK_COMMAND = "python3 scripts/check-repo-hygiene.py"
 REQUIRED_VALIDATE_COMMANDS = (
     "python3 .github/scripts/check-portability.py",
     "python3 scripts/check-version-consistency.py",
@@ -240,6 +241,25 @@ def validate_workflow(workflow: str, root: Path = ROOT) -> list[str]:
 
     if active.count(RELEASE_CHECK_COMMAND) != 1:
         errors.append("ci.yml: published-release check must appear exactly once")
+
+    hygiene = section_body(workflow, "repo-hygiene")
+    if hygiene is None:
+        errors.append("ci.yml: missing the repo-hygiene job")
+    else:
+        for line in (
+            "if: github.event_name ***REMOVED*** 'schedule' || github.event_name ***REMOVED*** 'workflow_dispatch'",
+            "runs-on: ubuntu-latest",
+            "pull-requests: read",
+        ):
+            if line not in hygiene:
+                errors.append(f"ci.yml: repo-hygiene job missing {line!r}")
+        if not has_run_command(hygiene, HYGIENE_CHECK_COMMAND):
+            errors.append("ci.yml: repo-hygiene job missing its hygiene check")
+        if "matrix:" in hygiene:
+            errors.append("ci.yml: repo-hygiene job must not use a matrix")
+
+    if active.count(HYGIENE_CHECK_COMMAND) != 1:
+        errors.append("ci.yml: hygiene check must appear exactly once")
 
     uses = re.findall(r"(?m)^\s*(?:-\s+)?uses:\s*([^#\s]+)", active)
     if not uses:

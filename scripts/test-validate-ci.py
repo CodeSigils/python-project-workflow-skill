@@ -55,6 +55,11 @@ def main() -> int:
 
     assert_rejected(
         module,
+        re.sub(r"(?ms)^  repo-hygiene:\n.*?(?=^  [A-Za-z0-9_-]+:\n|\Z)", "", workflow),
+        "the repo-hygiene job",
+    )
+    assert_rejected(
+        module,
         workflow.replace(
             "          fetch-depth: 0\n          persist-credentials: false\n",
             "          fetch-depth: 0\n        with:\n          persist-credentials: false\n",

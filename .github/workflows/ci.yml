@@ -123,3 +123,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/check-version-consistency.py --require-github-release
+
+  repo-hygiene:
+    name: Report repository hygiene
+    if: github.event_name ***REMOVED*** 'schedule' || github.event_name ***REMOVED*** 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    # Reading pull request state is the whole point; the default token cannot.
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
+
+      - name: Report stacked pull requests and stale branches
+        run: python3 scripts/check-repo-hygiene.py

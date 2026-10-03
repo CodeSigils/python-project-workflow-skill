@@ -46,6 +46,7 @@ run "cross-agent portability" python3 .github/scripts/check-portability.py
 run "README tree" python3 scripts/check-readme-tree.py
 run "version consistency" python3 scripts/check-version-consistency.py
 run "freshness markers" python3 scripts/check-expiry.py
+run "repo hygiene self-test" python3 scripts/check-repo-hygiene.py --self-test
 run "payload sync tests" python3 scripts/test-sync-payload.py
 run "payload drift" bash scripts/sync-payload.sh --ci
 run "behavioral regression fixtures" python3 scripts/run-codex-regression.py --self-test
