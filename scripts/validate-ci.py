@@ -25,6 +25,7 @@ REQUIRED_VALIDATE_COMMANDS = (
     "python3 scripts/grade-codex-regression.py --self-test",
     "bash scripts/sync-payload.sh --ci",
     "python3 -m ruff check scripts .github/scripts",
+    "shellcheck scripts/*.sh .githooks/*",
 )
 
 
