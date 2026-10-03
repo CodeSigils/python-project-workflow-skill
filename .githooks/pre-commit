@@ -5,8 +5,17 @@
 #
 set -e
 
-echo "=== pre-commit: ruff check ==="
-python3 -m ruff check scripts .github/scripts
+# Ruff is not vendored and this repository has no lockfile, so the
+# interpreter cannot provide it. Run whatever `ruff` is on PATH, and say
+# so when there is none rather than failing a commit over a tool this
+# repository does not install.
+if command -v ruff >/dev/null 2>&1; then
+    echo "=== pre-commit: ruff check ==="
+    ruff check scripts .github/scripts
+else
+    echo "=== pre-commit: ruff not found, skipping ==="
+    echo "Install it to lint locally; CI always runs it." >&2
+fi
 
 echo "=== pre-commit: check portability ==="
 python3 .github/scripts/check-portability.py
