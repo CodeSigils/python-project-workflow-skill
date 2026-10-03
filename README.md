@@ -235,6 +235,7 @@ python3 scripts/run-hermes-regression.py --self-test
 python3 scripts/grade-codex-regression.py --self-test
 bash scripts/sync-payload.sh --ci
 uv run --locked ruff check scripts .github/scripts
+uv run --locked ty check scripts .github/scripts
 shellcheck scripts/*.sh .githooks/*
 ```
 

@@ -13,6 +13,7 @@ set -e
 if command -v uv >/dev/null 2>&1; then
     echo "=== pre-commit: ruff check ==="
     uv run --locked ruff check scripts .github/scripts
+    uv run --locked ty check scripts .github/scripts
 else
     echo "=== pre-commit: uv not found, skipping lint ==="
     echo "Install uv to lint locally; CI always runs it." >&2

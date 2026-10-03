@@ -34,7 +34,7 @@ def assert_lockfile_rejected(module: ModuleType, lock_text: str | None, label: s
         if lock_text is not None:
             (Path(tmp) / "uv.lock").write_text(lock_text, encoding="utf-8")
         errors: list[str] = []
-        module.check_ruff_pin(Path(tmp), errors)
+        module.check_tool_pins(Path(tmp), errors)
         if not errors:
             raise AssertionError(f"CI validator accepted {label}")
 
@@ -90,12 +90,17 @@ def main() -> int:
     assert_lockfile_rejected(
         module,
         '[[package]]\nname = "unrelated"\nversion = "1.0.0"\n',
-        "a lockfile with no ruff entry",
+        "a lockfile with no ruff or ty entry",
     )
     assert_lockfile_rejected(
         module,
         lock.replace('version = "0.16.9"', 'version = "0.16.9rc1"', 1),
         "a ruff version that is not an exact three-part release",
+    )
+    assert_lockfile_rejected(
+        module,
+        re.sub(r'(?m)^version = "0\.0\.84"', 'version = "0.0.84rc1"', lock),
+        "a ty version that is not an exact three-part release",
     )
     assert_rejected(
         module,

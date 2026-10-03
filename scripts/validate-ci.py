@@ -28,6 +28,7 @@ REQUIRED_VALIDATE_COMMANDS = (
     "python3 scripts/grade-codex-regression.py --self-test",
     "bash scripts/sync-payload.sh --ci",
     "uv run --locked ruff check scripts .github/scripts",
+    "uv run --locked ty check scripts .github/scripts",
     "shellcheck scripts/*.sh .githooks/*",
 )
 
@@ -122,22 +123,30 @@ def duplicate_keys(workflow: str) -> list[str]:
     return errors
 
 
-def check_ruff_pin(root: Path, errors: list[str]) -> None:
-    """The lockfile, not a workflow string, must pin the linter.
+LOCKED_TOOLS = ("ruff", "ty")
+
+
+def check_tool_pins(root: Path, errors: list[str]) -> None:
+    """The lockfile, not a workflow string, must pin each enforced tool.
 
     Dependabot has no package ecosystem that reads a bare workflow variable,
     so a version kept in one is invisible to every update mechanism and only
-    changes when a human edits the workflow.
+    changes when a human edits the workflow. Both the linter and the type
+    checker are enforced in CI, so both need a pin the `uv` ecosystem can
+    raise; otherwise dropping one from the lockfile would silently leave CI
+    running an unpinned version.
     """
     lock = root / "uv.lock"
     if not lock.is_file():
-        errors.append("uv.lock: missing; Ruff must be pinned in the lockfile")
+        errors.append("uv.lock: missing; every enforced tool must be pinned in the lockfile")
         return
-    match = re.search(r'(?m)^name = "ruff"\nversion = "([^"]+)"', lock.read_text(encoding="utf-8"))
-    if match is None:
-        errors.append("uv.lock: no ruff entry pinning the linter version")
-    elif not EXACT_VERSION_RE.fullmatch(match.group(1)):
-        errors.append(f"uv.lock: ruff version {match.group(1)!r} is not an exact three-part version")
+    text = lock.read_text(encoding="utf-8")
+    for tool in LOCKED_TOOLS:
+        match = re.search(rf'(?m)^name = "{tool}"\nversion = "([^"]+)"', text)
+        if match is None:
+            errors.append(f"uv.lock: no {tool} entry pinning the {tool} version")
+        elif not EXACT_VERSION_RE.fullmatch(match.group(1)):
+            errors.append(f"uv.lock: {tool} version {match.group(1)!r} is not an exact three-part version")
 
 
 def validate_workflow(workflow: str, root: Path = ROOT) -> list[str]:
@@ -157,7 +166,7 @@ def validate_workflow(workflow: str, root: Path = ROOT) -> list[str]:
 
     errors.extend(duplicate_keys(workflow))
 
-    check_ruff_pin(root, errors)
+    check_tool_pins(root, errors)
 
     validate = section_body(active, "validate")
     external = section_body(active, "verify-urls")
