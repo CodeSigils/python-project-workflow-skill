@@ -34,6 +34,16 @@ absence of known unsafe probes. A
 passing validator is evidence for these defined checks, not a claim that the
 repository or generated projects are free of vulnerabilities.
 
+### Workflow permissions
+
+Every workflow runs at `permissions: contents: read`, with one exception:
+`workflows/release.yml` runs at `contents: write` because `gh release create`
+cannot create a GitHub release with a read-only token. It is the only write
+scope in the repository, it triggers solely on a pushed `v*.*.*` tag, and its
+checkout is pinned to a full commit revision. Nothing else in CI or in
+`scripts/` holds write access, and no workflow in this repository persists
+credentials.
+
 ## Shipped Skill Trust Guarantees
 
 The shipped payload is a single `SKILL.md` and eight reference files with no
