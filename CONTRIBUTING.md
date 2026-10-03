@@ -39,4 +39,33 @@ runtime evidence that was reset, added, or intentionally left unverified. Keep
 generated evaluation artifacts out of Git; record only redacted summaries in
 maintainer documentation.
 
+## Local hooks
+
+This repository ships two POSIX shell hooks in `.githooks/`. Activate them
+once per clone:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+`pre-commit` runs the fast validators: Ruff (when it is on `PATH`),
+cross-agent portability, skill structure, freshness markers, version
+consistency, and the README tree. `pre-push` mirrors the `validate` job in
+`.github/workflows/ci.yml`, so a push that passes locally has already run
+what CI would run.
+
+The pre-push hook is the real gate on this repository. Branch protection
+runs with `enforce_admins: false`, which means an administrator push to
+`main` bypasses every required status check; GitHub reports those checks as
+"expected" at push time, because the push that would trigger them has not
+landed yet. No branch-protection setting changes that, so the hook enforces
+locally and CI remains the backstop. `--no-verify` skips it, at the cost of
+leaving CI as the only gate.
+
+Both hooks are linted. CI runs `shellcheck scripts/*.sh .githooks/*` and
+`validate-ci.py` requires that command, so the lint cannot be dropped
+silently. Anything added to `.githooks/` is therefore expected to be shell;
+if a non-shell hook is ever added deliberately, change the convention and
+the command together.
+
 For releases, follow `docs/release-checklist.md`.
