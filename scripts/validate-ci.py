@@ -12,6 +12,9 @@ WORKFLOW = ROOT / ".github/workflows/ci.yml"
 SHA_PIN_RE = re.compile(r"^[^@\s]+@[0-9a-f]{40}$")
 EXACT_VERSION_RE = re.compile(r"^[0-9]+(?:\.[0-9]+){2}$")
 RUFF_INSTALL_COMMAND = "uv sync --locked"
+RELEASE_CHECK_COMMAND = (
+    "python3 scripts/check-version-consistency.py --require-github-release"
+)
 REQUIRED_VALIDATE_COMMANDS = (
     "python3 .github/scripts/check-portability.py",
     "python3 scripts/check-version-consistency.py",
@@ -135,6 +138,31 @@ def validate_workflow(workflow: str, root: Path = ROOT) -> list[str]:
     if active.count("scripts/verify-urls.py") != 1:
         errors.append("ci.yml: URL verifier must appear exactly once")
 
+    published = section_body(active, "release-integrity")
+    if published is None:
+        errors.append("ci.yml: missing release-integrity job")
+    else:
+        # The release procedure is otherwise unverified: nothing else in this
+        # repository consults GitHub Releases, so a tag can stand unpublished
+        # until someone reads the checklist by hand.
+        for line in (
+            "if: github.event_name == 'schedule'"
+            " || github.event_name == 'workflow_dispatch'",
+            "runs-on: ubuntu-latest",
+            "fetch-depth: 0",
+            "GH_TOKEN: ${{ github.token }}",
+        ):
+            if line not in published:
+                errors.append(f"ci.yml: release-integrity job missing {line!r}")
+        if not has_run_command(published, RELEASE_CHECK_COMMAND):
+            errors.append(
+                "ci.yml: release-integrity job missing its published-release check"
+            )
+        if "matrix:" in published:
+            errors.append("ci.yml: release-integrity job must not use a matrix")
+
+    if active.count(RELEASE_CHECK_COMMAND) != 1:
+        errors.append("ci.yml: published-release check must appear exactly once")
 
     uses = re.findall(r"(?m)^\s*(?:-\s+)?uses:\s*([^#\s]+)", active)
     if not uses:
