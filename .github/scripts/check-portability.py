@@ -24,7 +24,10 @@ FORBIDDEN_PATTERNS = (
         ),
     ),
     ("Hermes Python import", re.compile(r"from hermes_tools\b", re.IGNORECASE)),
-    (" Code agent reference", re.compile(r"\b\(\)", re.IGNORECASE)),
+    # A standalone empty call, not any call: \b asserts on the preceding
+    # character, and before "(" that meant every no-arg call in a code sample
+    # (math.isclose(), .read_bytes()) matched while a bare "()" never did.
+    ("Code agent reference", re.compile(r"(?<![\w.])\(\)", re.IGNORECASE)),
     ("Gemini CLI command", re.compile(r"\bgemini\s+skills?\b", re.IGNORECASE)),
     ("Codex CLI command", re.compile(r"\bcodex\s+run\b", re.IGNORECASE)),
     (
@@ -64,7 +67,7 @@ def run_self_tests() -> int:
         ("~/.hermes/", True, "Hermes config path with slash"),
         ("hermes skills install", True, "Hermes CLI command"),
         ("hermes config set", True, "Hermes CLI command"),
-        ("()", True, " Code agent reference"),
+        ("()", True, "Code agent reference"),
         ("gemini skills", True, "Gemini CLI command"),
         ("codex run", True, "Codex CLI command"),
         (".claude/config", True, "Platform-specific path"),
@@ -119,5 +122,5 @@ def main() -> int:
     return 0
 
 
-if __name__ ***REMOVED*** "__main__":
+if __name__ == "__main__":
     sys.exit(main())

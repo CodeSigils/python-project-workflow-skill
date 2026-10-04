@@ -11,25 +11,25 @@ set -e
 # that CI then rejects. Say so when uv is absent rather than failing a
 # commit over a tool this repository does not install.
 if command -v uv >/dev/null 2>&1; then
-    echo "***REMOVED***= pre-commit: ruff check ***REMOVED***="
+    echo "=== pre-commit: ruff check ==="
     uv run --locked ruff check scripts .github/scripts
     uv run --locked ty check scripts .github/scripts
 else
-    echo "***REMOVED***= pre-commit: uv not found, skipping lint ***REMOVED***="
+    echo "=== pre-commit: uv not found, skipping lint ==="
     echo "Install uv to lint locally; CI always runs it." >&2
 fi
 
-echo "***REMOVED***= pre-commit: check portability ***REMOVED***="
+echo "=== pre-commit: check portability ==="
 python3 .github/scripts/check-portability.py
 
-echo "***REMOVED***= pre-commit: validate skill structure ***REMOVED***="
+echo "=== pre-commit: validate skill structure ==="
 python3 scripts/validate.py
 
-echo "***REMOVED***= pre-commit: check expiry ***REMOVED***="
+echo "=== pre-commit: check expiry ==="
 python3 scripts/check-expiry.py
 
-echo "***REMOVED***= pre-commit: version consistency ***REMOVED***="
+echo "=== pre-commit: version consistency ==="
 python3 scripts/check-version-consistency.py
 
-echo "***REMOVED***= pre-commit: README tree ***REMOVED***="
+echo "=== pre-commit: README tree ==="
 python3 scripts/check-readme-tree.py

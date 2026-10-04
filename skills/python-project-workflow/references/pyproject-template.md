@@ -127,7 +127,7 @@ When authoring cross-platform Python packages:
 - Consider line endings in `.gitattributes` (`* text=auto`)
 - Avoid platform-specific assumptions in setup.py/pyproject.toml
 - Test installation and basic functionality on all supported platforms
-- Use environment markers in dependencies when needed (`sys_platform ***REMOVED*** "win32"`)
+- Use environment markers in dependencies when needed (`sys_platform == "win32"`)
 
 ## Version Recommendations
 

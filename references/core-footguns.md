@@ -28,13 +28,13 @@ for i in range(5):
 - `__init__` initializes the already-created instance
 - If you override `__new__`, you usually also need `__init__`
 
-## `is` vs `***REMOVED***`
+## `is` vs `==`
 
 - `is` is identity (same object in memory)
-- `***REMOVED***` is equality (value comparison)
+- `==` is equality (value comparison)
 - Use `is` for `None` and identity-based sentinels
 - For booleans, normally test truthiness directly; use `is True` or `is False` only when exact boolean identity matters
-- Use `***REMOVED***` for value comparison (numbers, strings, etc.)
+- Use `==` for value comparison (numbers, strings, etc.)
 
 ## Float Equality
 

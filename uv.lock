@@ -17,8 +17,8 @@ dev = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "ruff", specifier = "***REMOVED***0.16.9" },
-    { name = "ty", specifier = "***REMOVED***0.0.84" },
+    { name = "ruff", specifier = "==0.16.9" },
+    { name = "ty", specifier = "==0.0.84" },
 ]
 
 [[package]]

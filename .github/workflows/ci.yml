@@ -15,7 +15,7 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name ***REMOVED*** 'pull_request' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   UV_VERSION: "0.11.7"
@@ -95,7 +95,7 @@ jobs:
 
   verify-urls:
     name: Verify external references
-    if: github.event_name ***REMOVED*** 'schedule' || github.event_name ***REMOVED*** 'workflow_dispatch' || github.event_name ***REMOVED*** 'pull_request'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -108,7 +108,7 @@ jobs:
 
   release-integrity:
     name: Verify published release
-    if: github.event_name ***REMOVED*** 'schedule' || github.event_name ***REMOVED*** 'workflow_dispatch'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -126,7 +126,7 @@ jobs:
 
   repo-hygiene:
     name: Report repository hygiene
-    if: github.event_name ***REMOVED*** 'schedule' || github.event_name ***REMOVED*** 'workflow_dispatch'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     # Reading pull request state is the whole point; the default token cannot.
     permissions:
