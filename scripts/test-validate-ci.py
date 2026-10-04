@@ -12,6 +12,7 @@ from types import ModuleType
 ROOT = Path(__file__).resolve().parents[1]
 VALIDATOR = ROOT / "scripts/validate-ci.py"
 WORKFLOW = ROOT / ".github/workflows/ci.yml"
+RELEASE_WORKFLOW = ROOT / ".github/workflows/release.yml"
 
 
 def load_validator() -> ModuleType:
@@ -45,6 +46,23 @@ def main() -> int:
     errors = module.validate_workflow(workflow)
     if errors:
         raise AssertionError(f"current workflow failed validation: {errors}")
+
+    release_workflow = RELEASE_WORKFLOW.read_text(encoding="utf-8")
+    release_errors = module.validate_release_workflow(release_workflow)
+    if release_errors:
+        raise AssertionError(f"current release workflow failed validation: {release_errors}")
+    if not module.validate_release_workflow(
+        release_workflow.replace("needs: verify-release-tag\n", "", 1)
+    ):
+        raise AssertionError("release workflow accepted a write job without preflight")
+    if not module.validate_release_workflow(
+        release_workflow.replace("permissions:\n  contents: read\n", "", 1)
+    ):
+        raise AssertionError("release workflow accepted a writable default token")
+    if not module.validate_release_workflow(
+        release_workflow.replace("--expected-tag \"$GITHUB_REF_NAME\"", "", 1)
+    ):
+        raise AssertionError("release workflow accepted a tag without metadata validation")
 
     for command in module.REQUIRED_VALIDATE_COMMANDS:
         assert_rejected(

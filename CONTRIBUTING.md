@@ -54,17 +54,16 @@ git config core.hooksPath .githooks
 
 `pre-commit` runs the fast validators: Ruff (when it is on `PATH`),
 cross-agent portability, skill structure, freshness markers, version
-consistency, and the README tree. `pre-push` mirrors the `validate` job in
-`.github/workflows/ci.yml`, so a push that passes locally has already run
-what CI would run.
+consistency, and the README tree. `pre-push` runs the complete local source
+validation gate before a direct push to `main`; it deliberately exits without
+running for feature branches and tags.
 
-The pre-push hook is the real gate on this repository. Branch protection
-runs with `enforce_admins: false`, which means an administrator push to
-`main` bypasses every required status check; GitHub reports those checks as
-"expected" at push time, because the push that would trigger them has not
-landed yet. No branch-protection setting changes that, so the hook enforces
-locally and CI remains the backstop. `--no-verify` skips it, at the cost of
-leaving CI as the only gate.
+GitHub branch protection is the authoritative gate: `main` requires its CI
+checks and does not allow administrator bypass. The repository has one solo
+maintainer, so it deliberately requires zero approvals; pull requests remain
+the normal change record and CI is the independent validation. The local hook
+is faster feedback only. `--no-verify` skips it, leaving GitHub CI as the
+remaining gate.
 
 Both hooks are linted. CI runs `shellcheck scripts/*.sh .githooks/*` and
 `validate-ci.py` requires that command, so the lint cannot be dropped
@@ -73,3 +72,19 @@ if a non-shell hook is ever added deliberately, change the convention and
 the command together.
 
 For releases, follow `docs/release-checklist.md`.
+
+## Automation decisions
+
+- GitHub branch protection, not local hooks, requires CI checks and prevents
+  direct pushes to `main`, including administrator bypass. The repository has
+  a solo maintainer, so the approval requirement remains zero; stale-review
+  dismissal is retained for any future collaborator review.
+- Only an annotated `vX.Y.Z` tag whose target is reachable from `main` and
+  whose version matches `CITATION.cff` can create a release. The release job
+  receives `contents: write` only after a read-only preflight passes.
+- Dependabot groups minor and patch GitHub Action updates weekly. Major action
+  upgrades stay deliberately manual and must receive the same review as a
+  migration.
+- The scheduled hygiene job treats an unreviewed pull request older than three
+  days and any open pull request older than fourteen days as failures. A remote
+  branch without an open pull request becomes stale after thirty days.

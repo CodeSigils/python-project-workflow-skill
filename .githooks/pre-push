@@ -2,20 +2,27 @@
 #
 # pre-push hook: the local gate for a direct push to main.
 #
-# Branch protection on this repository runs with enforce_admins=false, so an
-# administrator push bypasses every required status check. GitHub reports
-# those checks as "expected" at push time, because the push that would
-# trigger them has not landed yet, which is exactly why the bypass notice
-# appears. There is no protection setting that gates a direct push:
-# turning enforce_admins on rejects the push for the same reason. This
-# hook is the gate instead, and CI is the backstop.
+# GitHub branch protection is the authoritative gate: it requires the CI
+# checks and blocks direct pushes, including administrator pushes. This hook
+# provides faster local feedback before attempting a direct push to main.
 #
-# The checks below mirror the `validate` job in .github/workflows/ci.yml, so
-# a push that passes here has already run what CI would run.
+# The checks below cover the local source-validation surface. CI remains the
+# independent validation record for every merged change.
 #
 # Install with: git config core.hooksPath .githooks
 #
 set -eu
+
+pushes_main=false
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+    if [ "$remote_ref" = "refs/heads/main" ]; then
+        pushes_main=true
+    fi
+done
+
+if [ "$pushes_main" = false ]; then
+    exit 0
+fi
 
 failed=0
 

@@ -5,12 +5,11 @@ on:
     tags:
       - 'v*.*.*'
 
-# This is the only write scope in the repository. SECURITY.md records it.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  release:
+  verify-release-tag:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
@@ -18,6 +17,22 @@ jobs:
           # gh reads GH_TOKEN from the environment and --verify-tag needs only
           # `git ls-remote`, which works unauthenticated here, so the write-scope
           # job has no reason to leave a usable token in .git/config.
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify tag format, version metadata, and main ancestry
+        run: |
+          python3 scripts/check-version-consistency.py --expected-tag "$GITHUB_REF_NAME"
+          git fetch --no-tags origin main
+          git merge-base --is-ancestor "${GITHUB_REF_NAME}^{}" origin/main
+
+  release:
+    needs: verify-release-tag
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
           persist-credentials: false
       - name: Create GitHub release with generated notes
         env:

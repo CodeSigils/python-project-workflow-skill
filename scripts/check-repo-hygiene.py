@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Report repository hygiene drift, and fail on stacked pull requests.
+"""Report repository hygiene drift and fail on actionable review debt.
 
 A review session that has to remember to run `git status`, close stale pull
 requests, and delete merged branches will eventually forget one of them. The
@@ -7,19 +7,24 @@ failure mode is not a dirty tree; it is a new pull request opened against a
 branch that was already superseded, which stacks work and makes the real diff
 hard to read.
 
-So the stacking condition is an error, and everything else is a note. Notes
-appear in the job summary whether or not anyone reads them; the error stops a
-push. Everything except the pull-request query works offline.
+Stacked pull requests, neglected pull requests, and stale branches are errors.
+Local state and inaccessible remote metadata remain notes. The workflow writes
+the result to the GitHub Actions job summary.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
+from datetime import datetime, timezone
 
 DEFAULT_BRANCH = "main"
+UNREVIEWED_PULL_GRACE_DAYS = 3
+STALE_PULL_DAYS = 14
+STALE_BRANCH_DAYS = 30
 
 
 def run(args: list[str]) -> tuple[int, str, str]:
@@ -72,6 +77,50 @@ def orphaned_branches(names: list[str], with_pull: set[str], default_branch: str
     ]
 
 
+def age_days(value: str, now: datetime) -> int | None:
+    try:
+        timestamp = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return max(0, (now - timestamp.astimezone(timezone.utc)).days)
+
+
+def neglected_pulls(pulls: list[dict], now: datetime) -> list[str]:
+    findings: list[str] = []
+    for pull in pulls:
+        number = pull.get("number")
+        created_days = age_days(str(pull.get("createdAt") or ""), now)
+        updated_days = age_days(str(pull.get("updatedAt") or ""), now)
+        if created_days is None or updated_days is None:
+            findings.append(f"pull request #{number} has an unreadable GitHub timestamp")
+            continue
+        reviews = pull.get("reviews") or []
+        if not reviews and created_days >= UNREVIEWED_PULL_GRACE_DAYS:
+            findings.append(
+                f"pull request #{number} has no review after {created_days} day(s)"
+            )
+        if updated_days >= STALE_PULL_DAYS:
+            findings.append(
+                f"pull request #{number} has not been updated for {updated_days} day(s)"
+            )
+    return findings
+
+
+def stale_branches(
+    branch_dates: dict[str, str], with_pull: set[str], now: datetime
+) -> list[str]:
+    findings: list[str] = []
+    for name, updated_at in sorted(branch_dates.items()):
+        if name ***REMOVED*** DEFAULT_BRANCH or name in with_pull:
+            continue
+        days = age_days(updated_at, now)
+        if days is None:
+            findings.append(f"branch {name!r} has an unreadable commit timestamp")
+        elif days >= STALE_BRANCH_DAYS:
+            findings.append(f"branch {name!r} has no pull request and is {days} day(s) old")
+    return findings
+
+
 # --------------------------------------------------------------------------
 # Collection
 # --------------------------------------------------------------------------
@@ -101,7 +150,8 @@ def remote_pulls(repo: str) -> tuple[list[dict], list[str]]:
     code, out, err = run(
         [
             "gh", "pr", "list", "--repo", repo, "--state", "open",
-            "--limit", "50", "--json", "number,headRefName,baseRefName",
+            "--limit", "50", "--json",
+            "number,headRefName,baseRefName,createdAt,updatedAt,reviews",
         ]
     )
     if code != 0:
@@ -112,14 +162,24 @@ def remote_pulls(repo: str) -> tuple[list[dict], list[str]]:
         return [], [f"pull request query returned invalid JSON: {error}"]
 
 
-def remote_branches(repo: str) -> tuple[list[str], list[str]]:
-    """Fetch remote branch names. Returns (names, notes)."""
+def remote_branches(repo: str) -> tuple[dict[str, str], list[str]]:
     code, out, err = run(
         ["gh", "api", f"repos/{repo}/branches", "--paginate", "--jq", ".[].name"]
     )
     if code != 0:
-        return [], [f"branch query unavailable: {err.strip() or out.strip()}"]
-    return [line.strip() for line in out.splitlines() if line.strip()], []
+        return {}, [f"branch query unavailable: {err.strip() or out.strip()}"]
+    names = [line.strip() for line in out.splitlines() if line.strip()]
+    dates: dict[str, str] = {}
+    notes: list[str] = []
+    for name in names:
+        code, timestamp, err = run(
+            ["gh", "api", f"repos/{repo}/commits/{name}", "--jq", ".commit.committer.date"]
+        )
+        if code != 0:
+            notes.append(f"could not read the latest commit for branch {name!r}: {err.strip()}")
+            continue
+        dates[name] = timestamp.strip()
+    return dates, notes
 
 
 def detect_repo(root: str) -> str:
@@ -146,12 +206,25 @@ def collect(repo: str, root: str) -> tuple[list[str], list[str]]:
     pulls, pull_notes = remote_pulls(repo)
     notes.extend(pull_notes)
     errors.extend(stacked_pulls(pulls, DEFAULT_BRANCH))
+    errors.extend(neglected_pulls(pulls, datetime.now(timezone.utc)))
 
     if not pull_notes:
         remote, branch_notes = remote_branches(repo)
         notes.extend(branch_notes)
-        notes.extend(orphaned_branches(remote, {p["headRefName"] for p in pulls}, DEFAULT_BRANCH))
+        pull_branches = {str(p.get("headRefName") or "") for p in pulls}
+        notes.extend(orphaned_branches(list(remote), pull_branches, DEFAULT_BRANCH))
+        errors.extend(stale_branches(remote, pull_branches, datetime.now(timezone.utc)))
     return errors, notes
+
+
+def write_summary(lines: list[str]) -> None:
+    summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if not summary:
+        return
+    with open(summary, "a", encoding="utf-8") as file:
+        file.write("## Repository hygiene\n\n")
+        file.write("\n".join(f"- {line}" for line in lines))
+        file.write("\n")
 
 
 def run_self_tests() -> None:
@@ -180,6 +253,17 @@ def run_self_tests() -> None:
     ]
     assert orphaned_branches(["main", "stale"], {"stale"}, DEFAULT_BRANCH) ***REMOVED*** []
 
+    now = datetime(2026, 10, 4, tzinfo=timezone.utc)
+    assert neglected_pulls(
+        [{"number": 1, "createdAt": "2026-10-01T00:00:00Z", "updatedAt": "2026-10-04T00:00:00Z", "reviews": []}], now
+    ) ***REMOVED*** ["pull request #1 has no review after 3 day(s)"]
+    assert neglected_pulls(
+        [{"number": 2, "createdAt": "2026-09-01T00:00:00Z", "updatedAt": "2026-09-01T00:00:00Z", "reviews": [{"state": "APPROVED"}]}], now
+    ) ***REMOVED*** ["pull request #2 has not been updated for 33 day(s)"]
+    assert stale_branches(
+        {"main": "2026-01-01T00:00:00Z", "old": "2026-09-01T00:00:00Z"}, set(), now
+    ) ***REMOVED*** ["branch 'old' has no pull request and is 33 day(s) old"]
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(
@@ -205,7 +289,9 @@ def main() -> int:
         for error in errors:
             print(f"FAIL: {error}", file=sys.stderr)
         print(f"FAIL: {len(errors)} repository hygiene error(s)", file=sys.stderr)
+        write_summary([f"FAIL: {error}" for error in errors] + notes)
         return 1
+    write_summary(["PASS: no stacked or neglected pull requests"] + notes)
     print("PASS: no stacked pull requests; hygiene notes above, if any")
     return 0
 
