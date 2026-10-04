@@ -56,26 +56,27 @@ def get_latest_tag() -> tuple[str | None, str | None]:
     return (tags[0], None) if tags else (None, None)
 
 
-def get_latest_release() -> tuple[str | None, str | None]:
-    """Return the newest published GitHub release tag and an optional error."""
+def get_release(tag: str) -> tuple[str | None, str | None]:
     try:
         result = subprocess.run(
-            ["gh", "release", "list", "--limit", "1", "--json", "tagName"],
+            ["gh", "release", "view", tag, "--json", "tagName,isDraft"],
             capture_output=True,
             text=True,
             check=False,
         )
     except OSError as exc:
         return None, str(exc)
+    if result.returncode != 0 and "HTTP 404" in result.stderr:
+        return None, None
     if result.returncode != 0:
         return None, result.stderr.strip() or f"gh exited {result.returncode}"
     try:
-        entries = json.loads(result.stdout or "[]")
+        release = json.loads(result.stdout or "{}")
     except json.JSONDecodeError as exc:
         return None, f"could not parse gh output: {exc}"
-    if not entries:
+    if release.get("isDraft"):
         return None, None
-    return entries[0].get("tagName"), None
+    return release.get("tagName"), None
 
 
 def validate_release(
@@ -96,6 +97,20 @@ def validate_release(
             f"but the latest tag is {latest_tag}"
         ]
     return []
+
+
+def validate_release_tag(
+    tag: str,
+    local_versions: Mapping[str, str | None],
+) -> list[str]:
+    tag_version = version_key(tag)
+    if tag_version is None or not tag.startswith("v"):
+        return [f"Release tag must use vX.Y.Z: {tag}"]
+    errors: list[str] = []
+    for source, version in local_versions.items():
+        if normalize_version(version or "") != normalize_version(tag):
+            errors.append(f"Release tag {tag} does not match {source} version {version or 'unreadable'}")
+    return errors
 
 
 def validate_versions(
@@ -178,6 +193,14 @@ def run_self_tests() -> int:
     assert validate_release("v0.2.0", None, "gh is not installed") == [
         "Could not query GitHub releases: gh is not installed"
     ]
+    release_aligned = {source: "0.2.0" for source in LOCAL_VERSION_SOURCES}
+    assert validate_release_tag("v0.2.0", release_aligned) == []
+    assert validate_release_tag("v0.2", aligned) == [
+        "Release tag must use vX.Y.Z: v0.2"
+    ]
+    assert validate_release_tag("v0.2.1", aligned) == [
+        "Release tag v0.2.1 does not match CITATION.cff version 0.1.0"
+    ]
 
     print("PASS: check-version-consistency.py self-tests")
     return 0
@@ -193,6 +216,10 @@ def main() -> int:
         help="also require a published GitHub release for the latest tag",
     )
     parser.add_argument("--self-test", action="store_true")
+    parser.add_argument(
+        "--expected-tag",
+        help="require this pushed tag to be exact SemVer and match local version metadata",
+    )
     args = parser.parse_args()
 
     if args.self_test:
@@ -209,8 +236,11 @@ def main() -> int:
 
     errors, notes = validate_versions(local_versions, latest_tag, tag_error)
 
+    if args.expected_tag:
+        errors.extend(validate_release_tag(args.expected_tag, local_versions))
+
     if args.require_github_release:
-        latest_release, release_error = get_latest_release()
+        latest_release, release_error = get_release(latest_tag or "")
         print(f"Latest GitHub release: {latest_release or 'none'}")
         errors.extend(validate_release(latest_tag, latest_release, release_error))
 

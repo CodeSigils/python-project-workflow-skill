@@ -54,9 +54,9 @@ git config core.hooksPath .githooks
 
 `pre-commit` runs the fast validators: Ruff (when it is on `PATH`),
 cross-agent portability, skill structure, freshness markers, version
-consistency, and the README tree. `pre-push` mirrors the `validate` job in
-`.github/workflows/ci.yml`, so a push that passes locally has already run
-what CI would run.
+consistency, and the README tree. `pre-push` runs the complete local source
+validation gate before a direct push to `main`; it deliberately exits without
+running for feature branches and tags.
 
 The pre-push hook is the real gate on this repository. Branch protection
 runs with `enforce_admins: false`, which means an administrator push to
@@ -73,3 +73,18 @@ if a non-shell hook is ever added deliberately, change the convention and
 the command together.
 
 For releases, follow `docs/release-checklist.md`.
+
+## Automation decisions
+
+- GitHub rulesets, not local hooks, must require one approving review, dismiss
+  stale approvals, require the CI checks, and prevent direct pushes to `main`.
+  A hook is a fast local guard and can always be bypassed with `--no-verify`.
+- Only an annotated `vX.Y.Z` tag whose target is reachable from `main` and
+  whose version matches `CITATION.cff` can create a release. The release job
+  receives `contents: write` only after a read-only preflight passes.
+- Dependabot groups minor and patch GitHub Action updates weekly. Major action
+  upgrades stay deliberately manual and must receive the same review as a
+  migration.
+- The scheduled hygiene job treats an unreviewed pull request older than three
+  days and any open pull request older than fourteen days as failures. A remote
+  branch without an open pull request becomes stale after thirty days.

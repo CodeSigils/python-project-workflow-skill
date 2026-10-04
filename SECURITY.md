@@ -36,11 +36,11 @@ repository or generated projects are free of vulnerabilities.
 
 ### Workflow permissions
 
-Every workflow runs at `permissions: contents: read`, with one exception:
-`workflows/release.yml` runs at `contents: write` because `gh release create`
-cannot create a GitHub release with a read-only token. It is the only write
-scope in the repository, it triggers solely on a pushed `v*.*.*` tag, and its
-checkout is pinned to a full commit revision. Nothing else in CI or in
+Every workflow starts with `permissions: contents: read`. The release workflow
+first verifies a pushed `vX.Y.Z` tag with read-only access: it must match
+`CITATION.cff` and resolve to a commit reachable from `main`. Only its dependent
+release job receives `contents: write`, because `gh release create` cannot
+create a GitHub release with a read-only token. Nothing else in CI or in
 `scripts/` holds write access, and no workflow in this repository persists
 credentials. Every checkout sets `persist-credentials: false`, and
 `scripts/validate-ci.py` fails a push that reintroduces one without it.

@@ -9,6 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github/workflows/ci.yml"
+RELEASE_WORKFLOW = ROOT / ".github/workflows/release.yml"
 SHA_PIN_RE = re.compile(r"^[^@\s]+@[0-9a-f]{40}$")
 EXACT_VERSION_RE = re.compile(r"^[0-9]+(?:\.[0-9]+){2}$")
 RUFF_INSTALL_COMMAND = "uv sync --locked"
@@ -320,8 +321,41 @@ def validate_workflow(workflow: str, root: Path = ROOT) -> list[str]:
     return errors
 
 
+def validate_release_workflow(workflow: str) -> list[str]:
+    errors: list[str] = []
+    if "permissions:\n  contents: read\n" not in workflow:
+        errors.append("release.yml: workflow must default to contents: read")
+    preflight = section_body(workflow, "verify-release-tag")
+    release = section_body(workflow, "release")
+    if preflight is None:
+        errors.append("release.yml: missing read-only verify-release-tag job")
+    else:
+        for required in (
+            "fetch-depth: 0",
+            "persist-credentials: false",
+            "--expected-tag \"$GITHUB_REF_NAME\"",
+            'git merge-base --is-ancestor "${GITHUB_REF_NAME}^{}" origin/main',
+        ):
+            if required not in preflight:
+                errors.append(f"release.yml: verify-release-tag missing {required!r}")
+    if release is None:
+        errors.append("release.yml: missing release job")
+    else:
+        for required in (
+            "needs: verify-release-tag",
+            "permissions:",
+            "contents: write",
+            "persist-credentials: false",
+            'gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes',
+        ):
+            if required not in release:
+                errors.append(f"release.yml: release job missing {required!r}")
+    return errors
+
+
 def main() -> int:
     errors = validate_workflow(WORKFLOW.read_text(encoding="utf-8"))
+    errors.extend(validate_release_workflow(RELEASE_WORKFLOW.read_text(encoding="utf-8")))
     # ci.yml is already covered above; skip it so a violation is not reported twice.
     for path in sorted((ROOT / ".github/workflows").glob("*.y*ml")):
         if path == WORKFLOW:

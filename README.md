@@ -272,7 +272,7 @@ python-project-workflow/
 │   └── scripts/check-portability.py     # Rejects agent-specific runtime references
 ├── .githooks/
 │   ├── pre-commit                       # Local validation hook for staged changes
-│   ├── pre-push                         # Local gate mirroring the CI validate job
+│   ├── pre-push                         # Local validation gate for direct pushes to main
 ├── references/                          # Canonical sources mirrored into the payload
 │   ├── pyproject-template.md             # PEP 621 project and tool configuration baseline
 │   ├── lint-format-typing-testing.md     # Tool commands and staged adoption guidance
@@ -288,7 +288,7 @@ python-project-workflow/
 │   ├── check-version-consistency.py      # Validates citation version alignment with release tags
 │   ├── check-readme-tree.py              # Ensures README repo-layout tree matches tracked files
 │   ├── check-expiry.py                   # Checks freshness markers for expired evidence
-│   ├── check-repo-hygiene.py            # Fails on pull requests stacked on a non-default branch
+│   ├── check-repo-hygiene.py            # Reports and fails on stacked, unreviewed, and stale work
 │   ├── test-validate-ci.py                # Regression tests for CI policy enforcement
 │   ├── test-sync-payload.py              # Regression tests for payload drift behavior
 │   ├── run-codex-regression.py           # Optional isolated agent behavior runner
