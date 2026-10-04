@@ -17,6 +17,17 @@
 #
 set -eu
 
+pushes_main=false
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+    if [ "$remote_ref" = "refs/heads/main" ]; then
+        pushes_main=true
+    fi
+done
+
+if [ "$pushes_main" = false ]; then
+    exit 0
+fi
+
 failed=0
 
 run() {
