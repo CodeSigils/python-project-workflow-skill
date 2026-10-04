@@ -43,7 +43,7 @@ def main() -> int:
         before = target.read_bytes()
 
         check = run_sync(fixture, "--ci")
-        if check.returncode ***REMOVED*** 0:
+        if check.returncode == 0:
             raise AssertionError(f"--ci accepted payload drift:\n{check.stdout}")
         if target.read_bytes() != before:
             raise AssertionError("--ci modified a drifted payload file")
@@ -69,7 +69,7 @@ def main() -> int:
 
         target.chmod(0o755)
         mode_check = run_sync(fixture, "--ci")
-        if mode_check.returncode ***REMOVED*** 0:
+        if mode_check.returncode == 0:
             raise AssertionError("--ci accepted payload permission drift")
         if not target.stat().st_mode & 0o111:
             raise AssertionError("--ci modified drifted payload permissions")
@@ -89,7 +89,7 @@ def main() -> int:
         orphan.symlink_to(fixture / "scripts/validate.py")
 
         link_check = run_sync(fixture, "--ci")
-        if link_check.returncode ***REMOVED*** 0:
+        if link_check.returncode == 0:
             raise AssertionError("--ci accepted symlinked payload entries")
         if not target.is_symlink() or not orphan.is_symlink():
             raise AssertionError("--ci modified symlinked payload entries")
@@ -113,7 +113,7 @@ def main() -> int:
         source.unlink()
         source.symlink_to(target)
         source_link_check = run_sync(fixture, "--ci")
-        if source_link_check.returncode ***REMOVED*** 0:
+        if source_link_check.returncode == 0:
             raise AssertionError("--ci accepted a symlinked canonical source")
         invalid_source = (
             "INVALID source (must be a regular file): references/core-footguns.md"
@@ -128,5 +128,5 @@ def main() -> int:
     return 0
 
 
-if __name__ ***REMOVED*** "__main__":
+if __name__ == "__main__":
     raise SystemExit(main())

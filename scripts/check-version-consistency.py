@@ -162,43 +162,43 @@ def run_self_tests() -> int:
     aligned = {source: "0.1.0" for source in LOCAL_VERSION_SOURCES}
 
     errors, notes = validate_versions(aligned, "v0.1.0", None)
-    assert errors ***REMOVED*** [] and notes ***REMOVED*** []
+    assert errors == [] and notes == []
 
     errors, _ = validate_versions(aligned, "v0.2.0", None)
     assert any("behind latest tag" in error for error in errors)
 
     ahead = {source: "0.2.0" for source in LOCAL_VERSION_SOURCES}
     errors, notes = validate_versions(ahead, "v0.1.0", None)
-    assert errors ***REMOVED*** [] and notes ***REMOVED*** [
+    assert errors == [] and notes == [
         "RELEASE PENDING: local version 0.2.0 is ahead of v0.1.0"
     ]
 
     errors, notes = validate_versions(aligned, None, None)
-    assert errors ***REMOVED*** [] and notes ***REMOVED*** ["SKIP: no v-prefixed git tags found"]
+    assert errors == [] and notes == ["SKIP: no v-prefixed git tags found"]
 
     errors, notes = validate_versions(aligned, None, "not a git repository")
-    assert errors ***REMOVED*** [] and notes ***REMOVED*** [
+    assert errors == [] and notes == [
         "SKIP: could not query git tags: not a git repository"
     ]
 
-    assert validate_release("v0.2.0", "v0.2.0", None) ***REMOVED*** []
-    assert validate_release("v0.2.0", "0.2.0", None) ***REMOVED*** []
-    assert validate_release(None, None, None) ***REMOVED*** []
-    assert validate_release("v0.2.0", None, None) ***REMOVED*** [
+    assert validate_release("v0.2.0", "v0.2.0", None) == []
+    assert validate_release("v0.2.0", "0.2.0", None) == []
+    assert validate_release(None, None, None) == []
+    assert validate_release("v0.2.0", None, None) == [
         "GitHub has no published release, but tag v0.2.0 exists"
     ]
-    assert validate_release("v0.2.0", "v0.1.0", None) ***REMOVED*** [
+    assert validate_release("v0.2.0", "v0.1.0", None) == [
         "Latest GitHub release is v0.1.0, but the latest tag is v0.2.0"
     ]
-    assert validate_release("v0.2.0", None, "gh is not installed") ***REMOVED*** [
+    assert validate_release("v0.2.0", None, "gh is not installed") == [
         "Could not query GitHub releases: gh is not installed"
     ]
     release_aligned = {source: "0.2.0" for source in LOCAL_VERSION_SOURCES}
-    assert validate_release_tag("v0.2.0", release_aligned) ***REMOVED*** []
-    assert validate_release_tag("v0.2", aligned) ***REMOVED*** [
+    assert validate_release_tag("v0.2.0", release_aligned) == []
+    assert validate_release_tag("v0.2", aligned) == [
         "Release tag must use vX.Y.Z: v0.2"
     ]
-    assert validate_release_tag("v0.2.1", aligned) ***REMOVED*** [
+    assert validate_release_tag("v0.2.1", aligned) == [
         "Release tag v0.2.1 does not match CITATION.cff version 0.1.0"
     ]
 
@@ -255,5 +255,5 @@ def main() -> int:
     return 0
 
 
-if __name__ ***REMOVED*** "__main__":
+if __name__ == "__main__":
     sys.exit(main())

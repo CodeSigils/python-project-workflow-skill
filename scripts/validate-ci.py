@@ -244,9 +244,9 @@ def validate_workflow(workflow: str, root: Path = ROOT) -> list[str]:
         errors.append("ci.yml: missing verify-urls job")
     else:
         required = (
-            "if: github.event_name ***REMOVED*** 'schedule'"
-            " || github.event_name ***REMOVED*** 'workflow_dispatch'"
-            " || github.event_name ***REMOVED*** 'pull_request'",
+            "if: github.event_name == 'schedule'"
+            " || github.event_name == 'workflow_dispatch'"
+            " || github.event_name == 'pull_request'",
             "runs-on: ubuntu-latest",
         )
         for line in required:
@@ -268,8 +268,8 @@ def validate_workflow(workflow: str, root: Path = ROOT) -> list[str]:
         # repository consults GitHub Releases, so a tag can stand unpublished
         # until someone reads the checklist by hand.
         for line in (
-            "if: github.event_name ***REMOVED*** 'schedule'"
-            " || github.event_name ***REMOVED*** 'workflow_dispatch'",
+            "if: github.event_name == 'schedule'"
+            " || github.event_name == 'workflow_dispatch'",
             "runs-on: ubuntu-latest",
             "fetch-depth: 0",
             "GH_TOKEN: ${{ github.token }}",
@@ -291,7 +291,7 @@ def validate_workflow(workflow: str, root: Path = ROOT) -> list[str]:
         errors.append("ci.yml: missing the repo-hygiene job")
     else:
         for line in (
-            "if: github.event_name ***REMOVED*** 'schedule' || github.event_name ***REMOVED*** 'workflow_dispatch'",
+            "if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'",
             "runs-on: ubuntu-latest",
             "pull-requests: read",
         ):
@@ -358,7 +358,7 @@ def main() -> int:
     errors.extend(validate_release_workflow(RELEASE_WORKFLOW.read_text(encoding="utf-8")))
     # ci.yml is already covered above; skip it so a violation is not reported twice.
     for path in sorted((ROOT / ".github/workflows").glob("*.y*ml")):
-        if path ***REMOVED*** WORKFLOW:
+        if path == WORKFLOW:
             continue
         errors.extend(
             no_persisted_credentials(path.read_text(encoding="utf-8"), path.name)
@@ -372,5 +372,5 @@ def main() -> int:
     return 0
 
 
-if __name__ ***REMOVED*** "__main__":
+if __name__ == "__main__":
     raise SystemExit(main())

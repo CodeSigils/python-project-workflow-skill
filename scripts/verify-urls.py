@@ -102,16 +102,16 @@ def check_url(
                 len(response.headers.get("Location", "").split("\n")) if "Location" in response.headers else 0
             )
 
-            if content_type ***REMOVED*** "json" or required_text:
+            if content_type == "json" or required_text:
                 body = response.read().decode("utf-8")
-            if content_type ***REMOVED*** "json":
+            if content_type == "json":
                 try:
                     json.loads(body)
                 except (json.JSONDecodeError, ValueError):
                     return UrlCheckResult(status, redirect_count, "INVALID_JSON")
             if required_text:
                 return UrlCheckResult(status, redirect_count, check_required_text(body, required_text))
-            if content_type ***REMOVED*** "json":
+            if content_type == "json":
                 return UrlCheckResult(status, redirect_count, "VALID")
             return UrlCheckResult(status, redirect_count, None)
 
@@ -135,14 +135,14 @@ def classify_status(status: int | str, expected_statuses: list[int]) -> str:
 def check_self_test() -> None:
     """Run internal self-tests for the validation logic."""
     # Test classify_status
-    assert classify_status(200, [200]) ***REMOVED*** "OK"
-    assert classify_status(404, [200]) ***REMOVED*** "DRIFT"
-    assert classify_status("ERROR", [200]) ***REMOVED*** "DRIFT"
-    assert classify_status(200, [200, 201]) ***REMOVED*** "OK"
-    assert classify_status(201, [200, 201]) ***REMOVED*** "OK"
+    assert classify_status(200, [200]) == "OK"
+    assert classify_status(404, [200]) == "DRIFT"
+    assert classify_status("ERROR", [200]) == "DRIFT"
+    assert classify_status(200, [200, 201]) == "OK"
+    assert classify_status(201, [200, 201]) == "OK"
     print("  PASS  classify_status")
-    assert check_required_text("alpha beta", ["alpha", "beta"]) ***REMOVED*** "ANCHORS_OK"
-    assert check_required_text("alpha beta", ["gamma"]) ***REMOVED*** "MISSING_ANCHOR"
+    assert check_required_text("alpha beta", ["alpha", "beta"]) == "ANCHORS_OK"
+    assert check_required_text("alpha beta", ["gamma"]) == "MISSING_ANCHOR"
     print("  PASS  check_required_text")
 
     # Test validate_entry
@@ -195,7 +195,7 @@ def main() -> int:
 
     entries = load_manifest()
 
-    print("***REMOVED***= Evidence URL Re-verification ***REMOVED***=")
+    print("=== Evidence URL Re-verification ===")
     print(f"{'Name':<30s} {'Status':<8s} {'Expected':<12s} {'Redirects':<9s} {'Content':<12s} {'Note':<10s}")
     print("-" * 90)
 
@@ -216,7 +216,7 @@ def main() -> int:
         result = check_url(entry["url"], content_type, entry.get("required_text"))
         expected = entry["expected_statuses"]
         note = classify_status(result.status, expected)
-        if note ***REMOVED*** "DRIFT":
+        if note == "DRIFT":
             drift_found = True
 
         # Content check trumps status check for JSON endpoints
@@ -226,8 +226,8 @@ def main() -> int:
             drift_found = True
 
         expected_text = "/".join(str(code) for code in expected)
-        marker = "  ← DRIFT" if note ***REMOVED*** "DRIFT" else ""
-        marker = "  ← BROKEN" if note ***REMOVED*** "BROKEN" else marker
+        marker = "  ← DRIFT" if note == "DRIFT" else ""
+        marker = "  ← BROKEN" if note == "BROKEN" else marker
         print(
             f"  {entry['name']:<30s} {result.status!s:<8s} {expected_text:<12s} "
             f"{result.redirects!s:<9s} {content_label:<12s} {note:<10s}{marker}"
@@ -242,5 +242,5 @@ def main() -> int:
     return 0
 
 
-if __name__ ***REMOVED*** "__main__":
+if __name__ == "__main__":
     raise SystemExit(main())

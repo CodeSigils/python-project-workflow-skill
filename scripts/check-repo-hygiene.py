@@ -111,7 +111,7 @@ def stale_branches(
 ) -> list[str]:
     findings: list[str] = []
     for name, updated_at in sorted(branch_dates.items()):
-        if name ***REMOVED*** DEFAULT_BRANCH or name in with_pull:
+        if name == DEFAULT_BRANCH or name in with_pull:
             continue
         days = age_days(updated_at, now)
         if days is None:
@@ -130,17 +130,17 @@ def local_state(root: str) -> tuple[list[str], list[str]]:
     """Collect local notes: dirty tree, stashes, unmerged branches, loose tags."""
     notes: list[str] = []
     code, out, _ = run(["git", "-C", root, "status", "--porcelain"])
-    if code ***REMOVED*** 0 and out.strip():
+    if code == 0 and out.strip():
         notes.append(f"worktree has {len(out.strip().splitlines())} uncommitted change(s)")
     code, out, _ = run(["git", "-C", root, "stash", "list"])
-    if code ***REMOVED*** 0 and out.strip():
+    if code == 0 and out.strip():
         notes.append(f"{len(out.strip().splitlines())} stash entry(ies) held")
     code, out, _ = run(["git", "-C", root, "branch", "--format=%(refname:short)"])
-    names = [line.strip() for line in out.splitlines() if line.strip()] if code ***REMOVED*** 0 else []
+    names = [line.strip() for line in out.splitlines() if line.strip()] if code == 0 else []
     code, out, _ = run(
         ["git", "-C", root, "branch", "--merged", DEFAULT_BRANCH, "--format=%(refname:short)"]
     )
-    merged = {line.strip() for line in out.splitlines()} if code ***REMOVED*** 0 else {DEFAULT_BRANCH}
+    merged = {line.strip() for line in out.splitlines()} if code == 0 else {DEFAULT_BRANCH}
     notes.extend(unmerged_branches(names, merged, DEFAULT_BRANCH))
     return names, notes
 
@@ -229,40 +229,40 @@ def write_summary(lines: list[str]) -> None:
 
 def run_self_tests() -> None:
     """Exercise each pure check with a known input and a known expectation."""
-    assert stacked_pulls([], DEFAULT_BRANCH) ***REMOVED*** []
+    assert stacked_pulls([], DEFAULT_BRANCH) == []
     assert stacked_pulls(
         [{"number": 8, "headRefName": "dependabot/x", "baseRefName": "main"}], DEFAULT_BRANCH
-    ) ***REMOVED*** []
+    ) == []
     assert stacked_pulls(
         [{"number": 9, "headRefName": "feature", "baseRefName": "feature"}], DEFAULT_BRANCH
-    ) ***REMOVED*** ["pull request #9 (feature) is based on 'feature' instead of 'main'"]
+    ) == ["pull request #9 (feature) is based on 'feature' instead of 'main'"]
     # A missing ref name is itself a fault, so it must not read as "main".
-    assert stacked_pulls([{"number": 10}], DEFAULT_BRANCH) ***REMOVED*** [
+    assert stacked_pulls([{"number": 10}], DEFAULT_BRANCH) == [
         "pull request #10 () is based on '' instead of 'main'"
     ]
 
-    assert unmerged_branches(["main"], {"main"}, DEFAULT_BRANCH) ***REMOVED*** []
-    assert unmerged_branches(["main", "old"], {"main"}, DEFAULT_BRANCH) ***REMOVED*** [
+    assert unmerged_branches(["main"], {"main"}, DEFAULT_BRANCH) == []
+    assert unmerged_branches(["main", "old"], {"main"}, DEFAULT_BRANCH) == [
         "branch 'old' has no commit reachable from main"
     ]
-    assert unmerged_branches(["main", "landed"], {"main", "landed"}, DEFAULT_BRANCH) ***REMOVED*** []
+    assert unmerged_branches(["main", "landed"], {"main", "landed"}, DEFAULT_BRANCH) == []
 
-    assert orphaned_branches(["main"], set(), DEFAULT_BRANCH) ***REMOVED*** []
-    assert orphaned_branches(["main", "stale"], set(), DEFAULT_BRANCH) ***REMOVED*** [
+    assert orphaned_branches(["main"], set(), DEFAULT_BRANCH) == []
+    assert orphaned_branches(["main", "stale"], set(), DEFAULT_BRANCH) == [
         "branch 'stale' is neither merged nor has an open pull request"
     ]
-    assert orphaned_branches(["main", "stale"], {"stale"}, DEFAULT_BRANCH) ***REMOVED*** []
+    assert orphaned_branches(["main", "stale"], {"stale"}, DEFAULT_BRANCH) == []
 
     now = datetime(2026, 10, 4, tzinfo=timezone.utc)
     assert neglected_pulls(
         [{"number": 1, "createdAt": "2026-10-01T00:00:00Z", "updatedAt": "2026-10-04T00:00:00Z", "reviews": []}], now
-    ) ***REMOVED*** ["pull request #1 has no review after 3 day(s)"]
+    ) == ["pull request #1 has no review after 3 day(s)"]
     assert neglected_pulls(
         [{"number": 2, "createdAt": "2026-09-01T00:00:00Z", "updatedAt": "2026-09-01T00:00:00Z", "reviews": [{"state": "APPROVED"}]}], now
-    ) ***REMOVED*** ["pull request #2 has not been updated for 33 day(s)"]
+    ) == ["pull request #2 has not been updated for 33 day(s)"]
     assert stale_branches(
         {"main": "2026-01-01T00:00:00Z", "old": "2026-09-01T00:00:00Z"}, set(), now
-    ) ***REMOVED*** ["branch 'old' has no pull request and is 33 day(s) old"]
+    ) == ["branch 'old' has no pull request and is 33 day(s) old"]
 
 
 def main() -> int:
@@ -296,5 +296,5 @@ def main() -> int:
     return 0
 
 
-if __name__ ***REMOVED*** "__main__":
+if __name__ == "__main__":
     sys.exit(main())
