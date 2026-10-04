@@ -58,13 +58,12 @@ consistency, and the README tree. `pre-push` runs the complete local source
 validation gate before a direct push to `main`; it deliberately exits without
 running for feature branches and tags.
 
-The pre-push hook is the real gate on this repository. Branch protection
-runs with `enforce_admins: false`, which means an administrator push to
-`main` bypasses every required status check; GitHub reports those checks as
-"expected" at push time, because the push that would trigger them has not
-landed yet. No branch-protection setting changes that, so the hook enforces
-locally and CI remains the backstop. `--no-verify` skips it, at the cost of
-leaving CI as the only gate.
+GitHub branch protection is the authoritative gate: `main` requires its CI
+checks and does not allow administrator bypass. The repository has one solo
+maintainer, so it deliberately requires zero approvals; pull requests remain
+the normal change record and CI is the independent validation. The local hook
+is faster feedback only. `--no-verify` skips it, leaving GitHub CI as the
+remaining gate.
 
 Both hooks are linted. CI runs `shellcheck scripts/*.sh .githooks/*` and
 `validate-ci.py` requires that command, so the lint cannot be dropped
@@ -76,9 +75,10 @@ For releases, follow `docs/release-checklist.md`.
 
 ## Automation decisions
 
-- GitHub rulesets, not local hooks, must require one approving review, dismiss
-  stale approvals, require the CI checks, and prevent direct pushes to `main`.
-  A hook is a fast local guard and can always be bypassed with `--no-verify`.
+- GitHub branch protection, not local hooks, requires CI checks and prevents
+  direct pushes to `main`, including administrator bypass. The repository has
+  a solo maintainer, so the approval requirement remains zero; stale-review
+  dismissal is retained for any future collaborator review.
 - Only an annotated `vX.Y.Z` tag whose target is reachable from `main` and
   whose version matches `CITATION.cff` can create a release. The release job
   receives `contents: write` only after a read-only preflight passes.
