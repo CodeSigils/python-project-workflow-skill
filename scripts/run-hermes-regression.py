@@ -65,7 +65,7 @@ def prepare_fixture(root: Path, case: dict[str, Any]) -> None:
     if root.exists():
         raise FileExistsError(root)
     root.mkdir(parents=True)
-    if case["id"] ***REMOVED*** "mature-preservation":
+    if case["id"] == "mature-preservation":
         (root / "legacy_app").mkdir()
         (root / "tests").mkdir()
         (root / "legacy_app/__init__.py").write_text('"""Legacy app."""\n', encoding="utf-8")
@@ -86,7 +86,7 @@ def prepare_fixture(root: Path, case: dict[str, Any]) -> None:
 
 def command(case: dict[str, Any], model: str | None, provider: str | None) -> list[str]:
     value = ["hermes", "chat", "-Q", "--toolsets", "terminal", "--max-turns", "40"]
-    if case["invocation"] ***REMOVED*** "explicit":
+    if case["invocation"] == "explicit":
         value.extend(["--skills", "python-project-workflow"])
     if model:
         value.extend(["--model", model])
@@ -115,7 +115,7 @@ def self_test() -> int:
         hermes_home = Path(directory) / "hermes"
         shutil.copytree(PAYLOAD, hermes_home / "skills/python-project-workflow")
         _, digest = verify_installed_payload(hermes_home)
-        assert digest ***REMOVED*** payload_digest(PAYLOAD)
+        assert digest == payload_digest(PAYLOAD)
         installed_skill = hermes_home / "skills/python-project-workflow/SKILL.md"
         installed_skill.write_text(installed_skill.read_text(encoding="utf-8") + "\ndrift\n", encoding="utf-8")
         try:
@@ -129,9 +129,9 @@ def self_test() -> int:
             fixture = Path(directory) / case["id"]
             prepare_fixture(fixture, case)
             built = command(case, None, None)
-            assert ("--skills" in built) ***REMOVED*** (case["invocation"] ***REMOVED*** "explicit")
+            assert ("--skills" in built) == (case["invocation"] == "explicit")
         sample = 'answer follows\n{"skills_used":["python-project-workflow"],"classification":"greenfield","changed_paths":[]}\n'
-        assert extract_result(sample)["classification"] ***REMOVED*** "greenfield"
+        assert extract_result(sample)["classification"] == "greenfield"
     print(f"validated Hermes runner fixtures for {len(cases)} cases")
     return 0
 
@@ -189,10 +189,10 @@ def main() -> int:
             )
             stdout_path.write_text(result.stdout, encoding="utf-8")
             stderr_path.write_text(result.stderr, encoding="utf-8")
-            parsed = extract_result(result.stdout) if result.returncode ***REMOVED*** 0 else None
+            parsed = extract_result(result.stdout) if result.returncode == 0 else None
             if parsed is not None:
                 result_path.write_text(json.dumps(parsed, indent=2) + "\n", encoding="utf-8")
-            status = "completed" if result.returncode ***REMOVED*** 0 and parsed is not None else "failed"
+            status = "completed" if result.returncode == 0 and parsed is not None else "failed"
         except (subprocess.TimeoutExpired, ValueError) as exc:
             stderr_path.write_text(str(exc) + "\n", encoding="utf-8")
             status = "failed"
@@ -216,5 +216,5 @@ def main() -> int:
     return grade_code
 
 
-if __name__ ***REMOVED*** "__main__":
+if __name__ == "__main__":
     raise SystemExit(main())

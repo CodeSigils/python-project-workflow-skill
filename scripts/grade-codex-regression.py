@@ -25,7 +25,7 @@ def path_matches(value: object, expected: str) -> bool:
         return False
     parts = PurePath(value).parts
     expected_parts = PurePath(expected).parts
-    return parts[-len(expected_parts) :] ***REMOVED*** expected_parts
+    return parts[-len(expected_parts) :] == expected_parts
 
 
 def contains_any(value: object, terms: list[str]) -> bool:
@@ -162,7 +162,7 @@ def self_test() -> int:
                 path = fixture / relative
                 path.parent.mkdir(parents=True, exist_ok=True)
                 content = "fixture\n"
-                if relative ***REMOVED*** "pyproject.toml":
+                if relative == "pyproject.toml":
                     content = '[project]\nname = "invoice-checker"\n\n[project.scripts]\ninvoice-checker = "invoice_checker.cli:main"\n'
                 elif relative.endswith("cli.py"):
                     content = "def main():\n    return 0\n"
@@ -206,5 +206,5 @@ def main() -> int:
     return 0 if grade["passed"] else 1
 
 
-if __name__ ***REMOVED*** "__main__":
+if __name__ == "__main__":
     raise SystemExit(main())
