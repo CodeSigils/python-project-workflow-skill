@@ -35,7 +35,7 @@ def prepare_fixture(root: Path, case: dict[str, Any]) -> None:
         raise FileExistsError(root)
     (root / ".agents/skills").mkdir(parents=True)
     shutil.copytree(ROOT / "skills/python-project-workflow", root / ".agents/skills/python-project-workflow")
-    if case["id"] ***REMOVED*** "mature-preservation":
+    if case["id"] == "mature-preservation":
         (root / "legacy_app").mkdir()
         (root / "tests").mkdir()
         (root / "legacy_app/__init__.py").write_text('"""Legacy app."""\n', encoding="utf-8")
@@ -70,7 +70,7 @@ def usage(transcript: Path) -> dict[str, int] | None:
             event = json.loads(line)
         except ValueError:
             continue
-        if event.get("type") ***REMOVED*** "turn.completed":
+        if event.get("type") == "turn.completed":
             return event.get("usage")
     return None
 
@@ -80,7 +80,7 @@ def self_test() -> int:
         for case in read_json(CASES)["cases"]:
             fixture = Path(directory) / case["id"]
             prepare_fixture(fixture, case)
-            assert command(fixture, case["prompt"], Path(directory) / "result.json", None)[-1] ***REMOVED*** case["prompt"]
+            assert command(fixture, case["prompt"], Path(directory) / "result.json", None)[-1] == case["prompt"]
     read_json(SCHEMA)
     print("validated runner fixtures for 2 cases")
     return 0
@@ -126,7 +126,7 @@ def main() -> int:
         with transcript.open("w", encoding="utf-8") as out, stderr.open("w", encoding="utf-8") as err:
             result = subprocess.run(command(fixture, case["prompt"], result_path, args.model), stdout=out, stderr=err,
                                     text=True, check=False, timeout=args.timeout)
-        summary["cases"].append({"id": case["id"], "status": "completed" if result.returncode ***REMOVED*** 0 else "failed",
+        summary["cases"].append({"id": case["id"], "status": "completed" if result.returncode == 0 else "failed",
                                  "duration_seconds": round(monotonic() - started, 3), "usage": usage(transcript)})
     summary["ended_at"] = datetime.now(timezone.utc).isoformat()
     (output / "run-summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
@@ -142,5 +142,5 @@ def main() -> int:
     return grade_code
 
 
-if __name__ ***REMOVED*** "__main__":
+if __name__ == "__main__":
     raise SystemExit(main())
