@@ -42,7 +42,8 @@ cannot create a GitHub release with a read-only token. It is the only write
 scope in the repository, it triggers solely on a pushed `v*.*.*` tag, and its
 checkout is pinned to a full commit revision. Nothing else in CI or in
 `scripts/` holds write access, and no workflow in this repository persists
-credentials.
+credentials. Every checkout sets `persist-credentials: false`, and
+`scripts/validate-ci.py` fails a push that reintroduces one without it.
 
 ## Shipped Skill Trust Guarantees
 

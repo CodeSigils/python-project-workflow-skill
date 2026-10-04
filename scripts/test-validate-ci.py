@@ -155,6 +155,49 @@ def main() -> int:
         "a published-release check on a shallow clone",
     )
 
+    assert_rejected(
+        module,
+        workflow.replace("          persist-credentials: false\n", "", 1),
+        "a checkout that leaves the token persisted",
+    )
+    assert_rejected(
+        module,
+        workflow.replace(
+            "persist-credentials: false", "persist-credentials: true", 1
+        ),
+        "a checkout that opts back into persisted credentials",
+    )
+    assert_rejected(
+        module,
+        workflow.replace(
+            "          persist-credentials: false\n",
+            "          # persist-credentials: false\n",
+            1,
+        ),
+        "a commented-out credential policy counted as a policy",
+    )
+
+    inline = (
+        "jobs:\n"
+        "  release:\n"
+        "    steps:\n"
+        f"      - uses: actions/checkout@{'a' * 40}\n"
+        "      - run: gh release create v1.0.0\n"
+    )
+    if not module.no_persisted_credentials(inline, "release.yml"):
+        raise AssertionError(
+            "CI validator accepted an inline checkout with no credential policy"
+        )
+    guarded = inline.replace(
+        "      - run: gh release create v1.0.0\n",
+        "        with:\n          persist-credentials: false\n"
+        "      - run: gh release create v1.0.0\n",
+    )
+    if module.no_persisted_credentials(guarded, "release.yml"):
+        raise AssertionError(
+            "CI validator rejected a checkout that disables persisted credentials"
+        )
+
     print("PASS: CI policy validator rejects missing gates, drift, and mutable pins")
     return 0
 
