@@ -14,6 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          # gh reads GH_TOKEN from the environment and --verify-tag needs only
+          # `git ls-remote`, which works unauthenticated here, so the write-scope
+          # job has no reason to leave a usable token in .git/config.
+          persist-credentials: false
       - name: Create GitHub release with generated notes
         env:
           GH_TOKEN: ${{ github.token }}

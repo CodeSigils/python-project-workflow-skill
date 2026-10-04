@@ -58,6 +58,49 @@ def has_run_command(body: str, command: str) -> bool:
     )
 
 
+CHECKOUT_USE_RE = re.compile(r"^\s*(?:-\s+)?uses:\s*actions/checkout@")
+
+
+def persisted_checkout_steps(workflow: str) -> list[int]:
+    """Return the 1-based line numbers of checkout steps that keep the token.
+
+    A checkout leaves the job's ``GITHUB_TOKEN`` in the runner's ``.git/config``
+    unless the step opts out, so the credential outlives the step that needed
+    it and is readable by anything that runs later in the job. SECURITY.md
+    promises that no workflow here persists credentials; this turns that promise
+    into something a push can fail on.
+    """
+    lines = workflow.splitlines()
+    persisted: list[int] = []
+    for index, line in enumerate(lines):
+        if not CHECKOUT_USE_RE.match(line):
+            continue
+        indent = len(line) - len(line.lstrip())
+        block: list[str] = []
+        for follower in lines[index + 1 :]:
+            if not follower.strip():
+                block.append(follower)
+                continue
+            follower_indent = len(follower) - len(follower.lstrip())
+            starts_step = follower.lstrip().startswith("- ")
+            if follower_indent < indent or (starts_step and follower_indent <= indent):
+                break
+            block.append(follower)
+        # A commented-out setting is not a setting, so comments never satisfy it.
+        settings = [entry for entry in block if not entry.lstrip().startswith("#")]
+        if not any("persist-credentials: false" in entry for entry in settings):
+            persisted.append(index + 1)
+    return persisted
+
+
+def no_persisted_credentials(workflow: str, label: str) -> list[str]:
+    """Report every checkout in ``workflow`` that leaves credentials persisted."""
+    return [
+        f"{label}: checkout at line {line} must set 'persist-credentials: false'"
+        for line in persisted_checkout_steps(workflow)
+    ]
+
+
 BLOCK_SCALAR_SUFFIXES = ("|", ">", "|-", ">-", "|+", ">+")
 KEY_RE = re.compile(r"([A-Za-z0-9_-]+):(.*)$")
 
@@ -272,11 +315,20 @@ def validate_workflow(workflow: str, root: Path = ROOT) -> list[str]:
                 f"ci.yml: action reference must use a full commit SHA: {reference}"
             )
 
+    errors.extend(no_persisted_credentials(workflow, "ci.yml"))
+
     return errors
 
 
 def main() -> int:
     errors = validate_workflow(WORKFLOW.read_text(encoding="utf-8"))
+    # ci.yml is already covered above; skip it so a violation is not reported twice.
+    for path in sorted((ROOT / ".github/workflows").glob("*.y*ml")):
+        if path ***REMOVED*** WORKFLOW:
+            continue
+        errors.extend(
+            no_persisted_credentials(path.read_text(encoding="utf-8"), path.name)
+        )
     if errors:
         for error in errors:
             print(error, file=sys.stderr)
