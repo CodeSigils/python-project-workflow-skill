@@ -52,8 +52,8 @@ once per clone:
 git config core.hooksPath .githooks
 ```
 
-`pre-commit` runs the fast validators: Ruff (when it is on `PATH`),
-cross-agent portability, skill structure, freshness markers, version
+`pre-commit` runs the fast validators: hook integrity, Ruff (when it is on
+`PATH`), cross-agent portability, skill structure, freshness markers, version
 consistency, and the README tree. `pre-push` runs the complete local source
 validation gate before a direct push to `main`; it deliberately exits without
 running for feature branches and tags.
@@ -70,6 +70,18 @@ Both hooks are linted. CI runs `shellcheck scripts/*.sh .githooks/*` and
 silently. Anything added to `.githooks/` is therefore expected to be shell;
 if a non-shell hook is ever added deliberately, change the convention and
 the command together.
+
+Shell lint cannot see content damage inside a hook. A redaction pass once
+rewrote `===` banner strings in `.githooks/*`, `ci.yml`, and the shipped
+references to a removal placeholder, and every gate stayed green because
+Ruff and `ty` only read `scripts/` and `.github/scripts/`.
+`scripts/check-hook-integrity.py` closes that gap: it fails when a hook no
+longer runs a command recorded in its manifest, and when a tracked file
+carries a redaction placeholder. Stage matching is whitespace-normalized, so
+reflowing a command is fine while deleting one is not. When you add, remove,
+or rename a stage in either hook, update the manifest in the same change; the
+command is required in CI by `validate-ci.py`, so CI enforces the same
+manifest the hooks do.
 
 For releases, follow `docs/release-checklist.md`.
 

@@ -22,6 +22,8 @@ REQUIRED_VALIDATE_COMMANDS = (
     "python3 scripts/check-version-consistency.py",
     "python3 scripts/check-readme-tree.py",
     "python3 scripts/validate-ci.py",
+    "python3 scripts/check-hook-integrity.py",
+    "python3 scripts/check-hook-integrity.py --self-test",
     "python3 scripts/validate.py",
     "python3 scripts/test-validate-ci.py",
     "python3 scripts/test-sync-payload.py",
