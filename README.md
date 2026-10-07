@@ -226,6 +226,8 @@ python3 scripts/check-version-consistency.py
 python3 scripts/check-readme-tree.py
 python3 scripts/check-expiry.py
 python3 scripts/check-repo-hygiene.py --self-test
+python3 scripts/check-hook-integrity.py
+python3 scripts/check-hook-integrity.py --self-test
 python3 scripts/validate-ci.py
 python3 scripts/validate.py
 python3 scripts/test-validate-ci.py
@@ -289,6 +291,7 @@ python-project-workflow/
 │   ├── check-readme-tree.py              # Ensures README repo-layout tree matches tracked files
 │   ├── check-expiry.py                   # Checks freshness markers for expired evidence
 │   ├── check-repo-hygiene.py            # Reports and fails on stacked, unreviewed, and stale work
+│   ├── check-hook-integrity.py           # Fails when hooks lose stages or tracked files leak markers
 │   ├── test-validate-ci.py                # Regression tests for CI policy enforcement
 │   ├── test-sync-payload.py              # Regression tests for payload drift behavior
 │   ├── run-codex-regression.py           # Optional isolated agent behavior runner

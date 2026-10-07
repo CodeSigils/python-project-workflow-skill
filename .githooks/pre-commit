@@ -5,6 +5,13 @@
 #
 set -e
 
+# Run first. Ruff and ty only inspect scripts/ and .github/scripts/, and shell
+# linting only parses structure, so neither opens an `echo` payload inside this
+# file. This stage is what notices when a hook quietly loses a check or a
+# redaction placeholder reaches tracked content.
+echo "=== pre-commit: hook integrity ==="
+python3 scripts/check-hook-integrity.py
+
 # Lint through uv so this hook, the pre-push hook, and CI all run the
 # Ruff version pinned in uv.lock. A bare `ruff` resolves to whatever the
 # machine happens to have, which is how a commit hook can pass on code
