@@ -46,6 +46,8 @@ else
 fi
 
 run "shell script lint" shellcheck scripts/*.sh .githooks/*
+run "hook integrity" python3 scripts/check-hook-integrity.py
+run "hook integrity self-test" python3 scripts/check-hook-integrity.py --self-test
 run "CI policy" python3 scripts/validate-ci.py
 run "CI policy tests" python3 scripts/test-validate-ci.py
 run "skill structure" python3 scripts/validate.py

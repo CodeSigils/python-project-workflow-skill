@@ -63,6 +63,12 @@ jobs:
       - name: Validate CI policy
         run: python3 scripts/validate-ci.py
 
+      - name: Check hook integrity
+        run: python3 scripts/check-hook-integrity.py
+
+      - name: Test hook integrity checks
+        run: python3 scripts/check-hook-integrity.py --self-test
+
       - name: Run skill source checks
         run: python3 scripts/validate.py
 
