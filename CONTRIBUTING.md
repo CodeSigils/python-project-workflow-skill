@@ -89,8 +89,9 @@ For releases, follow `docs/release-checklist.md`.
 
 - GitHub branch protection, not local hooks, requires CI checks and prevents
   direct pushes to `main`, including administrator bypass. The repository has
-  a solo maintainer, so the approval requirement remains zero; stale-review
-  dismissal is retained for any future collaborator review.
+  a solo maintainer, so the approval requirement remains zero. If collaborators
+  begin reviewing changes, enable an approval requirement and stale-review
+  dismissal together.
 - Only an annotated `vX.Y.Z` tag whose target is reachable from `main` and
   whose version matches `CITATION.cff` can create a release. The release job
   receives `contents: write` only after a read-only preflight passes.
