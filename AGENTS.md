@@ -4,6 +4,13 @@
 maintainer-specific procedures in this repository infrastructure, not in the
 shipped skill, unless they are portable across supported clients.
 
+## Read first
+
+Before changing this repository, read this file, then the root `README.md`,
+`CONTRIBUTING.md`, and `SECURITY.md`. Read the relevant workflow, script, or
+canonical file under `references/` before editing it; do not rely on a past
+session summary when the repository or GitHub settings can provide the fact.
+
 ## CI and Git policy
 
 GitHub repository settings are the operational source of truth for branch
