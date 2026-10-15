@@ -145,4 +145,6 @@ jobs:
           persist-credentials: false
 
       - name: Report stacked pull requests and stale branches
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: python3 scripts/check-repo-hygiene.py

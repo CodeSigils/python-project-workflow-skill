@@ -115,9 +115,16 @@ def main() -> int:
         '[[package]]\nname = "unrelated"\nversion = "1.0.0"\n',
         "a lockfile with no ruff or ty entry",
     )
+    invalid_ruff_lock, replacements = re.subn(
+        r'(?m)(^name = "ruff"\nversion = ")[^"]+(")',
+        r"\g<1>0.0.0rc1\g<2>",
+        lock,
+        count=1,
+    )
+    assert replacements == 1, "ruff lockfile entry not found"
     assert_lockfile_rejected(
         module,
-        lock.replace('version = "0.16.9"', 'version = "0.16.9rc1"', 1),
+        invalid_ruff_lock,
         "a ruff version that is not an exact three-part release",
     )
     assert_lockfile_rejected(
@@ -159,6 +166,12 @@ def main() -> int:
         module,
         workflow.replace("          GH_TOKEN: ${{ github.token }}\n", "", 1),
         "a published-release check with no token",
+    )
+
+    hygiene = module.section_body(workflow, "repo-hygiene")
+    assert hygiene is not None, "repository-hygiene job block not found"
+    assert "GH_TOKEN: ${{ github.token }}" in hygiene, (
+        "repository-hygiene check must receive the Actions token"
     )
 
     assert_rejected(
