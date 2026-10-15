@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "description": "Machine-readable evidence URL index for python-project-workflow documentation.",
   "urls": [
     {
@@ -129,6 +129,39 @@
       "required_text": ["Python"],
       "source_section": "skills/python-project-workflow/references/security-and-gitignore.md",
       "domain_tag": "python-packaging",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-10-15"
+    },
+    {
+      "name": "uv GitHub Actions integration guide",
+      "url": "https://docs.astral.sh/uv/guides/integration/github/",
+      "expected_statuses": [200],
+      "required_text": ["astral-sh/setup-uv"],
+      "source_section": "docs/decisions.md",
+      "domain_tag": "python-tooling",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-10-15"
+    },
+    {
+      "name": "setup-uv action repository",
+      "url": "https://github.com/astral-sh/setup-uv",
+      "expected_statuses": [200],
+      "required_text": ["astral-sh/setup-uv"],
+      "source_section": "docs/decisions.md",
+      "domain_tag": "python-tooling",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-10-15"
+    },
+    {
+      "name": "GitHub Actions security hardening",
+      "url": "https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions",
+      "expected_statuses": [200],
+      "required_text": ["commit SHA"],
+      "source_section": "docs/decisions.md",
+      "domain_tag": "github-actions",
       "source_type": "official_docs",
       "status": "active",
       "last_verified": "2026-10-15"

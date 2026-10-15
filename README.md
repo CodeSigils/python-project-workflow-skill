@@ -259,6 +259,7 @@ python-project-workflow/
 ├── SECURITY.md                          # Vulnerability reporting policy and security scope
 ├── docs/
 │   ├── behavior-evaluation-effort.md    # Prospective transfer effort and result ledger
+│   ├── decisions.md                     # Durable decisions with sources and recheck triggers
 │   ├── evidence-urls.json               # External evidence URL verification manifest
 │   ├── portability-contract.md          # Cross-agent portability requirements
 │   └── release-checklist.md              # Repeatable maintainer release procedure

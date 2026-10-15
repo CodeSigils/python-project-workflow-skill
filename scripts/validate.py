@@ -14,6 +14,7 @@ SKILL_DIR = ROOT / "skills" / "python-project-workflow"
 SKILL = SKILL_DIR / "SKILL.md"
 REF_DIR = SKILL_DIR / "references"
 EVIDENCE_MANIFEST = ROOT / "docs" / "evidence-urls.json"
+DECISIONS = ROOT / "docs" / "decisions.md"
 REQUIRED_REFS = {
     "pyproject-template.md",
     "lint-format-typing-testing.md",
@@ -349,6 +350,52 @@ def check_payload_urls_registered() -> None:
         )
 
 
+DECISION_HEADING_RE = re.compile(r"(?m)^## Decision: (?P<title>.+)$")
+DECISION_FIELDS = ("Status", "Decided", "Sources", "Recheck")
+DECISION_STATUSES = {"proposed", "accepted", "deprecated", "superseded", "rejected"}
+
+
+def check_decisions() -> None:
+    """Each durable decision must be complete and cite registered sources."""
+    text = read_text_checked(DECISIONS)
+    matches = list(DECISION_HEADING_RE.finditer(text))
+    if not matches:
+        fail(f"{rel(DECISIONS)} has no '## Decision:' entries")
+
+    registered = load_registered_urls()
+    for index, match in enumerate(matches):
+        title = match.group("title").strip()
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        block = text[match.end():end]
+        label = f"{rel(DECISIONS)} decision {title!r}"
+
+        fields: dict[str, str] = {}
+        for line in block.splitlines():
+            field = re.match(
+                r"^- (?P<key>Status|Decided|Sources|Recheck):\s*(?P<value>.+?)\s*$", line
+            )
+            if field:
+                fields[field.group("key")] = field.group("value")
+
+        for key in DECISION_FIELDS:
+            if not fields.get(key):
+                fail(f"{label} is missing a non-empty '{key}:' field")
+        if fields["Status"] not in DECISION_STATUSES:
+            fail(f"{label} has an unknown status: {fields['Status']}")
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", fields["Decided"]):
+            fail(f"{label} 'Decided' must be YYYY-MM-DD: {fields['Decided']}")
+
+        sources = EXTERNAL_URL_RE.findall(fields["Sources"])
+        if not sources:
+            fail(f"{label} cites no source URL in 'Sources:'")
+        for raw in sources:
+            if normalize_url(raw) not in registered:
+                fail(
+                    f"{label} cites a source absent from {rel(EVIDENCE_MANIFEST)}: {raw}",
+                    hint="Register the source in the evidence manifest, then run scripts/verify-urls.py.",
+                )
+
+
 def check_readme() -> None:
     readme = read_text_checked(ROOT / "README.md")
     required = [
@@ -439,6 +486,7 @@ def main() -> int:
     check_references()
     check_payload_links()
     check_payload_urls_registered()
+    check_decisions()
     check_readme()
     check_evidence_docs()
     check_security()

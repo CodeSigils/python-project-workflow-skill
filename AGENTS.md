@@ -11,6 +11,16 @@ Before changing this repository, read this file, then the root `README.md`,
 canonical file under `references/` before editing it; do not rely on a past
 session summary when the repository or GitHub settings can provide the fact.
 
+## Decisions
+
+`docs/decisions.md` records non-obvious maintainer choices with their sources and
+recheck triggers. Before researching a setup, pinning, or policy question from
+scratch, read it; the answer is often already recorded, so there is no need to
+re-derive it. When you make a durable choice others would otherwise re-research,
+add an entry with its `Status`, `Decided` date, `Sources` (registered in
+`docs/evidence-urls.json`), and a `Recheck` trigger. `scripts/validate.py` rejects
+an incomplete entry or one that cites an unregistered source.
+
 ## CI and Git policy
 
 GitHub repository settings are the operational source of truth for branch

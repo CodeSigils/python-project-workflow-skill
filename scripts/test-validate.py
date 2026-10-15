@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import importlib.util
+import tempfile
 from pathlib import Path
 from types import ModuleType
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 VALIDATOR = ROOT / "scripts/validate.py"
@@ -64,6 +66,44 @@ def main() -> int:
     mutated["skills/python-project-workflow/SKILL.md"] = "See https://example.invalid/new."
     if not module.unregistered_urls(mutated, registered):
         raise AssertionError("validator accepted an unregistered payload URL")
+
+    # The real decision log must pass, and malformed entries must be rejected.
+    module.check_decisions()
+
+    valid = (
+        "# Decisions\n\n## Decision: Sample\n\n"
+        "- Status: accepted\n- Decided: 2026-10-15\n"
+        "- Sources: https://docs.astral.sh/uv/\n- Recheck: on the next major release\n"
+    )
+
+    def run_decisions(text: str) -> bool:
+        with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False) as handle:
+            handle.write(text)
+            path = Path(handle.name)
+        holder: Any = module
+        original = holder.DECISIONS
+        holder.DECISIONS = path
+        try:
+            module.check_decisions()
+            return True
+        except SystemExit:
+            return False
+        finally:
+            holder.DECISIONS = original
+            path.unlink()
+
+    if not run_decisions(valid):
+        raise AssertionError("check_decisions rejected a valid decision")
+    for mutated, label in (
+        (valid.replace("- Recheck: on the next major release\n", ""), "a missing Recheck field"),
+        (valid.replace("Status: accepted", "Status: maybe"), "an unknown status"),
+        (
+            valid.replace("https://docs.astral.sh/uv/", "https://example.invalid/x"),
+            "an unregistered source",
+        ),
+    ):
+        if run_decisions(mutated):
+            raise AssertionError(f"check_decisions accepted {label}")
 
     print("PASS: skill source validator rejects broken links and unregistered URLs")
     return 0

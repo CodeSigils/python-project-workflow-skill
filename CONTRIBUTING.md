@@ -112,10 +112,13 @@ required content, and the `verify-urls` CI job enforces it.
 
 - When a canonical `references/*.md` change rests on an external source, update
   the manifest in the same change. The payload mirror then carries it forward.
-- Record non-obvious decisions in prose in this file (see
-  [Automation decisions](#automation-decisions)) rather than in a separate
-  research directory; git history is the change record.
-- Do not add a parallel research ledger or finding-ID registry. This repository
-  is sync-first: canonical `references/*.md` are the source of truth, mirrored
-  into `skills/python-project-workflow/references/`, and drift is caught by
-  `bash scripts/sync-payload.sh --ci`.
+- Record durable, non-obvious decisions in
+  [`docs/decisions.md`](docs/decisions.md) with their source URLs and a recheck
+  trigger. The log is the place to look before re-researching a setup or policy
+  question, so a settled choice is not re-derived in every session.
+  `scripts/validate.py` rejects an incomplete entry or one whose source is not in
+  the evidence manifest.
+- Keep this lightweight and sync-first: it is a short decision log, not a
+  finding-ID research directory. Canonical `references/*.md` remain the source of
+  truth, mirrored into `skills/python-project-workflow/references/`, and drift is
+  caught by `bash scripts/sync-payload.sh --ci`.
