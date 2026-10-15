@@ -222,6 +222,7 @@ runtime status.
 
 ```bash
 python3 .github/scripts/check-portability.py
+python3 .github/scripts/check-portability.py --self-test
 python3 scripts/check-version-consistency.py
 python3 scripts/check-readme-tree.py
 python3 scripts/check-expiry.py
@@ -231,7 +232,9 @@ python3 scripts/check-hook-integrity.py --self-test
 python3 scripts/validate-ci.py
 python3 scripts/validate.py
 python3 scripts/test-validate-ci.py
+python3 scripts/test-validate.py
 python3 scripts/verify-urls.py
+python3 scripts/verify-urls.py --self-test
 python3 scripts/test-sync-payload.py
 python3 scripts/run-codex-regression.py --self-test
 python3 scripts/run-hermes-regression.py --self-test
@@ -287,6 +290,7 @@ python-project-workflow/
 │   └── security-and-gitignore.md         # Secret-safe ignore and Git procedures
 ├── scripts/                             # Repository maintenance and validation tools
 │   ├── payload-manifest.json             # Declares canonical files copied into the payload
+│   ├── stage_manifest.py                 # Single source of truth for the verification stage lists
 │   ├── sync-payload.sh                   # Synchronizes or checks the runtime payload mirror
 │   ├── check-version-consistency.py      # Validates citation version alignment with release tags
 │   ├── check-readme-tree.py              # Ensures README repo-layout tree matches tracked files
@@ -294,7 +298,9 @@ python-project-workflow/
 │   ├── check-repo-hygiene.py            # Reports and fails on stacked, unreviewed, and stale work
 │   ├── check-hook-integrity.py           # Fails when hooks lose stages or tracked files leak markers
 │   ├── test-validate-ci.py                # Regression tests for CI policy enforcement
+│   ├── test-validate.py                   # Regression tests for skill source checks
 │   ├── test-sync-payload.py              # Regression tests for payload drift behavior
+│   ├── regression_support.py             # Shared fixtures and helpers for the behavior runners
 │   ├── run-codex-regression.py           # Optional isolated agent behavior runner
 │   ├── run-hermes-regression.py          # Optional isolated Hermes behavior runner
 │   ├── grade-codex-regression.py         # Deterministic behavior result grader

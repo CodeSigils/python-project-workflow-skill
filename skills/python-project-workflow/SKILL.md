@@ -15,8 +15,9 @@ framework-complete guidance.
 
 ## Workflow
 
-1. Inspect repository instructions, version-control state, and project-native
-   configuration before recommending or making changes.
+1. Inspect before advising: read repository instructions, version-control
+   state, and project-native configuration first. Do not recommend or make
+   changes until the current state is established from repository facts.
 2. Classify the repository and the requested operation.
 3. Load only the references relevant to that classification.
 4. Preserve coherent local conventions unless the user explicitly requests
@@ -85,6 +86,12 @@ Target the project-wide minimum unless configuration intentionally scopes a
 newer target. Preserve an existing compatibility contract unless the user
 authorizes a breaking change. Do not silently raise `requires-python` or remove
 older versions from CI.
+
+Treat the declared range, the CI matrix, and every tool target as one contract:
+when they disagree, surface the mismatch before changing any of them. Do not
+assume a tool's current release supports the project's minimum interpreter, or
+that the newest tooling matches the project's floor; confirm each tool's
+documented Python support from its own documentation instead.
 
 For a new compatibility recommendation, verify current interpreter lifecycle,
 platform defaults, dependency support, and packaging guidance from official

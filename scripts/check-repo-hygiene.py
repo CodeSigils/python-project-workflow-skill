@@ -200,7 +200,7 @@ def collect(repo: str, root: str) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     notes: list[str] = []
 
-    names, local_notes = local_state(root)
+    _, local_notes = local_state(root)
     notes.extend(local_notes)
 
     pulls, pull_notes = remote_pulls(repo)

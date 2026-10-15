@@ -7,14 +7,12 @@ import json
 import re
 import subprocess
 import sys
-from collections.abc import Mapping
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
-LOCAL_VERSION_SOURCES: dict[str, Path] = {
-    "CITATION.cff": ROOT / "CITATION.cff",
-}
+VERSION_SOURCE = "CITATION.cff"
+VERSION_SOURCE_PATH = ROOT / VERSION_SOURCE
 
 
 def normalize_version(version: str) -> str:
@@ -99,52 +97,38 @@ def validate_release(
     return []
 
 
-def validate_release_tag(
-    tag: str,
-    local_versions: Mapping[str, str | None],
-) -> list[str]:
+def validate_release_tag(tag: str, local_version: str | None) -> list[str]:
     tag_version = version_key(tag)
     if tag_version is None or not tag.startswith("v"):
         return [f"Release tag must use vX.Y.Z: {tag}"]
-    errors: list[str] = []
-    for source, version in local_versions.items():
-        if normalize_version(version or "") != normalize_version(tag):
-            errors.append(f"Release tag {tag} does not match {source} version {version or 'unreadable'}")
-    return errors
+    if normalize_version(local_version or "") != normalize_version(tag):
+        return [
+            f"Release tag {tag} does not match {VERSION_SOURCE} version {local_version or 'unreadable'}"
+        ]
+    return []
 
 
 def validate_versions(
-    local_versions: Mapping[str, str | None],
+    local_version: str | None,
     latest_tag: str | None,
     tag_error: str | None,
 ) -> tuple[list[str], list[str]]:
     """Validate version consistency and return errors plus informational notes."""
     errors: list[str] = []
     notes: list[str] = []
-    comparable: dict[str, str] = {}
 
-    for source in LOCAL_VERSION_SOURCES:
-        version = local_versions.get(source)
-        if not version:
-            errors.append(f"Could not extract version from {source}")
-        else:
-            comparable[source] = normalize_version(version)
+    if not local_version:
+        errors.append(f"Could not extract version from {VERSION_SOURCE}")
+        local: str | None = None
+    else:
+        local = normalize_version(local_version)
 
     if tag_error:
         notes.append(f"SKIP: could not query git tags: {tag_error}")
-    elif latest_tag:
-        comparable["latest tag"] = normalize_version(latest_tag)
-    else:
+    elif not latest_tag:
         notes.append("SKIP: no v-prefixed git tags found")
 
-    local_values = {value for source, value in comparable.items() if source != "latest tag"}
-    if len(local_values) > 1:
-        rendered = ", ".join(
-            f"{source}={version}" for source, version in comparable.items()
-        )
-        errors.append(f"Local version drift: {rendered}")
-    elif latest_tag and local_values:
-        local = next(iter(local_values))
+    if not errors and latest_tag and local:
         local_key = version_key(local)
         tag_key = version_key(latest_tag)
         if local_key is None or tag_key is None:
@@ -158,8 +142,8 @@ def validate_versions(
 
 
 def run_self_tests() -> int:
-    """Cover aligned, drifted, and no-tag states."""
-    aligned = {source: "0.1.0" for source in LOCAL_VERSION_SOURCES}
+    """Cover aligned, behind, ahead, and no-tag states."""
+    aligned = "0.1.0"
 
     errors, notes = validate_versions(aligned, "v0.1.0", None)
     assert errors == [] and notes == []
@@ -167,8 +151,7 @@ def run_self_tests() -> int:
     errors, _ = validate_versions(aligned, "v0.2.0", None)
     assert any("behind latest tag" in error for error in errors)
 
-    ahead = {source: "0.2.0" for source in LOCAL_VERSION_SOURCES}
-    errors, notes = validate_versions(ahead, "v0.1.0", None)
+    errors, notes = validate_versions("0.2.0", "v0.1.0", None)
     assert errors == [] and notes == [
         "RELEASE PENDING: local version 0.2.0 is ahead of v0.1.0"
     ]
@@ -193,8 +176,7 @@ def run_self_tests() -> int:
     assert validate_release("v0.2.0", None, "gh is not installed") == [
         "Could not query GitHub releases: gh is not installed"
     ]
-    release_aligned = {source: "0.2.0" for source in LOCAL_VERSION_SOURCES}
-    assert validate_release_tag("v0.2.0", release_aligned) == []
+    assert validate_release_tag("v0.2.0", "0.2.0") == []
     assert validate_release_tag("v0.2", aligned) == [
         "Release tag must use vX.Y.Z: v0.2"
     ]
@@ -225,19 +207,16 @@ def main() -> int:
     if args.self_test:
         return run_self_tests()
 
-    local_versions = {
-        "CITATION.cff": read_citation_version(LOCAL_VERSION_SOURCES["CITATION.cff"]),
-    }
+    local_version = read_citation_version(VERSION_SOURCE_PATH)
     latest_tag, tag_error = get_latest_tag()
 
-    for source, version in local_versions.items():
-        print(f"{source} version: {version or 'unreadable'}")
+    print(f"{VERSION_SOURCE} version: {local_version or 'unreadable'}")
     print(f"Latest tag: {latest_tag or 'none'}")
 
-    errors, notes = validate_versions(local_versions, latest_tag, tag_error)
+    errors, notes = validate_versions(local_version, latest_tag, tag_error)
 
     if args.expected_tag:
-        errors.extend(validate_release_tag(args.expected_tag, local_versions))
+        errors.extend(validate_release_tag(args.expected_tag, local_version))
 
     if args.require_github_release:
         latest_release, release_error = get_release(latest_tag or "")
@@ -251,7 +230,7 @@ def main() -> int:
             print(f"ERROR: {error}", file=sys.stderr)
         return 1
 
-    print("OK: all available version sources are consistent")
+    print("OK: version metadata is consistent")
     return 0
 
 

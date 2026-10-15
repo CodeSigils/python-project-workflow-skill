@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """Verify reachable HTTP(S) URLs referenced by docs and skill files.
 
-The URL list lives in docs/evidence-urls.json so the research evidence base has
-one machine-readable source of truth. If the doc adds or removes URLs, update
-that manifest instead of editing this script's code.
+The URL list lives in docs/evidence-urls.json so the evidence base has one
+machine-readable source of truth. If a doc adds or removes URLs, update that
+manifest instead of editing this script's code.
 
 Usage:
   python3 scripts/verify-urls.py
   python3 scripts/verify-urls.py --self-test
 
-Outputs a table of URL -> final status with drift annotations.
-Exit code 0 = all URLs match documented expected state.
-Exit code 1 = one or more URLs differs from the manifest.
+Prints one line per URL and exits 0 when every URL matches the manifest.
+Exit code 1 when a URL's status differs from the manifest or a required text
+anchor is missing.
 """
 
 from __future__ import annotations
@@ -33,7 +33,6 @@ class UrlCheckResult:
     """Result of a single URL check."""
 
     status: int | str
-    redirects: int
     content: str | None
 
 
@@ -82,47 +81,31 @@ def check_required_text(body: str, required_text: list[str]) -> str:
 
 def check_url(
     url: str,
-    content_type: str | None = None,
     required_text: list[str] | None = None,
 ) -> UrlCheckResult:
-    """Return UrlCheckResult for one URL.
-
-    Read response bodies only when JSON or semantic anchors need validation.
-    """
+    """Return UrlCheckResult for one URL, reading the body only for anchors."""
     request = urllib.request.Request(
         url,
         method="GET",
-        headers={"User-Agent": "repo-architecture-skill-url-verify"},
+        headers={"User-Agent": "python-project-workflow-url-verify"},
     )
 
     try:
         with urllib.request.urlopen(request, timeout=10) as response:
             status = response.status
-            redirect_count = (
-                len(response.headers.get("Location", "").split("\n")) if "Location" in response.headers else 0
-            )
-
-            if content_type == "json" or required_text:
-                body = response.read().decode("utf-8")
-            if content_type == "json":
-                try:
-                    json.loads(body)
-                except (json.JSONDecodeError, ValueError):
-                    return UrlCheckResult(status, redirect_count, "INVALID_JSON")
             if required_text:
-                return UrlCheckResult(status, redirect_count, check_required_text(body, required_text))
-            if content_type == "json":
-                return UrlCheckResult(status, redirect_count, "VALID")
-            return UrlCheckResult(status, redirect_count, None)
+                body = response.read().decode("utf-8")
+                return UrlCheckResult(status, check_required_text(body, required_text))
+            return UrlCheckResult(status, None)
 
     except urllib.error.HTTPError as exc:
-        return UrlCheckResult(exc.code, 0, f"HTTP {exc.code}")
+        return UrlCheckResult(exc.code, f"HTTP {exc.code}")
     except urllib.error.URLError as exc:
-        return UrlCheckResult("ERROR", 0, str(exc.reason))
+        return UrlCheckResult("ERROR", str(exc.reason))
     except TimeoutError:
-        return UrlCheckResult("TIMEOUT", 0, "timeout")
+        return UrlCheckResult("TIMEOUT", "timeout")
     except ValueError as exc:
-        return UrlCheckResult("ERROR", 0, f"invalid URL: {exc}")
+        return UrlCheckResult("ERROR", f"invalid URL: {exc}")
 
 
 def classify_status(status: int | str, expected_statuses: list[int]) -> str:
@@ -196,32 +179,30 @@ def main() -> int:
     entries = load_manifest()
 
     print("=== Evidence URL Re-verification ===")
-    print(f"{'Name':<30s} {'Status':<8s} {'Expected':<12s} {'Redirects':<9s} {'Content':<12s} {'Note':<10s}")
-    print("-" * 90)
+    print(f"{'Name':<30s} {'Status':<8s} {'Expected':<12s} {'Content':<12s} {'Note':<10s}")
+    print("-" * 84)
 
     drift_found = False
     for entry in sorted(entries, key=lambda item: item["name"].lower()):
         try:
             validate_entry(entry)
         except ValueError as exc:
-            print(f"  {entry.get('name', '<unnamed>'):<30s} {'-':<8s} {'-':<12s} {'-':<9s} {'-':<12s} MANIFEST: {exc}")
+            print(f"  {entry.get('name', '<unnamed>'):<30s} {'-':<8s} {'-':<12s} {'-':<12s} MANIFEST: {exc}")
             drift_found = True
             continue
 
         if entry.get("monitor", True) is False:
-            print(f"  {entry['name']:<30s} {'—':<8s} {'immutable':<12s} {'—':<9s} {'—':<12s} SKIPPED")
+            print(f"  {entry['name']:<30s} {'—':<8s} {'immutable':<12s} {'—':<12s} SKIPPED")
             continue
 
-        content_type = entry.get("content_type")
-        result = check_url(entry["url"], content_type, entry.get("required_text"))
+        result = check_url(entry["url"], entry.get("required_text"))
         expected = entry["expected_statuses"]
         note = classify_status(result.status, expected)
         if note == "DRIFT":
             drift_found = True
 
-        # Content check trumps status check for JSON endpoints
         content_label = result.content or "—"
-        if result.content in {"INVALID_JSON", "MISSING_ANCHOR"}:
+        if result.content == "MISSING_ANCHOR":
             note = "BROKEN"
             drift_found = True
 
@@ -230,12 +211,12 @@ def main() -> int:
         marker = "  ← BROKEN" if note == "BROKEN" else marker
         print(
             f"  {entry['name']:<30s} {result.status!s:<8s} {expected_text:<12s} "
-            f"{result.redirects!s:<9s} {content_label:<12s} {note:<10s}{marker}"
+            f"{content_label:<12s} {note:<10s}{marker}"
         )
 
     if drift_found:
         print("\nRESULT: Drift or broken content detected — one or more URLs differ from docs/evidence-urls.json.")
-        print("Update the manifest and research doc together after investigating the changed URL state.")
+        print("Update the manifest after investigating the changed URL state.")
         return 1
 
     print("\nRESULT: All URLs match documented expected state and content validates OK")

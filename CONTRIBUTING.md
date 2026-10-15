@@ -101,3 +101,21 @@ For releases, follow `docs/release-checklist.md`.
 - The scheduled hygiene job treats an unreviewed pull request older than three
   days and any open pull request older than fourteen days as failures. A remote
   branch without an open pull request becomes stale after thirty days.
+
+## Evidence and research
+
+Claims that depend on an external source cite an entry in
+[`docs/evidence-urls.json`](docs/evidence-urls.json) and that entry's
+`last_verified` date. The manifest is the single machine-readable evidence base;
+`scripts/verify-urls.py` checks every listed URL against its expected status and
+required content, and the `verify-urls` CI job enforces it.
+
+- When a canonical `references/*.md` change rests on an external source, update
+  the manifest in the same change. The payload mirror then carries it forward.
+- Record non-obvious decisions in prose in this file (see
+  [Automation decisions](#automation-decisions)) rather than in a separate
+  research directory; git history is the change record.
+- Do not add a parallel research ledger or finding-ID registry. This repository
+  is sync-first: canonical `references/*.md` are the source of truth, mirrored
+  into `skills/python-project-workflow/references/`, and drift is caught by
+  `bash scripts/sync-payload.sh --ci`.

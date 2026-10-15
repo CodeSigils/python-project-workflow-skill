@@ -51,10 +51,13 @@ run "hook integrity self-test" python3 scripts/check-hook-integrity.py --self-te
 run "CI policy" python3 scripts/validate-ci.py
 run "CI policy tests" python3 scripts/test-validate-ci.py
 run "skill structure" python3 scripts/validate.py
+run "skill source tests" python3 scripts/test-validate.py
 run "cross-agent portability" python3 .github/scripts/check-portability.py
+run "cross-agent portability self-test" python3 .github/scripts/check-portability.py --self-test
 run "README tree" python3 scripts/check-readme-tree.py
 run "version consistency" python3 scripts/check-version-consistency.py
 run "freshness markers" python3 scripts/check-expiry.py
+run "URL verifier self-test" python3 scripts/verify-urls.py --self-test
 run "repo hygiene self-test" python3 scripts/check-repo-hygiene.py --self-test
 run "payload sync tests" python3 scripts/test-sync-payload.py
 run "payload drift" bash scripts/sync-payload.sh --ci

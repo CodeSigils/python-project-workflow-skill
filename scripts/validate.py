@@ -3,14 +3,17 @@
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
+from typing import NoReturn
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL_DIR = ROOT / "skills" / "python-project-workflow"
 SKILL = SKILL_DIR / "SKILL.md"
 REF_DIR = SKILL_DIR / "references"
+EVIDENCE_MANIFEST = ROOT / "docs" / "evidence-urls.json"
 REQUIRED_REFS = {
     "pyproject-template.md",
     "lint-format-typing-testing.md",
@@ -47,7 +50,7 @@ def rel(path: Path) -> str:
         return str(path)
 
 
-def fail(message: str, *, hint: str | None = None) -> None:
+def fail(message: str, *, hint: str | None = None) -> NoReturn:
     print(f"FAIL: {message}", file=sys.stderr)
     if hint:
         print(f"HINT: {hint}", file=sys.stderr)
@@ -257,6 +260,95 @@ def check_references() -> None:
             fail(f"security reference missing required procedure: {procedure}")
 
 
+LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
+BACKTICK_REF_RE = re.compile(r"`(references/[A-Za-z0-9._/-]+\.md)`")
+EXTERNAL_URL_RE = re.compile(r"https?://[^\s)>\]`'\"]+")
+
+
+def normalize_url(url: str) -> str:
+    """Compare URLs without fragment, trailing slash, or trailing punctuation."""
+    cleaned = url.strip().strip("<>").rstrip(".,;:'\"")
+    return cleaned.split("#", 1)[0].rstrip("/")
+
+
+def unregistered_urls(texts: dict[str, str], registered: set[str]) -> dict[str, str]:
+    """Return ``{url: source-label}`` for payload URLs absent from the registry."""
+    missing: dict[str, str] = {}
+    for label, text in texts.items():
+        for raw in EXTERNAL_URL_RE.findall(text):
+            normalized = normalize_url(raw)
+            if normalized not in registered:
+                missing.setdefault(normalized, label)
+    return missing
+
+
+def extract_relative_links(text: str) -> list[str]:
+    """Relative markdown link targets, without schemes, anchors, or titles."""
+    targets: list[str] = []
+    for raw in LINK_RE.findall(text):
+        target = raw.strip().split()[0] if raw.strip() else ""
+        target = target.split("#", 1)[0]
+        if not target or target.startswith(("http://", "https://", "mailto:", "/")):
+            continue
+        targets.append(target)
+    return targets
+
+
+def extract_backtick_refs(text: str) -> list[str]:
+    """Inline ``references/*.md`` paths named in backticks."""
+    return BACKTICK_REF_RE.findall(text)
+
+
+def load_registered_urls() -> set[str]:
+    raw = read_text_checked(EVIDENCE_MANIFEST)
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        fail(f"evidence manifest is not valid JSON: {rel(EVIDENCE_MANIFEST)}: {exc}")
+    urls = data.get("urls") if isinstance(data, dict) else None
+    if not isinstance(urls, list) or not urls:
+        fail(f"evidence manifest has no urls list: {rel(EVIDENCE_MANIFEST)}")
+    registered: set[str] = set()
+    for entry in urls:
+        url = entry.get("url") if isinstance(entry, dict) else None
+        if not isinstance(url, str) or not url:
+            fail(f"evidence manifest entry without a url: {rel(EVIDENCE_MANIFEST)}")
+        registered.add(normalize_url(url))
+    return registered
+
+
+def payload_texts() -> dict[str, str]:
+    texts = {rel(SKILL): read_text_checked(SKILL)}
+    for path in sorted(REF_DIR.glob("*.md")):
+        texts[rel(path)] = read_text_checked(path)
+    return texts
+
+
+def check_payload_links() -> None:
+    for label, text in payload_texts().items():
+        base = (ROOT / label).parent
+        for target in extract_relative_links(text):
+            if not (base / target).is_file():
+                fail(
+                    f"{label} has a broken relative link: {target}",
+                    hint="Fix the path or add the missing payload file.",
+                )
+        for refname in extract_backtick_refs(text):
+            if not (SKILL_DIR / refname).is_file():
+                fail(f"{label} points at a missing reference: `{refname}`")
+
+
+def check_payload_urls_registered() -> None:
+    registered = load_registered_urls()
+    missing = unregistered_urls(payload_texts(), registered)
+    if missing:
+        listed = ", ".join(f"{url} ({label})" for url, label in sorted(missing.items()))
+        fail(
+            f"payload cites external URLs absent from {rel(EVIDENCE_MANIFEST)}: {listed}",
+            hint="Register each tool doc in the manifest, then run scripts/verify-urls.py.",
+        )
+
+
 def check_readme() -> None:
     readme = read_text_checked(ROOT / "README.md")
     required = [
@@ -345,6 +437,8 @@ def check_status_sources() -> None:
 def main() -> int:
     check_skill()
     check_references()
+    check_payload_links()
+    check_payload_urls_registered()
     check_readme()
     check_evidence_docs()
     check_security()
