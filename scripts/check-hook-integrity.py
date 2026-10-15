@@ -30,46 +30,17 @@ import subprocess
 import sys
 from pathlib import Path
 
+from stage_manifest import PRE_COMMIT_STAGES, PRE_PUSH_STAGES
+
 ROOT = Path(__file__).resolve().parents[1]
 
 # Placeholders that indicate a redaction pass rewrote content in place. Each is
 # matched literally, so a hit is a real leak rather than a documentation mention.
 REDACTION_MARKERS = ("***REMOVED***", "<<REMOVED>>", "<REDACTED>", "[REDACTED]")
 
-# The commands each hook must run. This file is excluded from its own marker scan
-# because it has to name the markers it searches for.
-PRE_COMMIT_STAGES = (
-    "uv run --locked ruff check scripts .github/scripts",
-    "uv run --locked ty check scripts .github/scripts",
-    "python3 .github/scripts/check-portability.py",
-    "python3 scripts/validate.py",
-    "python3 scripts/check-expiry.py",
-    "python3 scripts/check-version-consistency.py",
-    "python3 scripts/check-readme-tree.py",
-    "python3 scripts/check-hook-integrity.py",
-)
-
-PRE_PUSH_STAGES = (
-    "uv run --locked ruff check scripts .github/scripts",
-    "uv run --locked ty check scripts .github/scripts",
-    "shellcheck scripts/*.sh .githooks/*",
-    "python3 scripts/validate-ci.py",
-    "python3 scripts/test-validate-ci.py",
-    "python3 scripts/validate.py",
-    "python3 .github/scripts/check-portability.py",
-    "python3 scripts/check-readme-tree.py",
-    "python3 scripts/check-version-consistency.py",
-    "python3 scripts/check-expiry.py",
-    "python3 scripts/check-repo-hygiene.py --self-test",
-    "python3 scripts/test-sync-payload.py",
-    "bash scripts/sync-payload.sh --ci",
-    "python3 scripts/run-codex-regression.py --self-test",
-    "python3 scripts/run-hermes-regression.py --self-test",
-    "python3 scripts/grade-codex-regression.py --self-test",
-    "python3 scripts/check-hook-integrity.py",
-    "python3 scripts/check-hook-integrity.py --self-test",
-)
-
+# The commands each hook must run come from scripts/stage_manifest.py, the one
+# place the CI validator and this file both import. This file is excluded from
+# its own marker scan because it has to name the markers it searches for.
 HOOKS: dict[str, tuple[str, ...]] = {
     ".githooks/pre-commit": PRE_COMMIT_STAGES,
     ".githooks/pre-push": PRE_PUSH_STAGES,

@@ -42,24 +42,21 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Set up uv
-        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
-        with:
-          version: ${{ env.UV_VERSION }}
-
-      - name: Install dependencies from the lockfile
-        run: uv sync --locked
-
       - name: Check cross-agent portability
         run: python3 .github/scripts/check-portability.py
+
+      - name: Test cross-agent portability checks
+        run: python3 .github/scripts/check-portability.py --self-test
 
       - name: Check version consistency
         run: python3 scripts/check-version-consistency.py
 
       - name: Check README tree matches tracked files
         run: python3 scripts/check-readme-tree.py
+
       - name: Check expired freshness markers
         run: python3 scripts/check-expiry.py
+
       - name: Validate CI policy
         run: python3 scripts/validate-ci.py
 
@@ -75,6 +72,9 @@ jobs:
       - name: Test CI policy validation
         run: python3 scripts/test-validate-ci.py
 
+      - name: Test skill source validation
+        run: python3 scripts/test-validate.py
+
       - name: Test payload sync behavior
         run: python3 scripts/test-sync-payload.py
 
@@ -89,6 +89,28 @@ jobs:
 
       - name: Payload sync check
         run: bash scripts/sync-payload.sh --ci
+
+  lint:
+    name: Lint and type check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.14"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: ${{ env.UV_VERSION }}
+
+      - name: Install dependencies from the lockfile
+        run: uv sync --locked
 
       - name: Ruff check scripts
         run: uv run --locked ruff check scripts .github/scripts
@@ -108,6 +130,9 @@ jobs:
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           persist-credentials: false
+
+      - name: Test URL verification logic
+        run: python3 scripts/verify-urls.py --self-test
 
       - name: Verify referenced URLs
         run: python3 scripts/verify-urls.py

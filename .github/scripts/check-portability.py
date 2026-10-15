@@ -11,7 +11,8 @@ import re
 import sys
 from pathlib import Path
 
-SKILLS_DIR = Path("skills")
+ROOT = Path(__file__).resolve().parents[2]
+SKILLS_DIR = ROOT / "skills"
 
 FORBIDDEN_PATTERNS = (
     ("Hermes tool name", re.compile(r"\bskill_(?:view|manage)\b", re.IGNORECASE)),

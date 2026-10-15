@@ -7,6 +7,8 @@ import re
 import sys
 from pathlib import Path
 
+from stage_manifest import LINT_JOB_COMMANDS, REQUIRED_VALIDATE_COMMANDS
+
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github/workflows/ci.yml"
 RELEASE_WORKFLOW = ROOT / ".github/workflows/release.yml"
@@ -17,24 +19,9 @@ RELEASE_CHECK_COMMAND = (
     "python3 scripts/check-version-consistency.py --require-github-release"
 )
 HYGIENE_CHECK_COMMAND = "python3 scripts/check-repo-hygiene.py"
-REQUIRED_VALIDATE_COMMANDS = (
-    "python3 .github/scripts/check-portability.py",
-    "python3 scripts/check-version-consistency.py",
-    "python3 scripts/check-readme-tree.py",
-    "python3 scripts/validate-ci.py",
-    "python3 scripts/check-hook-integrity.py",
-    "python3 scripts/check-hook-integrity.py --self-test",
-    "python3 scripts/validate.py",
-    "python3 scripts/test-validate-ci.py",
-    "python3 scripts/test-sync-payload.py",
-    "python3 scripts/run-codex-regression.py --self-test",
-    "python3 scripts/run-hermes-regression.py --self-test",
-    "python3 scripts/grade-codex-regression.py --self-test",
-    "bash scripts/sync-payload.sh --ci",
-    "uv run --locked ruff check scripts .github/scripts",
-    "uv run --locked ty check scripts .github/scripts",
-    "shellcheck scripts/*.sh .githooks/*",
-)
+# The list of checks every gate must run lives in one place (stage_manifest.py)
+# so the CI job, the push hook, the hook-integrity test, and this validator can
+# never drift apart. Importing it here was the point of that module.
 
 
 def section_body(workflow: str, name: str) -> str | None:
@@ -57,6 +44,21 @@ def has_run_command(body: str, command: str) -> bool:
         re.search(
             rf"(?m)^\s*run:\s*{re.escape(command)}\s*(?:#.*)?$",
             body,
+        )
+    )
+
+
+def count_run_command(workflow: str, command: str) -> int:
+    """Count how many steps run ``command`` exactly.
+
+    A step that merely mentions a command in prose or a comment is not a step
+    that runs it, so the match stays anchored to a ``run:`` line. Counting
+    globally is what proves a check runs in one job and not another.
+    """
+    return len(
+        re.findall(
+            rf"(?m)^\s*run:\s*{re.escape(command)}\s*(?:#.*)?$",
+            workflow,
         )
     )
 
@@ -229,18 +231,32 @@ def validate_workflow(workflow: str, root: Path = ROOT) -> list[str]:
                 errors.append(
                     f"ci.yml: validation matrix missing run command {command!r}"
                 )
-        if not has_run_command(validate, RUFF_INSTALL_COMMAND):
-            errors.append(
-                "ci.yml: validation matrix must install dependencies from the lockfile"
-            )
-        if re.search(r"\bpip\s+install\s+--upgrade\s+pip\b", validate):
-            errors.append(
-                "ci.yml: validation matrix must not install an unpinned latest pip"
-            )
         if 'python-version: ["3.10", "3.14"]' not in validate:
             errors.append(
                 "ci.yml: Python matrix must test the advertised 3.10 lower bound and 3.14 stable boundary"
             )
+
+    # Linting and type checking read the whole tree, not the interpreter under
+    # test, so they run once in their own job instead of once per matrix leg.
+    lint = section_body(active, "lint")
+    if lint is None:
+        errors.append("ci.yml: missing the lint job")
+    else:
+        if "matrix:" in lint:
+            errors.append("ci.yml: lint job must not use a matrix")
+        for command in LINT_JOB_COMMANDS:
+            if not has_run_command(lint, command):
+                errors.append(f"ci.yml: lint job missing run command {command!r}")
+            if count_run_command(active, command) != 1:
+                errors.append(
+                    f"ci.yml: run command {command!r} must run in exactly one job"
+                )
+        if not has_run_command(lint, RUFF_INSTALL_COMMAND):
+            errors.append(
+                "ci.yml: lint job must install dependencies from the lockfile"
+            )
+        if re.search(r"\bpip\s+install\s+--upgrade\s+pip\b", lint):
+            errors.append("ci.yml: lint job must not install an unpinned latest pip")
 
     if external is None:
         errors.append("ci.yml: missing verify-urls job")
@@ -259,8 +275,10 @@ def validate_workflow(workflow: str, root: Path = ROOT) -> list[str]:
         if "matrix:" in external:
             errors.append("ci.yml: verify-urls job must not use a matrix")
 
-    if active.count("scripts/verify-urls.py") != 1:
-        errors.append("ci.yml: URL verifier must appear exactly once")
+    if count_run_command(active, "python3 scripts/verify-urls.py") != 1:
+        errors.append("ci.yml: URL verifier must run exactly once")
+    if count_run_command(active, "python3 scripts/verify-urls.py --self-test") != 1:
+        errors.append("ci.yml: URL verifier self-test must run exactly once")
 
     published = section_body(active, "release-integrity")
     if published is None:
@@ -288,7 +306,7 @@ def validate_workflow(workflow: str, root: Path = ROOT) -> list[str]:
     if active.count(RELEASE_CHECK_COMMAND) != 1:
         errors.append("ci.yml: published-release check must appear exactly once")
 
-    hygiene = section_body(workflow, "repo-hygiene")
+    hygiene = section_body(active, "repo-hygiene")
     if hygiene is None:
         errors.append("ci.yml: missing the repo-hygiene job")
     else:
@@ -334,7 +352,6 @@ def validate_release_workflow(workflow: str) -> list[str]:
     else:
         for required in (
             "fetch-depth: 0",
-            "persist-credentials: false",
             "--expected-tag \"$GITHUB_REF_NAME\"",
             'git merge-base --is-ancestor "${GITHUB_REF_NAME}^{}" origin/main',
         ):
@@ -347,7 +364,6 @@ def validate_release_workflow(workflow: str) -> list[str]:
             "needs: verify-release-tag",
             "permissions:",
             "contents: write",
-            "persist-credentials: false",
             'gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes',
         ):
             if required not in release:

@@ -156,6 +156,61 @@ def main() -> int:
         "live URL check in validation matrix",
     )
 
+    dropped_lint = re.sub(
+        r"(?ms)^  lint:\n.*?(?=^  [A-Za-z0-9_-]+:\n|\Z)", "", workflow, count=1
+    )
+    assert dropped_lint != workflow, "lint job block not found"
+    assert_rejected(module, dropped_lint, "a workflow with no lint job")
+
+    assert_rejected(
+        module,
+        workflow.replace(
+            "      - name: Type check scripts\n"
+            "        run: uv run --locked ty check scripts .github/scripts\n",
+            "",
+            1,
+        ),
+        "a lint job missing its type check",
+    )
+
+    assert_rejected(
+        module,
+        workflow.replace(
+            "      - name: Test CI policy validation\n"
+            "        run: python3 scripts/test-validate-ci.py\n",
+            "      - name: Test CI policy validation\n"
+            "        run: python3 scripts/test-validate-ci.py\n\n"
+            "      - name: Duplicate type check\n"
+            "        run: uv run --locked ty check scripts .github/scripts\n",
+            1,
+        ),
+        "a toolchain check that runs in two jobs",
+    )
+
+    assert_rejected(
+        module,
+        workflow.replace(
+            "        run: python3 scripts/verify-urls.py --self-test\n",
+            "        # run: python3 scripts/verify-urls.py --self-test\n",
+            1,
+        ),
+        "a missing URL verifier self-test",
+    )
+
+    assert_rejected(
+        module,
+        workflow.replace(
+            "      - name: Verify referenced URLs\n"
+            "        run: python3 scripts/verify-urls.py\n",
+            "      - name: Duplicate URL verification\n"
+            "        run: python3 scripts/verify-urls.py\n\n"
+            "      - name: Verify referenced URLs\n"
+            "        run: python3 scripts/verify-urls.py\n",
+            1,
+        ),
+        "a URL verifier that runs twice",
+    )
+
     dropped_job = re.sub(
         r"(?ms)^  release-integrity:\n.*?(?=^  [A-Za-z0-9_-]+:\n|\Z)", "", workflow, count=1
     )

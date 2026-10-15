@@ -8,28 +8,23 @@ import json
 import os
 import shutil
 import subprocess
-import sys
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from time import monotonic
 from typing import Any
 
+from regression_support import (
+    CASES,
+    checked,
+    init_fixture_repo,
+    read_json,
+    run_grader,
+    write_mature_preservation_fixture,
+)
+
 ROOT = Path(__file__).resolve().parents[1]
-CASES = ROOT / "evals/codex/cases.json"
-GRADER = ROOT / "scripts/grade-codex-regression.py"
 PAYLOAD = ROOT / "skills/python-project-workflow"
-
-
-def read_json(path: Path) -> Any:
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
-def checked(command: list[str], cwd: Path) -> str:
-    result = subprocess.run(command, cwd=cwd, capture_output=True, text=True, check=False)
-    if result.returncode:
-        raise RuntimeError(result.stderr or result.stdout)
-    return result.stdout
 
 
 def payload_digest(path: Path) -> str:
@@ -66,22 +61,8 @@ def prepare_fixture(root: Path, case: dict[str, Any]) -> None:
         raise FileExistsError(root)
     root.mkdir(parents=True)
     if case["id"] == "mature-preservation":
-        (root / "legacy_app").mkdir()
-        (root / "tests").mkdir()
-        (root / "legacy_app/__init__.py").write_text('"""Legacy app."""\n', encoding="utf-8")
-        (root / "tests/test_app.py").write_text("def test_app():\n    assert True\n", encoding="utf-8")
-        (root / "pyproject.toml").write_text(
-            '[tool.poetry]\nname = "legacy-app"\nversion = "1.0.0"\n\n'
-            '[tool.black]\nline-length = 88\n\n[tool.poetry.dependencies]\npython = "^3.10"\n',
-            encoding="utf-8",
-        )
-        (root / "tox.ini").write_text("[tox]\nenvlist = py310\n", encoding="utf-8")
-    checked(["git", "init", "-b", "main"], root)
-    checked(["git", "config", "user.name", "Hermes Eval"], root)
-    checked(["git", "config", "user.email", "hermes-eval@example.invalid"], root)
-    checked(["git", "config", "commit.gpgsign", "false"], root)
-    checked(["git", "add", "."], root)
-    checked(["git", "commit", "--allow-empty", "-m", "test: create workflow fixture"], root)
+        write_mature_preservation_fixture(root)
+    init_fixture_repo(root, "Hermes Eval", "hermes-eval@example.invalid", allow_empty=True)
 
 
 def command(case: dict[str, Any], model: str | None, provider: str | None) -> list[str]:
@@ -206,11 +187,7 @@ def main() -> int:
         if temporary:
             temporary.cleanup()
         return 1
-    grade_code = subprocess.run(
-        [sys.executable, str(GRADER), "--results-dir", str(output),
-         "--fixtures-dir", str(fixtures), "--output", str(output / "grade.json")],
-        cwd=ROOT, check=False,
-    ).returncode
+    grade_code = run_grader(output, fixtures)
     if temporary:
         temporary.cleanup()
     return grade_code

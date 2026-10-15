@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "description": "Machine-readable evidence URL index for python-project-workflow documentation.",
   "urls": [
     {
@@ -77,6 +77,61 @@
       "source_type": "official_docs",
       "status": "active",
       "last_verified": "2026-08-16"
+    },
+    {
+      "name": "uv documentation",
+      "url": "https://docs.astral.sh/uv/",
+      "expected_statuses": [200],
+      "required_text": ["An extremely fast Python package and project manager"],
+      "source_section": "skills/python-project-workflow/references/lint-format-typing-testing.md",
+      "domain_tag": "python-tooling",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-10-15"
+    },
+    {
+      "name": "Ruff documentation",
+      "url": "https://docs.astral.sh/ruff/",
+      "expected_statuses": [200],
+      "required_text": ["An extremely fast Python linter"],
+      "source_section": "skills/python-project-workflow/references/lint-format-typing-testing.md",
+      "domain_tag": "python-tooling",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-10-15"
+    },
+    {
+      "name": "mypy documentation",
+      "url": "https://mypy.readthedocs.io/",
+      "expected_statuses": [200],
+      "required_text": ["Mypy", "static type"],
+      "source_section": "skills/python-project-workflow/references/lint-format-typing-testing.md",
+      "domain_tag": "python-tooling",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-10-15"
+    },
+    {
+      "name": "pytest documentation",
+      "url": "https://docs.pytest.org/",
+      "expected_statuses": [200],
+      "required_text": ["pytest"],
+      "source_section": "skills/python-project-workflow/references/lint-format-typing-testing.md",
+      "domain_tag": "python-tooling",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-10-15"
+    },
+    {
+      "name": "GitHub Python gitignore template",
+      "url": "https://github.com/github/gitignore/blob/main/Python.gitignore",
+      "expected_statuses": [200],
+      "required_text": ["Python"],
+      "source_section": "skills/python-project-workflow/references/security-and-gitignore.md",
+      "domain_tag": "python-packaging",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-10-15"
     },
     {
       "name": "Python project workflow repository",
