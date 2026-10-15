@@ -249,6 +249,7 @@ shellcheck scripts/*.sh .githooks/*
 ```text
 python-project-workflow/
 ├── README.md                            # Project overview, setup, usage, and verification
+├── AGENTS.md                            # Agent routing and live-policy verification rules
 ├── CONTRIBUTING.md                      # Contributor workflow and evidence policy
 ├── LICENSE                              # MIT license terms
 ├── CITATION.cff                         # Citation metadata for research and tooling
