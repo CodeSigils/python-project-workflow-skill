@@ -18,14 +18,19 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = ROOT / "docs" / "evidence-urls.json"
+RETRYABLE_HTTP_STATUSES = frozenset({429, 500, 502, 503, 504})
+MAX_ATTEMPTS = 3
+RETRY_DELAY_SECONDS = 1
 
 
 @dataclass(frozen=True)
@@ -34,6 +39,7 @@ class UrlCheckResult:
 
     status: int | str
     content: str | None
+    attempts: int
 
 
 def load_manifest(path: Path = MANIFEST_PATH) -> list[dict[str, Any]]:
@@ -79,11 +85,11 @@ def check_required_text(body: str, required_text: list[str]) -> str:
     return "ANCHORS_OK"
 
 
-def check_url(
+def check_url_once(
     url: str,
     required_text: list[str] | None = None,
 ) -> UrlCheckResult:
-    """Return UrlCheckResult for one URL, reading the body only for anchors."""
+    """Fetch one URL once, reading its body only when anchors are required."""
     request = urllib.request.Request(
         url,
         method="GET",
@@ -95,17 +101,36 @@ def check_url(
             status = response.status
             if required_text:
                 body = response.read().decode("utf-8")
-                return UrlCheckResult(status, check_required_text(body, required_text))
-            return UrlCheckResult(status, None)
+                return UrlCheckResult(status, check_required_text(body, required_text), 1)
+            return UrlCheckResult(status, None, 1)
 
     except urllib.error.HTTPError as exc:
-        return UrlCheckResult(exc.code, f"HTTP {exc.code}")
+        return UrlCheckResult(exc.code, f"HTTP {exc.code}", 1)
     except urllib.error.URLError as exc:
-        return UrlCheckResult("ERROR", str(exc.reason))
+        return UrlCheckResult("ERROR", str(exc.reason), 1)
     except TimeoutError:
-        return UrlCheckResult("TIMEOUT", "timeout")
+        return UrlCheckResult("TIMEOUT", "timeout", 1)
     except ValueError as exc:
-        return UrlCheckResult("ERROR", f"invalid URL: {exc}")
+        return UrlCheckResult("ERROR", f"invalid URL: {exc}", 1)
+
+
+def is_retryable(status: int | str) -> bool:
+    """Return whether a result is a transient availability failure, not content drift."""
+    return status in {"ERROR", "TIMEOUT"} or (
+        isinstance(status, int) and status in RETRYABLE_HTTP_STATUSES
+    )
+
+
+def check_url(url: str, required_text: list[str] | None = None) -> UrlCheckResult:
+    """Return a checked URL after bounded retries for transient host failures."""
+    result = check_url_once(url, required_text)
+    for attempt in range(2, MAX_ATTEMPTS + 1):
+        if not is_retryable(result.status):
+            return result
+        time.sleep(RETRY_DELAY_SECONDS)
+        retried = check_url_once(url, required_text)
+        result = UrlCheckResult(retried.status, retried.content, attempt)
+    return result
 
 
 def classify_status(status: int | str, expected_statuses: list[int]) -> str:
@@ -124,6 +149,38 @@ def check_self_test() -> None:
     assert classify_status(200, [200, 201]) == "OK"
     assert classify_status(201, [200, 201]) == "OK"
     print("  PASS  classify_status")
+    assert is_retryable(503)
+    assert is_retryable("TIMEOUT")
+    assert not is_retryable(404)
+    assert not is_retryable(200)
+    print("  PASS  is_retryable")
+    with (
+        patch.object(
+            sys.modules[__name__],
+            "check_url_once",
+            side_effect=[
+                UrlCheckResult(503, "HTTP 503", 1),
+                UrlCheckResult(200, "ANCHORS_OK", 1),
+            ],
+        ),
+        patch.object(time, "sleep") as sleep,
+    ):
+        recovered = check_url("https://example.invalid", ["anchor"])
+    assert recovered == UrlCheckResult(200, "ANCHORS_OK", 2)
+    sleep.assert_called_once_with(RETRY_DELAY_SECONDS)
+
+    with (
+        patch.object(
+            sys.modules[__name__],
+            "check_url_once",
+            return_value=UrlCheckResult(404, "HTTP 404", 1),
+        ),
+        patch.object(time, "sleep") as sleep,
+    ):
+        definite = check_url("https://example.invalid")
+    assert definite == UrlCheckResult(404, "HTTP 404", 1)
+    sleep.assert_not_called()
+    print("  PASS  check_url retry behavior")
     assert check_required_text("alpha beta", ["alpha", "beta"]) == "ANCHORS_OK"
     assert check_required_text("alpha beta", ["gamma"]) == "MISSING_ANCHOR"
     print("  PASS  check_required_text")
@@ -192,7 +249,7 @@ def main() -> int:
             continue
 
         if entry.get("monitor", True) is False:
-            print(f"  {entry['name']:<30s} {'—':<8s} {'immutable':<12s} {'—':<12s} SKIPPED")
+            print(f"  {entry['name']:<30s} {'—':<8s} {'unmonitored':<12s} {'—':<12s} SKIPPED")
             continue
 
         result = check_url(entry["url"], entry.get("required_text"))
@@ -209,8 +266,9 @@ def main() -> int:
         expected_text = "/".join(str(code) for code in expected)
         marker = "  ← DRIFT" if note == "DRIFT" else ""
         marker = "  ← BROKEN" if note == "BROKEN" else marker
+        status_label = f"{result.status} ({result.attempts}x)"
         print(
-            f"  {entry['name']:<30s} {result.status!s:<8s} {expected_text:<12s} "
+            f"  {entry['name']:<30s} {status_label:<8s} {expected_text:<12s} "
             f"{content_label:<12s} {note:<10s}{marker}"
         )
 
