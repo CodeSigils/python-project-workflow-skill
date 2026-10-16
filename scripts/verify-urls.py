@@ -24,6 +24,7 @@ import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = ROOT / "docs" / "evidence-urls.json"
@@ -153,6 +154,33 @@ def check_self_test() -> None:
     assert not is_retryable(404)
     assert not is_retryable(200)
     print("  PASS  is_retryable")
+    with (
+        patch.object(
+            sys.modules[__name__],
+            "check_url_once",
+            side_effect=[
+                UrlCheckResult(503, "HTTP 503", 1),
+                UrlCheckResult(200, "ANCHORS_OK", 1),
+            ],
+        ),
+        patch.object(time, "sleep") as sleep,
+    ):
+        recovered = check_url("https://example.invalid", ["anchor"])
+    assert recovered == UrlCheckResult(200, "ANCHORS_OK", 2)
+    sleep.assert_called_once_with(RETRY_DELAY_SECONDS)
+
+    with (
+        patch.object(
+            sys.modules[__name__],
+            "check_url_once",
+            return_value=UrlCheckResult(404, "HTTP 404", 1),
+        ),
+        patch.object(time, "sleep") as sleep,
+    ):
+        definite = check_url("https://example.invalid")
+    assert definite == UrlCheckResult(404, "HTTP 404", 1)
+    sleep.assert_not_called()
+    print("  PASS  check_url retry behavior")
     assert check_required_text("alpha beta", ["alpha", "beta"]) == "ANCHORS_OK"
     assert check_required_text("alpha beta", ["gamma"]) == "MISSING_ANCHOR"
     print("  PASS  check_required_text")
