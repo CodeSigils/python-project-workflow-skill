@@ -175,6 +175,7 @@
       "domain_tag": "research-consultation",
       "source_type": "academic",
       "status": "active",
+      "monitor": false,
       "last_verified": "2026-10-15"
     },
     {

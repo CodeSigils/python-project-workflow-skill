@@ -249,7 +249,7 @@ def main() -> int:
             continue
 
         if entry.get("monitor", True) is False:
-            print(f"  {entry['name']:<30s} {'—':<8s} {'immutable':<12s} {'—':<12s} SKIPPED")
+            print(f"  {entry['name']:<30s} {'—':<8s} {'unmonitored':<12s} {'—':<12s} SKIPPED")
             continue
 
         result = check_url(entry["url"], entry.get("required_text"))

@@ -107,7 +107,7 @@ For releases, follow `docs/release-checklist.md`.
 Claims that depend on an external source cite an entry in
 [`docs/evidence-urls.json`](docs/evidence-urls.json) and that entry's
 `last_verified` date. The manifest is the single machine-readable evidence base;
-`scripts/verify-urls.py` checks every listed URL against its expected status and
+`scripts/verify-urls.py` checks every monitored URL against its expected status and
 required content, and the `verify-urls` CI job enforces it.
 
 - When a canonical `references/*.md` change rests on an external source, update
