@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import re
 import sys
+from datetime import date
 from pathlib import Path
 from typing import NoReturn
 
@@ -15,6 +16,7 @@ SKILL = SKILL_DIR / "SKILL.md"
 REF_DIR = SKILL_DIR / "references"
 EVIDENCE_MANIFEST = ROOT / "docs" / "evidence-urls.json"
 DECISIONS = ROOT / "docs" / "decisions.md"
+RESEARCH_INDEX = ROOT / "docs" / "research" / "index.md"
 REQUIRED_REFS = {
     "pyproject-template.md",
     "lint-format-typing-testing.md",
@@ -351,8 +353,16 @@ def check_payload_urls_registered() -> None:
 
 
 DECISION_HEADING_RE = re.compile(r"(?m)^## Decision: (?P<title>.+)$")
-DECISION_FIELDS = ("Status", "Decided", "Sources", "Recheck")
+DECISION_FIELDS = ("ID", "Status", "Decided", "Sources", "Recheck")
 DECISION_STATUSES = {"proposed", "accepted", "deprecated", "superseded", "rejected"}
+DECISION_ID_RE = re.compile(r"D\d+")
+APPRAISAL_FIELDS = ("Context", "Evidence appraisal", "Outcome check", "Evidence profile")
+EVIDENCE_PROFILES = {"primary", "constrained"}
+RESEARCH_ROW_RE = re.compile(
+    r"(?m)^\|\s*(?P<id>R-\d+)\s*\|(?P<concern>[^|]*)\|(?P<status>[^|]*)\|"
+    r"(?P<verified>[^|]*)\|(?P<enables>[^|]*)\|"
+)
+RESEARCH_BODY_RE = re.compile(r"(?m)^##\s+(?P<id>R-\d+)\b")
 
 
 def check_decisions() -> None:
@@ -363,6 +373,7 @@ def check_decisions() -> None:
         fail(f"{rel(DECISIONS)} has no '## Decision:' entries")
 
     registered = load_registered_urls()
+    decision_ids: set[str] = set()
     for index, match in enumerate(matches):
         title = match.group("title").strip()
         end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
@@ -372,7 +383,8 @@ def check_decisions() -> None:
         fields: dict[str, str] = {}
         for line in block.splitlines():
             field = re.match(
-                r"^- (?P<key>Status|Decided|Sources|Recheck):\s*(?P<value>.+?)\s*$", line
+                r"^- (?P<key>ID|Status|Decided|Sources|Recheck|Context|Evidence appraisal|Outcome check|Evidence profile|Primary-source exception):\s*(?P<value>.+?)\s*$",
+                line,
             )
             if field:
                 fields[field.group("key")] = field.group("value")
@@ -382,6 +394,11 @@ def check_decisions() -> None:
                 fail(f"{label} is missing a non-empty '{key}:' field")
         if fields["Status"] not in DECISION_STATUSES:
             fail(f"{label} has an unknown status: {fields['Status']}")
+        if not DECISION_ID_RE.fullmatch(fields["ID"]):
+            fail(f"{label} has an invalid ID: {fields['ID']}")
+        if fields["ID"] in decision_ids:
+            fail(f"{label} repeats decision ID: {fields['ID']}")
+        decision_ids.add(fields["ID"])
         if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", fields["Decided"]):
             fail(f"{label} 'Decided' must be YYYY-MM-DD: {fields['Decided']}")
 
@@ -394,6 +411,107 @@ def check_decisions() -> None:
                     f"{label} cites a source absent from {rel(EVIDENCE_MANIFEST)}: {raw}",
                     hint="Register the source in the evidence manifest, then run scripts/verify-urls.py.",
                 )
+
+        profile = fields.get("Evidence profile")
+        if profile is not None:
+            for field in APPRAISAL_FIELDS:
+                if not fields.get(field):
+                    fail(f"{label} declares an evidence profile but is missing a non-empty '{field}:' field")
+            if profile not in EVIDENCE_PROFILES:
+                fail(f"{label} has an unknown Evidence profile: {profile}")
+            if profile == "primary" and not any(
+                source_type(raw) == "official_docs" for raw in sources
+            ):
+                fail(f"{label} has primary evidence but no official_docs source")
+            if profile == "constrained" and not fields.get("Primary-source exception"):
+                fail(f"{label} has constrained evidence but no Primary-source exception")
+
+
+def source_type(url: str) -> str | None:
+    """Return a registered source's declared provenance class."""
+    raw = read_text_checked(EVIDENCE_MANIFEST)
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        fail(f"evidence manifest is not valid JSON: {rel(EVIDENCE_MANIFEST)}: {exc}")
+    entries = data.get("urls") if isinstance(data, dict) else None
+    if not isinstance(entries, list):
+        fail(f"evidence manifest has no urls list: {rel(EVIDENCE_MANIFEST)}")
+    normalized = normalize_url(url)
+    for entry in entries:
+        if isinstance(entry, dict) and normalize_url(str(entry.get("url", ""))) == normalized:
+            value = entry.get("source_type")
+            return value if isinstance(value, str) else None
+    return None
+
+
+def research_bodies(text: str) -> dict[str, str]:
+    """Return recognised research bodies keyed by their stable finding ID."""
+    matches = list(RESEARCH_BODY_RE.finditer(text))
+    return {
+        match.group("id"): text[
+            match.end() : matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        ]
+        for index, match in enumerate(matches)
+    }
+
+
+def check_research() -> None:
+    """Require each durable decision to link to registered, append-only research."""
+    text = read_text_checked(RESEARCH_INDEX)
+    rows = list(RESEARCH_ROW_RE.finditer(text))
+    if not rows:
+        fail(f"{rel(RESEARCH_INDEX)} has no recognised R-### register rows")
+
+    decisions = read_text_checked(DECISIONS)
+    decision_ids = set(re.findall(r"(?m)^- ID:\s*(D\d+)\s*$", decisions))
+    registered = load_registered_urls()
+    bodies = research_bodies(text)
+    enabled: set[str] = set()
+    seen: set[str] = set()
+
+    for row in rows:
+        research_id = row.group("id")
+        if research_id in seen:
+            fail(f"{rel(RESEARCH_INDEX)} repeats research ID: {research_id}")
+        seen.add(research_id)
+
+        verified = row.group("verified").strip()
+        try:
+            date.fromisoformat(verified)
+        except ValueError:
+            fail(f"{rel(RESEARCH_INDEX)} research {research_id!r} has invalid Last Verified: {verified}")
+
+        body = bodies.get(research_id)
+        if body is None:
+            fail(f"{rel(RESEARCH_INDEX)} research {research_id!r} has no matching body section")
+        sources = EXTERNAL_URL_RE.findall(body)
+        if not sources:
+            fail(f"{rel(RESEARCH_INDEX)} research {research_id!r} cites no source URL")
+        for raw in sources:
+            if normalize_url(raw) not in registered:
+                fail(
+                    f"{rel(RESEARCH_INDEX)} research {research_id!r} cites an unregistered source: {raw}",
+                    hint="Register the source in the evidence manifest, then run scripts/verify-urls.py.",
+                )
+
+        targets = set(DECISION_ID_RE.findall(row.group("enables")))
+        if not targets:
+            fail(f"{rel(RESEARCH_INDEX)} research {research_id!r} enables no decision ID")
+        unknown = targets - decision_ids
+        if unknown:
+            fail(
+                f"{rel(RESEARCH_INDEX)} research {research_id!r} enables unknown decision IDs: "
+                f"{', '.join(sorted(unknown))}"
+            )
+        enabled.update(targets)
+
+    missing = decision_ids - enabled
+    if missing:
+        fail(
+            f"{rel(RESEARCH_INDEX)} has no finding enabling decision IDs: {', '.join(sorted(missing))}",
+            hint="Add a research row and matching body before recording a durable decision.",
+        )
 
 
 def check_readme() -> None:
@@ -487,6 +605,7 @@ def main() -> int:
     check_payload_links()
     check_payload_urls_registered()
     check_decisions()
+    check_research()
     check_readme()
     check_evidence_docs()
     check_security()

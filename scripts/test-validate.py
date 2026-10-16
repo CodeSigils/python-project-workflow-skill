@@ -69,10 +69,11 @@ def main() -> int:
 
     # The real decision log must pass, and malformed entries must be rejected.
     module.check_decisions()
+    module.check_research()
 
     valid = (
         "# Decisions\n\n## Decision: Sample\n\n"
-        "- Status: accepted\n- Decided: 2026-10-15\n"
+        "- ID: D99\n- Status: accepted\n- Decided: 2026-10-15\n"
         "- Sources: https://docs.astral.sh/uv/\n- Recheck: on the next major release\n"
     )
 
@@ -95,6 +96,7 @@ def main() -> int:
     if not run_decisions(valid):
         raise AssertionError("check_decisions rejected a valid decision")
     for mutated, label in (
+        (valid.replace("- ID: D99\n", ""), "a missing ID field"),
         (valid.replace("- Recheck: on the next major release\n", ""), "a missing Recheck field"),
         (valid.replace("Status: accepted", "Status: maybe"), "an unknown status"),
         (
@@ -104,6 +106,46 @@ def main() -> int:
     ):
         if run_decisions(mutated):
             raise AssertionError(f"check_decisions accepted {label}")
+
+    profiled = valid.replace(
+        "- Recheck: on the next major release\n",
+        "- Recheck: on the next major release\n"
+        "- Context: sample context\n"
+        "- Evidence appraisal: applicable official documentation\n"
+        "- Outcome check: the sample remains valid\n"
+        "- Evidence profile: primary\n",
+    )
+    if not run_decisions(profiled):
+        raise AssertionError("check_decisions rejected a complete primary evidence profile")
+    if run_decisions(profiled.replace("- Outcome check: the sample remains valid\n", "")):
+        raise AssertionError("check_decisions accepted an incomplete evidence profile")
+
+    # The checked-in research register must keep every D# linked to a dated,
+    # source-backed R-### finding.
+    research = module.RESEARCH_INDEX.read_text(encoding="utf-8")
+
+    def run_research(text: str) -> bool:
+        with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False) as handle:
+            handle.write(text)
+            path = Path(handle.name)
+        holder: Any = module
+        original = holder.RESEARCH_INDEX
+        holder.RESEARCH_INDEX = path
+        try:
+            module.check_research()
+            return True
+        except SystemExit:
+            return False
+        finally:
+            holder.RESEARCH_INDEX = original
+            path.unlink()
+
+    if not run_research(research):
+        raise AssertionError("check_research rejected the checked-in register")
+    if run_research(research.replace("| R-003 |", "| R-001 |", 1)):
+        raise AssertionError("check_research accepted a duplicate research ID")
+    if run_research(research.replace("| R-003 |", "| R-003 |", 1).replace("| D3 |", "| D99 |", 1)):
+        raise AssertionError("check_research accepted an unknown decision ID")
 
     print("PASS: skill source validator rejects broken links and unregistered URLs")
     return 0

@@ -112,13 +112,15 @@ required content, and the `verify-urls` CI job enforces it.
 
 - When a canonical `references/*.md` change rests on an external source, update
   the manifest in the same change. The payload mirror then carries it forward.
-- Record durable, non-obvious decisions in
-  [`docs/decisions.md`](docs/decisions.md) with their source URLs and a recheck
-  trigger. The log is the place to look before re-researching a setup or policy
-  question, so a settled choice is not re-derived in every session.
-  `scripts/validate.py` rejects an incomplete entry or one whose source is not in
-  the evidence manifest.
-- Keep this lightweight and sync-first: it is a short decision log, not a
-  finding-ID research directory. Canonical `references/*.md` remain the source of
-  truth, mirrored into `skills/python-project-workflow/references/`, and drift is
+- Before new research, consult [`docs/decisions.md`](docs/decisions.md), search
+  the manifest by `domain_tag`, then read
+  [`docs/research/index.md`](docs/research/index.md). When no current,
+  applicable record answers the concern, research official guidance first,
+  append a dated `R-###` finding, then record any durable `D#` decision with
+  its source URLs and a recheck trigger. `scripts/validate.py` rejects
+  incomplete, duplicated, unregistered, or unlinked records.
+- Keep this local, lightweight, and sync-first: the research register records
+  only findings that enable a durable maintainer decision; it is not a general
+  knowledge base. Canonical `references/*.md` remain the source of truth,
+  mirrored into `skills/python-project-workflow/references/`, and drift is
   caught by `bash scripts/sync-payload.sh --ci`.

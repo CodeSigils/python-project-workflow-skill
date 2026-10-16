@@ -13,13 +13,14 @@ session summary when the repository or GitHub settings can provide the fact.
 
 ## Decisions
 
-`docs/decisions.md` records non-obvious maintainer choices with their sources and
-recheck triggers. Before researching a setup, pinning, or policy question from
-scratch, read it; the answer is often already recorded, so there is no need to
-re-derive it. When you make a durable choice others would otherwise re-research,
-add an entry with its `Status`, `Decided` date, `Sources` (registered in
-`docs/evidence-urls.json`), and a `Recheck` trigger. `scripts/validate.py` rejects
-an incomplete entry or one that cites an unregistered source.
+Before researching a setup, pinning, policy, or other durable maintainer
+concern, consult `docs/decisions.md`, then search `docs/evidence-urls.json` by
+`domain_tag`, then read `docs/research/index.md`. Reuse a current, applicable
+finding; otherwise research official guidance first, append a dated finding,
+then record the resulting durable decision. Each decision has a stable `D#` ID,
+links to registered sources and a recheck trigger, and is enabled by an `R-###`
+finding. `scripts/validate.py` rejects incomplete, unregistered, duplicated, or
+unlinked records.
 
 ## CI and Git policy
 

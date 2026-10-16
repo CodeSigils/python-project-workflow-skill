@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "description": "Machine-readable evidence URL index for python-project-workflow documentation.",
   "urls": [
     {
@@ -162,6 +162,39 @@
       "required_text": ["commit SHA"],
       "source_section": "docs/decisions.md",
       "domain_tag": "github-actions",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-10-15"
+    },
+    {
+      "name": "Evidence-Based Software Engineering",
+      "url": "https://ebse.webspace.durham.ac.uk/",
+      "expected_statuses": [200],
+      "required_text": ["Evidence-Based Software Engineering"],
+      "source_section": "docs/research/index.md",
+      "domain_tag": "research-consultation",
+      "source_type": "academic",
+      "status": "active",
+      "last_verified": "2026-10-15"
+    },
+    {
+      "name": "GOV.UK evidence-led SDLC assurance",
+      "url": "https://www.gov.uk/government/publications/evidence-led-assurance-for-the-software-development-lifecycle",
+      "expected_statuses": [200],
+      "required_text": ["Evidence-led assurance"],
+      "source_section": "docs/research/index.md",
+      "domain_tag": "research-consultation",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-10-15"
+    },
+    {
+      "name": "AWS architectural decision records process",
+      "url": "https://docs.aws.amazon.com/prescriptive-guidance/latest/architectural-decision-records/adr-process.html",
+      "expected_statuses": [200],
+      "required_text": ["architectural decision records"],
+      "source_section": "docs/research/index.md",
+      "domain_tag": "research-consultation",
       "source_type": "official_docs",
       "status": "active",
       "last_verified": "2026-10-15"
