@@ -14,6 +14,9 @@ updates:
     open-pull-requests-limit: 2
     commit-message:
       prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "github_actions"
     groups:
       routine-actions:
         update-types: ["minor", "patch"]
@@ -45,3 +48,6 @@ updates:
     open-pull-requests-limit: 1
     commit-message:
       prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "python:uv"
