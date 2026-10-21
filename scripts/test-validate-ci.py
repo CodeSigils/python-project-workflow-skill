@@ -127,9 +127,16 @@ def main() -> int:
         invalid_ruff_lock,
         "a ruff version that is not an exact three-part release",
     )
+    invalid_ty_lock, replacements = re.subn(
+        r'(?m)(^name = "ty"\nversion = ")[^"]+(")',
+        r"\g<1>0.0.0rc1\g<2>",
+        lock,
+        count=1,
+    )
+    assert replacements == 1, "ty lockfile entry not found"
     assert_lockfile_rejected(
         module,
-        re.sub(r'(?m)^version = "0\.0\.84"', 'version = "0.0.84rc1"', lock),
+        invalid_ty_lock,
         "a ty version that is not an exact three-part release",
     )
     assert_rejected(
