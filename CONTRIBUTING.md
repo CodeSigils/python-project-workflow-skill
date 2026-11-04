@@ -95,12 +95,15 @@ For releases, follow `docs/release-checklist.md`.
 - Only an annotated `vX.Y.Z` tag whose target is reachable from `main` and
   whose version matches `CITATION.cff` can create a release. The release job
   receives `contents: write` only after a read-only preflight passes.
-- Dependabot groups minor and patch GitHub Action updates weekly. Major action
-  upgrades stay deliberately manual and must receive the same review as a
-  migration.
+- Dependabot groups minor and patch GitHub Action updates weekly. Patch and
+  minor Dependabot pull requests request auto-merge once the required checks
+  pass; major action upgrades stay deliberately manual and must receive the
+  same review as a migration.
 - The scheduled hygiene job treats an unreviewed pull request older than three
-  days and any open pull request older than fourteen days as failures. A remote
-  branch without an open pull request becomes stale after thirty days.
+  days and any open pull request older than fourteen days as failures. Pull
+  requests already queued for auto-merge are left to that automation and are
+  not counted as review debt. A remote branch without an open pull request
+  becomes stale after thirty days.
 
 ## Evidence and research
 

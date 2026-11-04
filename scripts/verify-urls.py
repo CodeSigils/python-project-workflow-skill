@@ -17,6 +17,7 @@ anchor is missing.
 from __future__ import annotations
 
 import json
+import os
 import sys
 import time
 import urllib.error
@@ -140,6 +141,31 @@ def classify_status(status: int | str, expected_statuses: list[int]) -> str:
     return "DRIFT"
 
 
+def build_summary(
+    drift_found: bool, failures: list[tuple[str, str, str, str]]
+) -> list[str]:
+    """Return markdown lines for the GitHub Actions job summary."""
+    if not drift_found:
+        return [
+            "## Evidence URL re-verification",
+            "",
+            "All monitored URLs match the manifest.",
+        ]
+    lines = ["## Evidence URL re-verification", ""]
+    for name, url, status, note in failures:
+        lines.append(f"- **{name}** — {status} ({note}): {url}")
+    return lines
+
+
+def write_summary(lines: list[str]) -> None:
+    """Append the result to the job summary when GitHub provides one."""
+    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if not summary_path:
+        return
+    with open(summary_path, "a", encoding="utf-8") as summary:
+        summary.write("\n".join(lines) + "\n")
+
+
 def check_self_test() -> None:
     """Run internal self-tests for the validation logic."""
     # Test classify_status
@@ -224,6 +250,14 @@ def check_self_test() -> None:
         except ValueError:
             pass
     print("  PASS  validate_entry semantic fields")
+    assert "All monitored URLs" in build_summary(False, [])[2]
+    broken = build_summary(True, [("Example", "https://example.com", "404", "DRIFT")])
+    assert broken == [
+        "## Evidence URL re-verification",
+        "",
+        "- **Example** — 404 (DRIFT): https://example.com",
+    ]
+    print("  PASS  build_summary")
 
     print("  PASS  verify-urls.py self-tests")
 
@@ -240,11 +274,15 @@ def main() -> int:
     print("-" * 84)
 
     drift_found = False
+    failures: list[tuple[str, str, str, str]] = []
     for entry in sorted(entries, key=lambda item: item["name"].lower()):
         try:
             validate_entry(entry)
         except ValueError as exc:
             print(f"  {entry.get('name', '<unnamed>'):<30s} {'-':<8s} {'-':<12s} {'-':<12s} MANIFEST: {exc}")
+            failures.append(
+                (entry.get("name", "<unnamed>"), entry.get("url", ""), "-", f"MANIFEST: {exc}")
+            )
             drift_found = True
             continue
 
@@ -263,6 +301,9 @@ def main() -> int:
             note = "BROKEN"
             drift_found = True
 
+        if note in {"DRIFT", "BROKEN"}:
+            failures.append((entry["name"], entry["url"], str(result.status), note))
+
         expected_text = "/".join(str(code) for code in expected)
         marker = "  ← DRIFT" if note == "DRIFT" else ""
         marker = "  ← BROKEN" if note == "BROKEN" else marker
@@ -271,6 +312,8 @@ def main() -> int:
             f"  {entry['name']:<30s} {status_label:<8s} {expected_text:<12s} "
             f"{content_label:<12s} {note:<10s}{marker}"
         )
+
+    write_summary(build_summary(drift_found, failures))
 
     if drift_found:
         print("\nRESULT: Drift or broken content detected — one or more URLs differ from docs/evidence-urls.json.")

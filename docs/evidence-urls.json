@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 8,
   "description": "Machine-readable evidence URL index for python-project-workflow documentation.",
   "urls": [
     {
@@ -209,6 +209,61 @@
       "source_type": "pinned_snapshot",
       "status": "active",
       "last_verified": "2026-08-16"
+    },
+    {
+      "name": "GitHub Actions schedule event",
+      "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows",
+      "expected_statuses": [200],
+      "required_text": ["can be delayed during periods of high loads", "Scheduled workflows will only run on the default branch"],
+      "source_section": "docs/decisions.md",
+      "domain_tag": "github-actions",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-11-04"
+    },
+    {
+      "name": "GitHub auto-merge",
+      "url": "https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/automatically-merging-a-pull-request",
+      "expected_statuses": [200],
+      "required_text": ["must be enabled for the repository", "after all required reviews and status checks pass"],
+      "source_section": "docs/decisions.md",
+      "domain_tag": "github-actions",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-11-04"
+    },
+    {
+      "name": "Automating Dependabot with GitHub Actions",
+      "url": "https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions",
+      "expected_statuses": [200],
+      "required_text": ["gh pr merge --auto --merge", "Enabling automerge on a pull request"],
+      "source_section": "docs/decisions.md",
+      "domain_tag": "github-actions",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-11-04"
+    },
+    {
+      "name": "Dependabot on GitHub Actions restrictions",
+      "url": "https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-on-actions",
+      "expected_statuses": [200],
+      "required_text": ["has read-only permissions by default", "Secrets are populated from Dependabot secrets"],
+      "source_section": "docs/decisions.md",
+      "domain_tag": "github-actions",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-11-04"
+    },
+    {
+      "name": "Dependabot options reference",
+      "url": "https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference",
+      "expected_statuses": [200],
+      "required_text": ["rebase-strategy", "cooldown"],
+      "source_section": "docs/decisions.md",
+      "domain_tag": "github-actions",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-11-04"
     }
   ]
 }
