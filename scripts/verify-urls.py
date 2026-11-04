@@ -252,7 +252,11 @@ def check_self_test() -> None:
     print("  PASS  validate_entry semantic fields")
     assert "All monitored URLs" in build_summary(False, [])[2]
     broken = build_summary(True, [("Example", "https://example.com", "404", "DRIFT")])
-    assert any("https://example.com" in line and "404" in line for line in broken)
+    assert broken == [
+        "## Evidence URL re-verification",
+        "",
+        "- **Example** — 404 (DRIFT): https://example.com",
+    ]
     print("  PASS  build_summary")
 
     print("  PASS  verify-urls.py self-tests")
