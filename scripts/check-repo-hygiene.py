@@ -21,6 +21,7 @@ import os
 import subprocess
 import sys
 from datetime import datetime, timezone
+from urllib.parse import urlparse
 
 DEFAULT_BRANCH = "main"
 UNREVIEWED_PULL_GRACE_DAYS = 3
@@ -185,17 +186,24 @@ def remote_branches(repo: str) -> tuple[dict[str, str], list[str]]:
     return dates, notes
 
 
+def parse_remote(url: str) -> str:
+    """Return owner/name from a GitHub remote URL, or unknown/unknown."""
+    if url.startswith("git@") and ":" in url:
+        return url.split(":", 1)[1].removesuffix(".git")
+    parsed = urlparse(url)
+    if not parsed.netloc:
+        parsed = urlparse(f"//{url}")
+    if parsed.hostname == "github.com":
+        return parsed.path.lstrip("/").removesuffix(".git")
+    return "unknown/unknown"
+
+
 def detect_repo(root: str) -> str:
     """Read owner/name from the origin remote so no repository is hardcoded."""
     code, out, _ = run(["git", "-C", root, "remote", "get-url", "origin"])
     if code != 0:
         return "unknown/unknown"
-    url = out.strip()
-    if url.startswith("git@") and ":" in url:
-        return url.split(":", 1)[1].removesuffix(".git")
-    if "github.com/" in url:
-        return url.split("github.com/", 1)[1].removesuffix(".git")
-    return "unknown/unknown"
+    return parse_remote(out.strip())
 
 
 def collect(repo: str, root: str) -> tuple[list[str], list[str]]:
@@ -269,6 +277,12 @@ def run_self_tests() -> None:
     assert stale_branches(
         {"main": "2026-01-01T00:00:00Z", "old": "2026-09-01T00:00:00Z"}, set(), now
     ) == ["branch 'old' has no pull request and is 33 day(s) old"]
+
+    assert parse_remote("git@github.com:CodeSigils/repo.git") == "CodeSigils/repo"
+    assert parse_remote("https://github.com/CodeSigils/repo.git") == "CodeSigils/repo"
+    assert parse_remote("ssh://git@github.com/CodeSigils/repo.git") == "CodeSigils/repo"
+    assert parse_remote("github.com/CodeSigils/repo") == "CodeSigils/repo"
+    assert parse_remote("https://example.com/CodeSigils/repo") == "unknown/unknown"
 
 
 def main() -> int:
