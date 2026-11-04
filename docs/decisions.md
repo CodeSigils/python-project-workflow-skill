@@ -69,3 +69,28 @@ local decision log, evidence manifest, and research register before repeating
 research; a new durable decision records the relevant finding, sources,
 limitations, and a recheck trigger. The mechanism is local to this repository,
 not dependent on the exploratory lab.
+
+## Decision: Automate Dependabot patch and minor merges and exempt queued work from hygiene review debt
+
+- ID: D4
+- Status: accepted
+- Decided: 2026-11-04
+- Sources: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows, https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/automatically-merging-a-pull-request, https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions, https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-on-actions, https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
+- Recheck: a change to GitHub scheduled-workflow, auto-merge, or Dependabot guidance, or a Dependabot/Actions configuration change that alters this flow
+- Context: whether scheduled hygiene failures from unreviewed Dependabot pull requests should be fixed by automation rather than by relaxing the gate
+- Evidence appraisal: GitHub documents schedule delay under load, auto-merge gated by required checks, and Dependabot rebase cadence and read-only default token. These primary sources apply directly to this repository's solo-maintainer, SHA-pinned, strict-check setup.
+- Outcome check: a Dependabot patch/minor PR enables auto-merge after CI; `check-repo-hygiene.py --self-test` proves queued PRs are skipped; CI and validators pass.
+- Evidence profile: primary
+
+Rationale: Two consecutive Monday runs failed only in the repository-hygiene job
+because the two open Dependabot pull requests had no review beyond the three-day
+grace period. The repository deliberately requires zero approvals for its solo
+maintainer, so a review requirement in the hygiene gate cannot be satisfied by
+the same automation that is meant to merge bot updates. GitHub documents that
+auto-merge waits for required checks, that Dependabot rebases on its weekly
+schedule or on conflict rather than immediately when merely behind, and that
+Dependabot-triggered workflows receive a read-only token unless permissions are
+explicit. Automating patch and minor merges therefore addresses the backlog
+while keeping required checks as the gate; excluding queued pull requests from
+review debt keeps the hygiene signal for genuinely neglected work. Major
+upgrades remain manual because they are migrations.

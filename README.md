@@ -277,6 +277,7 @@ python-project-workflow/
 │   ├── dependabot.yml                   # Scheduled updates for actions and locked dependencies
 │   ├── release.yml                      # Generated release-note categories
 │   ├── workflows/ci.yml                 # Validation matrix and scheduled URL checks
+│   ├── workflows/dependabot-auto-merge.yml # Enables auto-merge for Dependabot patch and minor updates
 │   ├── workflows/release.yml            # Tag-triggered GitHub release creation
 │   └── scripts/check-portability.py     # Rejects agent-specific runtime references
 ├── .githooks/
@@ -298,7 +299,7 @@ python-project-workflow/
 │   ├── check-version-consistency.py      # Validates citation version alignment with release tags
 │   ├── check-readme-tree.py              # Ensures README repo-layout tree matches tracked files
 │   ├── check-expiry.py                   # Checks freshness markers for expired evidence
-│   ├── check-repo-hygiene.py            # Reports and fails on stacked, unreviewed, and stale work
+│   ├── check-repo-hygiene.py            # Reports stacked, unreviewed, and stale work; skips auto-merge-queued PRs
 │   ├── check-hook-integrity.py           # Fails when hooks lose stages or tracked files leak markers
 │   ├── test-validate-ci.py                # Regression tests for CI policy enforcement
 │   ├── test-validate.py                   # Regression tests for skill source checks

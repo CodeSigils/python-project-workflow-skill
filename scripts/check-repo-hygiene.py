@@ -8,8 +8,9 @@ branch that was already superseded, which stacks work and makes the real diff
 hard to read.
 
 Stacked pull requests, neglected pull requests, and stale branches are errors.
-Local state and inaccessible remote metadata remain notes. The workflow writes
-the result to the GitHub Actions job summary.
+A pull request already queued for auto-merge is left to that automation rather
+than treated as review debt. Local state and inaccessible remote metadata
+remain notes. The workflow writes the result to the GitHub Actions job summary.
 """
 
 from __future__ import annotations
@@ -89,6 +90,8 @@ def neglected_pulls(pulls: list[dict], now: datetime) -> list[str]:
     findings: list[str] = []
     for pull in pulls:
         number = pull.get("number")
+        if pull.get("autoMergeRequest"):
+            continue
         created_days = age_days(str(pull.get("createdAt") or ""), now)
         updated_days = age_days(str(pull.get("updatedAt") or ""), now)
         if created_days is None or updated_days is None:
@@ -151,7 +154,7 @@ def remote_pulls(repo: str) -> tuple[list[dict], list[str]]:
         [
             "gh", "pr", "list", "--repo", repo, "--state", "open",
             "--limit", "50", "--json",
-            "number,headRefName,baseRefName,createdAt,updatedAt,reviews",
+            "number,headRefName,baseRefName,createdAt,updatedAt,reviews,autoMergeRequest",
         ]
     )
     if code != 0:
@@ -260,6 +263,9 @@ def run_self_tests() -> None:
     assert neglected_pulls(
         [{"number": 2, "createdAt": "2026-09-01T00:00:00Z", "updatedAt": "2026-09-01T00:00:00Z", "reviews": [{"state": "APPROVED"}]}], now
     ) == ["pull request #2 has not been updated for 33 day(s)"]
+    assert neglected_pulls(
+        [{"number": 3, "createdAt": "2026-10-01T00:00:00Z", "updatedAt": "2026-10-01T00:00:00Z", "reviews": [], "autoMergeRequest": {"enabledAt": "2026-10-01T00:00:00Z"}}], now
+    ) == []
     assert stale_branches(
         {"main": "2026-01-01T00:00:00Z", "old": "2026-09-01T00:00:00Z"}, set(), now
     ) == ["branch 'old' has no pull request and is 33 day(s) old"]
