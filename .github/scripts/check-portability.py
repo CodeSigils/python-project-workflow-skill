@@ -59,13 +59,14 @@ def scan_file(path: Path) -> list[tuple[Path, int, str, str]]:
 
 def run_self_tests() -> int:
     """Run internal self-tests for the validation logic."""
+    hermes_home = "~" + "/.hermes"
     test_cases = [
         ("skill_view(name)", True, "Hermes tool name"),
         ("SKILL_VIEW(name)", True, "Hermes tool name case insensitive"),
         ("from hermes_tools import foo", True, "Hermes Python import"),
         ("from HERMES_TOOLS import foo", True, "Hermes Python import case insensitive"),
-        ("~/.hermes/config", True, "Hermes config path"),
-        ("~/.hermes/", True, "Hermes config path with slash"),
+        (f"{hermes_home}/config", True, "Hermes config path"),
+        (f"{hermes_home}/", True, "Hermes config path with slash"),
         ("hermes skills install", True, "Hermes CLI command"),
         ("hermes config set", True, "Hermes CLI command"),
         ("()", True, "Code agent reference"),

@@ -111,8 +111,8 @@ Status: documented discovery path; installation and workflow behavior have not
 been independently verified for this project.
 
 ```bash
-mkdir -p ~/.claude/skills
-cp -r skills/python-project-workflow ~/.claude/skills/
+mkdir -p "$HOME/.claude/skills"
+cp -r skills/python-project-workflow "$HOME/.claude/skills/"
 ```
 </details>
 
@@ -123,8 +123,8 @@ Status: workflow verified with Codex CLI 0.133.0 under behavioral contract
 version 3. See [the portability contract](docs/portability-contract.md).
 
 ```bash
-mkdir -p ~/.agents/skills
-cp -r skills/python-project-workflow ~/.agents/skills/
+mkdir -p "$HOME/.agents/skills"
+cp -r skills/python-project-workflow "$HOME/.agents/skills/"
 ```
 </details>
 
