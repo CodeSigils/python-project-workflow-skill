@@ -17,7 +17,7 @@
       "name": " Code skill discovery",
       "url": "https://code.claude.com/docs/en/skills",
       "expected_statuses": [200],
-      "required_text": ["~/.claude/skills", "SKILL.md"],
+      "required_text": [".claude/skills", "SKILL.md"],
       "source_section": "README.md Quick Start",
       "domain_tag": "claude-code",
       "source_type": "official_docs",

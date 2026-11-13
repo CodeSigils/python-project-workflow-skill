@@ -24,7 +24,7 @@ explicit and implicit selection paths.
 | Runtime | Discovery or install evidence | Behavioral result | Status |
 |---|---|---|---|
 | Codex CLI 0.133.0 | Exact payload copied into each fixture's `.agents/skills/python-project-workflow` directory | Implicit greenfield and explicit mature-preservation cases passed deterministic grading, 2/2 | `workflow_verified` |
-| Hermes Agent 0.19.0 | Exact payload copied temporarily into `~/.hermes/skills/python-project-workflow`; `hermes skills list` showed it enabled | Not established: provider returned HTTP 429 for implicit selection, and explicit `--skills python-project-workflow` did not resolve the skill listed by the client | `install_verified` |
+| Hermes Agent 0.19.0 | Exact payload copied temporarily into `$HOME/.hermes/skills/python-project-workflow`; `hermes skills list` showed it enabled | Not established: provider returned HTTP 429 for implicit selection, and explicit `--skills python-project-workflow` did not resolve the skill listed by the client | `install_verified` |
 
 The temporary Hermes payload was removed after the run. Hermes was 1,661
 upstream commits behind at evaluation time, so the preload discrepancy may be a
