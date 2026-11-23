@@ -1,12 +1,18 @@
 {
-  "version": 8,
+  "version": 9,
   "description": "Machine-readable evidence URL index for python-project-workflow documentation.",
   "urls": [
     {
       "name": "Agent Skills specification",
       "url": "https://agentskills.io/specification",
-      "expected_statuses": [200],
-      "required_text": ["name", "description", "SKILL.md"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "name",
+        "description",
+        "SKILL.md"
+      ],
       "source_section": "README.md",
       "domain_tag": "skill-format",
       "source_type": "official_docs",
@@ -16,8 +22,13 @@
     {
       "name": " Code skill discovery",
       "url": "https://code.claude.com/docs/en/skills",
-      "expected_statuses": [200],
-      "required_text": [".claude/skills", "SKILL.md"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        ".claude/skills",
+        "SKILL.md"
+      ],
       "source_section": "README.md Quick Start",
       "domain_tag": "claude-code",
       "source_type": "official_docs",
@@ -27,8 +38,13 @@
     {
       "name": "Codex skill discovery",
       "url": "https://learn.chatgpt.com/docs/build-skills.md",
-      "expected_statuses": [200],
-      "required_text": [".agents/skills", "SKILL.md"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        ".agents/skills",
+        "SKILL.md"
+      ],
       "source_section": "README.md Quick Start",
       "domain_tag": "codex",
       "source_type": "official_docs",
@@ -38,8 +54,13 @@
     {
       "name": "Gemini CLI skill discovery",
       "url": "https://geminicli.com/docs/cli/using-agent-skills/",
-      "expected_statuses": [200],
-      "required_text": [".agents/skills", "Agent Skills"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        ".agents/skills",
+        "Agent Skills"
+      ],
       "source_section": "README.md Quick Start",
       "domain_tag": "gemini-cli",
       "source_type": "official_docs",
@@ -49,8 +70,13 @@
     {
       "name": "Hermes skill installation",
       "url": "https://github.com/NousResearch/hermes-agent/blob/main/website/docs/guides/work-with-skills.md",
-      "expected_statuses": [200],
-      "required_text": ["hermes skills install", "SKILL.md"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "hermes skills install",
+        "SKILL.md"
+      ],
       "source_section": "README.md Quick Start",
       "domain_tag": "hermes-agent",
       "source_type": "official_docs",
@@ -60,8 +86,13 @@
     {
       "name": "OpenCode skill discovery",
       "url": "https://opencode.ai/v2/docs/skills",
-      "expected_statuses": [200],
-      "required_text": [".opencode/skills", "SKILL.md"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        ".opencode/skills",
+        "SKILL.md"
+      ],
       "source_section": "README.md Quick Start",
       "domain_tag": "opencode",
       "source_type": "official_docs",
@@ -71,7 +102,9 @@
     {
       "name": "Python packaging user guide",
       "url": "https://packaging.python.org/en/latest/guides/",
-      "expected_statuses": [200],
+      "expected_statuses": [
+        200
+      ],
       "source_section": "README.md",
       "domain_tag": "python-packaging",
       "source_type": "official_docs",
@@ -81,8 +114,12 @@
     {
       "name": "uv documentation",
       "url": "https://docs.astral.sh/uv/",
-      "expected_statuses": [200],
-      "required_text": ["An extremely fast Python package and project manager"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "An extremely fast Python package and project manager"
+      ],
       "source_section": "skills/python-project-workflow/references/lint-format-typing-testing.md",
       "domain_tag": "python-tooling",
       "source_type": "official_docs",
@@ -92,8 +129,12 @@
     {
       "name": "Ruff documentation",
       "url": "https://docs.astral.sh/ruff/",
-      "expected_statuses": [200],
-      "required_text": ["An extremely fast Python linter"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "An extremely fast Python linter"
+      ],
       "source_section": "skills/python-project-workflow/references/lint-format-typing-testing.md",
       "domain_tag": "python-tooling",
       "source_type": "official_docs",
@@ -103,8 +144,13 @@
     {
       "name": "mypy documentation",
       "url": "https://mypy.readthedocs.io/",
-      "expected_statuses": [200],
-      "required_text": ["Mypy", "static type"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "Mypy",
+        "static type"
+      ],
       "source_section": "skills/python-project-workflow/references/lint-format-typing-testing.md",
       "domain_tag": "python-tooling",
       "source_type": "official_docs",
@@ -114,8 +160,12 @@
     {
       "name": "pytest documentation",
       "url": "https://docs.pytest.org/",
-      "expected_statuses": [200],
-      "required_text": ["pytest"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "pytest"
+      ],
       "source_section": "skills/python-project-workflow/references/lint-format-typing-testing.md",
       "domain_tag": "python-tooling",
       "source_type": "official_docs",
@@ -125,8 +175,12 @@
     {
       "name": "GitHub Python gitignore template",
       "url": "https://github.com/github/gitignore/blob/main/Python.gitignore",
-      "expected_statuses": [200],
-      "required_text": ["Python"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "Python"
+      ],
       "source_section": "skills/python-project-workflow/references/security-and-gitignore.md",
       "domain_tag": "python-packaging",
       "source_type": "official_docs",
@@ -136,8 +190,12 @@
     {
       "name": "uv GitHub Actions integration guide",
       "url": "https://docs.astral.sh/uv/guides/integration/github/",
-      "expected_statuses": [200],
-      "required_text": ["astral-sh/setup-uv"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "astral-sh/setup-uv"
+      ],
       "source_section": "docs/decisions.md",
       "domain_tag": "python-tooling",
       "source_type": "official_docs",
@@ -147,8 +205,12 @@
     {
       "name": "setup-uv action repository",
       "url": "https://github.com/astral-sh/setup-uv",
-      "expected_statuses": [200],
-      "required_text": ["astral-sh/setup-uv"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "astral-sh/setup-uv"
+      ],
       "source_section": "docs/decisions.md",
       "domain_tag": "python-tooling",
       "source_type": "official_docs",
@@ -158,8 +220,12 @@
     {
       "name": "GitHub Actions security hardening",
       "url": "https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions",
-      "expected_statuses": [200],
-      "required_text": ["commit SHA"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "commit SHA"
+      ],
       "source_section": "docs/decisions.md",
       "domain_tag": "github-actions",
       "source_type": "official_docs",
@@ -169,8 +235,12 @@
     {
       "name": "Evidence-Based Software Engineering",
       "url": "https://ebse.webspace.durham.ac.uk/",
-      "expected_statuses": [200],
-      "required_text": ["Evidence-Based Software Engineering"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "Evidence-Based Software Engineering"
+      ],
       "source_section": "docs/research/index.md",
       "domain_tag": "research-consultation",
       "source_type": "academic",
@@ -181,8 +251,12 @@
     {
       "name": "GOV.UK evidence-led SDLC assurance",
       "url": "https://www.gov.uk/government/publications/evidence-led-assurance-for-the-software-development-lifecycle",
-      "expected_statuses": [200],
-      "required_text": ["Evidence-led assurance"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "Evidence-led assurance"
+      ],
       "source_section": "docs/research/index.md",
       "domain_tag": "research-consultation",
       "source_type": "official_docs",
@@ -192,8 +266,12 @@
     {
       "name": "AWS architectural decision records process",
       "url": "https://docs.aws.amazon.com/prescriptive-guidance/latest/architectural-decision-records/adr-process.html",
-      "expected_statuses": [200],
-      "required_text": ["architectural decision records"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "architectural decision records"
+      ],
       "source_section": "docs/research/index.md",
       "domain_tag": "research-consultation",
       "source_type": "official_docs",
@@ -203,7 +281,9 @@
     {
       "name": "Python project workflow repository",
       "url": "https://github.com/CodeSigils/python-project-workflow-skill",
-      "expected_statuses": [200],
+      "expected_statuses": [
+        200
+      ],
       "source_section": "README.md",
       "domain_tag": "repository",
       "source_type": "pinned_snapshot",
@@ -213,8 +293,13 @@
     {
       "name": "GitHub Actions schedule event",
       "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows",
-      "expected_statuses": [200],
-      "required_text": ["can be delayed during periods of high loads", "Scheduled workflows will only run on the default branch"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "can be delayed during periods of high loads",
+        "Scheduled workflows will only run on the default branch"
+      ],
       "source_section": "docs/decisions.md",
       "domain_tag": "github-actions",
       "source_type": "official_docs",
@@ -224,8 +309,13 @@
     {
       "name": "GitHub auto-merge",
       "url": "https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/automatically-merging-a-pull-request",
-      "expected_statuses": [200],
-      "required_text": ["must be enabled for the repository", "after all required reviews and status checks pass"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "must be enabled for the repository",
+        "after all required reviews and status checks pass"
+      ],
       "source_section": "docs/decisions.md",
       "domain_tag": "github-actions",
       "source_type": "official_docs",
@@ -235,8 +325,13 @@
     {
       "name": "Automating Dependabot with GitHub Actions",
       "url": "https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions",
-      "expected_statuses": [200],
-      "required_text": ["gh pr merge --auto --merge", "Enabling automerge on a pull request"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "gh pr merge --auto --merge",
+        "Enabling automerge on a pull request"
+      ],
       "source_section": "docs/decisions.md",
       "domain_tag": "github-actions",
       "source_type": "official_docs",
@@ -246,8 +341,13 @@
     {
       "name": "Dependabot on GitHub Actions restrictions",
       "url": "https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-on-actions",
-      "expected_statuses": [200],
-      "required_text": ["has read-only permissions by default", "Secrets are populated from Dependabot secrets"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "has read-only permissions by default",
+        "Secrets are populated from Dependabot secrets"
+      ],
       "source_section": "docs/decisions.md",
       "domain_tag": "github-actions",
       "source_type": "official_docs",
@@ -257,13 +357,98 @@
     {
       "name": "Dependabot options reference",
       "url": "https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference",
-      "expected_statuses": [200],
-      "required_text": ["rebase-strategy", "cooldown"],
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "rebase-strategy",
+        "cooldown"
+      ],
       "source_section": "docs/decisions.md",
       "domain_tag": "github-actions",
       "source_type": "official_docs",
       "status": "active",
       "last_verified": "2026-11-04"
+    },
+    {
+      "name": "PyPA pyproject.toml specification",
+      "url": "https://packaging.python.org/en/latest/specifications/pyproject-toml/",
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "Declaring project metadata",
+        "[project]"
+      ],
+      "source_section": "docs/research/index.md R-005, skills/python-project-workflow/references/pyproject-template.md",
+      "domain_tag": "python-packaging",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-11-23"
+    },
+    {
+      "name": "PEP 621 project metadata in pyproject.toml",
+      "url": "https://peps.python.org/pep-0621/",
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "Storing project metadata in pyproject.toml",
+        "Final"
+      ],
+      "source_section": "docs/research/index.md R-005, skills/python-project-workflow/references/pyproject-template.md",
+      "domain_tag": "python-packaging",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-11-23"
+    },
+    {
+      "name": "PyPA core metadata specification",
+      "url": "https://packaging.python.org/en/latest/specifications/core-metadata/",
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "Core metadata specifications",
+        "Name"
+      ],
+      "source_section": "docs/research/index.md R-005",
+      "domain_tag": "python-packaging",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-11-23"
+    },
+    {
+      "name": "Writing your pyproject.toml guide",
+      "url": "https://packaging.python.org/en/latest/guides/writing-pyproject-toml/",
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "Writing your",
+        "pyproject.toml"
+      ],
+      "source_section": "docs/research/index.md R-005, skills/python-project-workflow/references/pyproject-template.md",
+      "domain_tag": "python-packaging",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-11-23"
+    },
+    {
+      "name": "PEP 639 license metadata",
+      "url": "https://peps.python.org/pep-0639/",
+      "expected_statuses": [
+        200
+      ],
+      "required_text": [
+        "Improving License Clarity",
+        "License-Expression"
+      ],
+      "source_section": "docs/research/index.md R-005, skills/python-project-workflow/references/pyproject-template.md",
+      "domain_tag": "python-packaging",
+      "source_type": "official_docs",
+      "status": "active",
+      "last_verified": "2026-11-23"
     }
   ]
 }

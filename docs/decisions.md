@@ -94,3 +94,25 @@ explicit. Automating patch and minor merges therefore addresses the backlog
 while keeping required checks as the gate; excluding queued pull requests from
 review debt keeps the hygiene signal for genuinely neglected work. Major
 upgrades remain manual because they are migrations.
+
+
+## Decision: Use a bounded PEP 621 inspection-first contract in PPW
+
+- ID: D5
+- Status: accepted
+- Decided: 2026-11-23
+- Sources: https://packaging.python.org/en/latest/specifications/pyproject-toml/, https://peps.python.org/pep-0621/, https://packaging.python.org/en/latest/specifications/core-metadata/, https://packaging.python.org/en/latest/guides/writing-pyproject-toml/, https://peps.python.org/pep-0639/
+- Recheck: a PyPA pyproject/core-metadata/PEP 639 spec change, a packaging-guide change that alters PEP 621 guidance, or a PPW behavior case that reveals missing/unsafe metadata inspection boundaries
+- Context: whether PPW should treat PEP 621 as a target-repo inspection/compliance domain or as bounded workflow guidance
+- Evidence appraisal: PyPA specifications are canonical for current pyproject/core metadata behavior; PEP 621 is final/historical and points to the PyPA spec; the PyPA guide and PEP 639 provide user-facing and license-metadata guidance. These sources support an inspect-first reporting contract, not a universal scanner claim.
+- Outcome check: PPW runtime/reference/eval changes report PEP 621 metadata status with evidence, preserve coherent legacy layouts, and deterministic evals pass for bounded inspection cases.
+- Evidence profile: primary
+
+Rationale: PPW is a workflow skill, not a packaging compliance engine. PEP 621
+metadata is relevant to packaging and compatibility workflows, so PPW should
+inspect it before making claims and report bounded, evidence-backed status.
+The contract must distinguish aligned, partial, missing, legacy-alternative,
+unknown, and not-applicable states; keep `requires-python` inside the Python
+Version Contract; avoid imposing PEP 621 on coherent legacy repositories; and
+avoid claiming universal compliance. Canonical links belong in research/evidence
+records and targeted reference guidance, not as noisy runtime boilerplate.

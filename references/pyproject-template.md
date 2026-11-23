@@ -2,9 +2,21 @@
 
 This file provides a minimal, modern `pyproject.toml` using PEP 621 metadata. Adjust the values to fit your project.
 
-> **Freshness:** Verify packaging metadata, build-backend compatibility, and
-> interpreter lifecycle status against current official documentation before
-> using this template.
+> **Inspection-first caveat:** This is a baseline template/reference, not a
+> target-repository compliance validator. Before claiming PEP 621 alignment in
+> an existing repository, inspect actual metadata and project-native signals;
+> report `aligned`, `partial`, `missing`, `legacy-alternative`, `unknown`, or
+> `N/A` with evidence. Preserve coherent legacy packaging layouts unless the
+> user explicitly requests migration.
+>
+> **Canonical sources:** [PyPA pyproject.toml specification](https://packaging.python.org/en/latest/specifications/pyproject-toml/),
+> [PEP 621](https://peps.python.org/pep-0621/),
+> [Writing your pyproject.toml](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/),
+> [PEP 639](https://peps.python.org/pep-0639/),
+> [PyPA core metadata](https://packaging.python.org/en/latest/specifications/core-metadata/).
+> Verify packaging metadata, build-backend compatibility, and interpreter
+> lifecycle status against current official documentation before using this
+> template.
 > See [ruff docs](https://docs.astral.sh/ruff/), [mypy docs](https://mypy.readthedocs.io/),
 > [pytest docs](https://docs.pytest.org/), [uv docs](https://docs.astral.sh/uv/) for current versions.
 
@@ -159,5 +171,9 @@ default:
 - For existing projects, do not change `requires-python` without understanding the impact on users.
 - When in doubt, preserve the existing `requires-python`, align tooling to it, and flag unsupported Python versions for
   an explicit migration decision.
+- **Inspection boundary:** PEP 621 metadata presence is not by itself proof of
+  project correctness. Inspect related build backend, dependency declarations,
+  dynamic metadata, tool/CI version contracts, and legacy metadata files before
+  making claims.
 - **Version maintenance:** Treat concrete versions in this template as examples.
   Check official documentation for compatible versions when applying them.

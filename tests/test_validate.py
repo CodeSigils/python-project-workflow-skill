@@ -25,9 +25,12 @@ def load_validator() -> ModuleType:
 def main() -> int:
     module = load_validator()
 
-    # The real repository must pass both new structural checks.
+    # The real repository must pass core structural checks.
     module.check_payload_links()
     module.check_payload_urls_registered()
+    module.check_skill()
+    module.check_references()
+    module.check_pep621_contract_parity()
 
     # URL comparison ignores fragments, trailing slashes, and trailing dots.
     if module.normalize_url("https://docs.astral.sh/ruff/#rules") != "https://docs.astral.sh/ruff":

@@ -19,6 +19,8 @@ from regression_support import (
     read_json,
     run_grader,
     write_mature_preservation_fixture,
+    write_pep621_legacy_setupcfg_fixture,
+    write_pep621_partial_inspect_fixture,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -32,6 +34,10 @@ def prepare_fixture(root: Path, case: dict[str, Any]) -> None:
     shutil.copytree(ROOT / "skills/python-project-workflow", root / ".agents/skills/python-project-workflow")
     if case["id"] == "mature-preservation":
         write_mature_preservation_fixture(root)
+    elif case["id"] == "pep621-partial-inspect":
+        write_pep621_partial_inspect_fixture(root)
+    elif case["id"] == "pep621-legacy-setupcfg":
+        write_pep621_legacy_setupcfg_fixture(root)
     init_fixture_repo(root, "Codex Eval", "codex-eval@example.invalid", allow_empty=False)
 
 

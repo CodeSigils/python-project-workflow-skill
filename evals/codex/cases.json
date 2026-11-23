@@ -12,19 +12,78 @@
         "tests/test_cli.py",
         ".github/workflows/ci.yml"
       ],
-      "required_scripts": {"invoice-checker": "invoice_checker.cli:main"},
+      "required_scripts": {
+        "invoice-checker": "invoice_checker.cli:main"
+      },
       "import_check": "from invoice_checker.cli import main; assert callable(main)",
-      "classification_terms": ["greenfield"],
-      "summary_terms": ["3.11", "src", "test"]
+      "classification_terms": [
+        "greenfield"
+      ],
+      "summary_terms": [
+        "3.11",
+        "src",
+        "test"
+      ]
     },
     {
       "id": "mature-preservation",
       "invocation": "explicit",
       "prompt": "Use the python-project-workflow skill to inspect this established Python project and report its existing workflow. Do not modify files or replace its tools. Return only the requested JSON result.",
       "expected_paths": [],
-      "classification_terms": ["existing", "mature"],
-      "preserved_tools": ["poetry", "black", "tox"],
-      "summary_terms": ["preserv", "existing", "poetry"]
+      "classification_terms": [
+        "existing",
+        "mature"
+      ],
+      "preserved_tools": [
+        "poetry",
+        "black",
+        "tox"
+      ],
+      "summary_terms": [
+        "preserv",
+        "existing",
+        "poetry"
+      ],
+      "inspect_only": true,
+      "contract": "pep621-inspection-first"
+    },
+    {
+      "id": "pep621-partial-inspect",
+      "invocation": "explicit",
+      "prompt": "Use the python-project-workflow skill to inspect this repository's PEP 621/pyproject metadata. Do not modify files. Return only the requested JSON result.",
+      "expected_paths": [],
+      "classification_terms": [
+        "existing"
+      ],
+      "summary_terms": [
+        "partial",
+        "requires-python",
+        "evidence",
+        "inspect"
+      ],
+      "inspect_only": true,
+      "contract": "pep621-inspection-first"
+    },
+    {
+      "id": "pep621-legacy-setupcfg",
+      "invocation": "explicit",
+      "prompt": "Use the python-project-workflow skill to inspect this legacy Python repository's packaging metadata. Do not modify files, do not migrate to PEP 621, and do not invent compliance. Return only the requested JSON result.",
+      "expected_paths": [],
+      "classification_terms": [
+        "existing",
+        "mature"
+      ],
+      "preserved_tools": [
+        "setuptools"
+      ],
+      "summary_terms": [
+        "legacy-alternative",
+        "setup.cfg",
+        "preserv",
+        "no"
+      ],
+      "inspect_only": true,
+      "contract": "pep621-inspection-first"
     }
   ]
 }

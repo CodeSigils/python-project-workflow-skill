@@ -12,6 +12,7 @@ decision it enables.
 | R-002 | How CI should pin Actions and handle checkout credentials | Complete | 2026-10-15 | D2 |
 | R-003 | Whether this repository needs a standalone research-first consultation path | Complete | 2026-10-15 | D3 |
 | R-004 | How to prevent scheduled hygiene failures from unreviewed Dependabot pull requests | Complete | 2026-11-04 | D4 |
+| R-005 | What inspection-first evidence bounds PEP 621/pyproject metadata claims in target Python repositories | Complete | 2026-11-23 | D5 |
 
 ## R-001 — CI installs uv with its official pinned action
 
@@ -66,3 +67,24 @@ https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/a
 https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions,
 https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-on-actions,
 https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
+
+
+## R-005 — PEP 621/pyproject metadata inspection-first evidence
+
+The canonical PyPA `pyproject.toml` specification defines `[project]` metadata,
+static/dynamic boundaries, and required/optional key behavior; PEP 621 is the
+accepted historical proposal and points readers to the canonical PyPA spec for
+current rules. PyPA core metadata, the writing-pyproject-toml guide, and PEP 639
+provide related packaging metadata and license-expression guidance. For PPW this
+supports a bounded inspection-first contract: inspect declared metadata and
+related project-native signals before claiming PEP 621 alignment; report
+evidence-backed status (`aligned`, `partial`, `missing`, `legacy-alternative`,
+`unknown`, `N/A`); preserve coherent legacy layouts; treat `requires-python` as
+part of the Python Version Contract; and avoid universal compliance-scanner
+claims.
+
+Sources: https://packaging.python.org/en/latest/specifications/pyproject-toml/,
+https://peps.python.org/pep-0621/,
+https://packaging.python.org/en/latest/specifications/core-metadata/,
+https://packaging.python.org/en/latest/guides/writing-pyproject-toml/,
+https://peps.python.org/pep-0639/

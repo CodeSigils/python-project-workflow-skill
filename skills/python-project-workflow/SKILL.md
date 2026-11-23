@@ -85,6 +85,29 @@ platform defaults, dependency support, and packaging guidance from official
 sources before making a new compatibility recommendation. Do not encode
 point-in-time lifecycle claims as durable policy.
 
+## PEP 621 Inspection-First Contract
+
+When a task touches packaging/pyproject metadata, inspect before claiming PEP 621
+alignment. This is a bounded workflow contract, not a universal compliance scanner.
+
+- **Inspect evidence:** `[project]` table presence and key fields; `project.dynamic`;
+  `[build-system]`; `requires-python`; dependency declarations; existing
+  `setup.py`/`setup.cfg`/Poetry/Flit/Hatch/PDM metadata; tool targets and CI
+  version matrices relevant to the Python Version Contract.
+- **Report status with evidence:** use `aligned`, `partial`, `missing`,
+  `legacy-alternative`, `unknown`, or `N/A`. State what was inspected and what
+  was not. Do not invent compliance when evidence is absent or unreadable.
+- **Preserve coherent layouts:** do not impose PEP 621 on a coherent legacy
+  repository unless the user explicitly requests migration. For greenfield or
+  explicitly incoherent projects, PEP 621 is a negotiable baseline.
+- **Version contract:** treat `requires-python` as part of the Python Version Contract; report mismatches, do not silently change it.
+- **Canonical sources:** [PyPA pyproject.toml specification](https://packaging.python.org/en/latest/specifications/pyproject-toml/),
+  [PEP 621](https://peps.python.org/pep-0621/),
+  [PyPA core metadata](https://packaging.python.org/en/latest/specifications/core-metadata/),
+  [Writing your pyproject.toml](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/),
+  [PEP 639](https://peps.python.org/pep-0639/); load
+  `references/pyproject-template.md` for baseline template/caveats.
+
 ## Reference Routing
 
 Load references progressively:
