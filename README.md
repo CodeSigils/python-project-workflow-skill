@@ -327,7 +327,38 @@ modifying it. Everything else is repository-only development infrastructure.
 ### Maintainer note: the canonical/mirror architecture
 
 This repository uses a **canonical-source + mirrored-payload** pattern for reference
-files:
+files. The diagram below is an illustrative orientation aid; it shows stable
+boundaries, not volatile implementation detail.
+
+```mermaid
+flowchart LR
+  subgraph Authoring["Authoring sources"]
+    R["Root references/ (canonical)"]
+    M["Payload manifest (declares mirrored refs)"]
+  end
+
+  subgraph Payload["Shipped runtime payload"]
+    S["skills/python-project-workflow/SKILL.md (authored in place)"]
+    P["skills/python-project-workflow/references/ (mirror)"]
+  end
+
+  subgraph Maintainer["Maintainer infrastructure (not shipped)"]
+    D["Docs, scripts, CI, tests"]
+  end
+
+  R -->|"sync / drift check"| P
+  M -.->|"defines mirrored set"| P
+  S --> Payload
+  P --> Payload
+  D -.->|"validates"| R
+  D -.->|"validates"| Payload
+```
+
+Authoritative details: [CONTRIBUTING.md](CONTRIBUTING.md),
+[scripts/payload-manifest.json](scripts/payload-manifest.json),
+[scripts/sync-payload.sh](scripts/sync-payload.sh), and the
+[Skill Payload — What Ships to the User](#skill-payload--what-ships-to-the-user)
+section.
 
 - **Root `references/`** — the single source of truth. You edit these files. They are
   never shipped directly to agents.
