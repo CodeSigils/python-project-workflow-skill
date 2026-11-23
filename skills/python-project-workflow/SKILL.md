@@ -35,7 +35,7 @@ scripts, documentation, or history already exist.
 | Empty directory or explicit new-scaffold request | Greenfield | Load `references/pyproject-template.md` |
 | Packaging metadata and coherent tooling | Existing project | Orient first, then load task-specific guidance |
 | Python used for repository checkers or governance | Mature automation | Load `references/mature-repo-preservation.md` |
-| Eval or benchmark runners | Automation with benchmarks | Also load `references/eval-benchmark-hardening.md` |
+| Eval or benchmark runners | Automation with benchmarks | Also load `references/eval-benchmark-hardening.md` when runner behavior, assertions, or artifacts are in scope |
 
 For isolated support scripts that fall outside this skill's trigger, use
 repository-native instructions and focused checks. Do not infer correctness
@@ -74,28 +74,16 @@ completion.
 
 ## Python Version Contract
 
-Determine and align:
+Treat declared packaging range, effective CI/deployment range, tool targets, and
+minimum-supported syntax/dependencies as one contract. Target the project-wide
+minimum unless configuration intentionally scopes a newer target. Do not silently
+raise `requires-python` or remove older CI versions.
 
-1. The declared range in packaging metadata.
-2. The effective range exercised by CI or deployment.
-3. Tool targets such as Ruff's `target-version`, MyPy's `python_version`, and
-   Pyright's `pythonVersion`.
-4. Syntax and dependency compatibility with the minimum supported version.
-
-Target the project-wide minimum unless configuration intentionally scopes a
-newer target. Preserve an existing compatibility contract unless the user
-authorizes a breaking change. Do not silently raise `requires-python` or remove
-older versions from CI.
-
-Treat the declared range, the CI matrix, and every tool target as one contract:
-when they disagree, surface the mismatch before changing any of them. Do not
-assume a tool's current release supports the project's minimum interpreter, or
-that the newest tooling matches the project's floor; confirm each tool's
-documented Python support from its own documentation instead.
-
-For a new compatibility recommendation, verify current interpreter lifecycle,
+Surface mismatches before changing any contract element. Do not assume tool
+support or defaults; confirm current tool Python support, interpreter lifecycle,
 platform defaults, dependency support, and packaging guidance from official
-sources. Do not encode point-in-time lifecycle claims as durable policy.
+sources before making a new compatibility recommendation. Do not encode
+point-in-time lifecycle claims as durable policy.
 
 ## Reference Routing
 
@@ -106,9 +94,9 @@ Load references progressively:
 | Greenfield setup, packaging, release, or CLI entry points | `references/pyproject-template.md` |
 | Linting, formatting, typing, tests, or CI commands | `references/lint-format-typing-testing.md` |
 | Mature repositories and automation | `references/mature-repo-preservation.md` |
-| Eval or benchmark runners | `references/eval-benchmark-hardening.md` |
+| Eval or benchmark runners | `references/eval-benchmark-hardening.md` (thin runtime checklist; detailed maintainer guidance in repo docs) |
 | `.gitignore`, secrets, credentials, or Git-history exposure | `references/security-and-gitignore.md` |
-| Canonical/runtime payload or installed-copy drift | `references/drift-classes.md` |
+| Canonical/runtime payload or installed-copy drift | `references/drift-classes.md` (thin runtime summary; detailed maintainer procedure in repo docs) |
 | Escape-heavy shell, regex, or generated text | `references/safe-editing.md` |
 | Compact correctness awareness outside pure review | `references/core-footguns.md` |
 
@@ -139,23 +127,22 @@ commands, then run both source-only and mirror-aware gates.
 
 ## Sensitive-Evidence Safety
 
-- Inspect existing `.gitignore` behavior before changing it. Preserve
-  project-specific and security-related rules, including a sanitized
+Runtime-critical invariants (canonical runtime detail: `references/security-and-gitignore.md`):
+
+- **Preserve before editing:** inspect existing `.gitignore` behavior before
+  changing it; keep project-specific/security rules, including sanitized
   `!.env.example` when used.
-- Never commit credentials, access tokens, private keys, or populated secret files.
-- `.gitignore` does not protect files that Git already tracks. Check tracked
-  state without printing suspected secret contents.
-- If sensitive material is tracked or may have entered history, stop, alert the
-  user, and recommend revocation or rotation. Removing or ignoring a file does
-  not erase historical exposure.
-- Never include credentials, access tokens, private keys, sensitive values, or secret-bearing URLs in commit subjects or bodies.
-- Inspect Git metadata with bounded, redacted queries. Do not print raw commit bodies.
-- Report existence or location only. Redact secret values, sensitive URLs,
-  connection strings, and identifying fragments from output and examples.
-- Do not claim a repository is secret-free from filename checks or the absence
-  of a regex match.
-- Load `references/security-and-gitignore.md` before advising or editing around
-  ignore rules, credentials, tracked sensitive files, or history exposure.
+- **Never expose or commit secrets:** do not commit or print credentials, access
+  tokens, private keys, populated secret files, sensitive URLs, or secret-bearing
+  commit metadata; never print raw commit bodies.
+- **Tracked/history exposure:** `.gitignore` does not protect tracked files. If
+  sensitive material is tracked or may have entered history, stop, alert the
+  user, report existence/location only, and recommend revocation or rotation.
+  Do not claim a repository is secret-free from filename checks or absence of a
+  regex match.
+- **Load detailed procedure:** before advising or editing ignore rules,
+  credentials, tracked sensitive files, or history exposure, load
+  `references/security-and-gitignore.md`.
 
 ## Verification
 

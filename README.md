@@ -270,9 +270,11 @@ python-project-workflow/
 ├── docs/
 │   ├── behavior-evaluation-effort.md    # Prospective transfer effort and result ledger
 │   ├── decisions.md                     # Durable decisions with sources and recheck triggers
+│   ├── drift-classes.md                 # Maintainer detail for payload/install drift handling
+│   ├── eval-benchmark-hardening.md      # Maintainer detail for eval/benchmark integrity
 │   ├── evidence-urls.json               # External evidence URL verification manifest
 │   ├── research/
-│   │   └── index.md                      # Findings that enable durable decisions
+│   │   └── index.md                     # Findings that enable durable decisions
 │   ├── portability-contract.md          # Cross-agent portability requirements
 │   └── release-checklist.md              # Repeatable maintainer release procedure
 ├── evals/
