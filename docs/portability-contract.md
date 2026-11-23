@@ -59,14 +59,17 @@ The canonical payload passes:
 - Evaluation fixture and schema integrity
 
 Behavioral contract version 3 added Git-state verification, executable CLI
-checks, and exact Hermes payload hashing. That material change started a new
-evidence baseline; deterministic validation alone establishes only payload
-portability.
+checks, and exact Hermes payload hashing. The 2026-11-23 PEP 621 inspection-first
+contract materially changed `SKILL.md`, eval cases/fixtures, and graders, so it
+starts a new evidence baseline under this contract. Deterministic validation
+passes for the current 4-case contract (`greenfield-scaffold`,
+`mature-preservation`, `pep621-partial-inspect`, `pep621-legacy-setupcfg`), but
+no live Codex/Hermes rerun has been recorded against that updated contract.
 
 | Runtime          | Version | Status      | Current evidence boundary |
 | ---------------- | ------- | ----------- | ------------------------- |
-| OpenAI Codex CLI | 0.133.0 | `workflow_verified` | Contract v3 implicit greenfield and explicit mature-preservation cases passed 2/2 on 2026-08-16 with Git-state and executable CLI grading |
-| Hermes Agent     | 0.20.1  | `install_verified` | Exact payload appeared enabled in `hermes skills list`; behavioral run remained blocked by provider HTTP 429 and explicit preload resolution |
+| OpenAI Codex CLI | 0.133.0 | `candidate` (behavioral rerun required) | Historical contract-v3 2-case run passed 2/2 on 2026-08-16, but it predates the 2026-11-23 PEP 621 inspection-first contract and 4-case deterministic baseline; rerun required before restoring `workflow_verified` |
+| Hermes Agent     | 0.20.1  | `install_verified` | Exact payload appeared enabled in `hermes skills list`; behavioral run remained blocked by provider HTTP 429 and explicit preload resolution; rerun against current contract still required for workflow evidence |
 |  Code      | —       | `candidate` | Documented discovery path only; installation and workflow unverified |
 | Gemini CLI       | —       | `candidate` | Documented discovery path only; installation and workflow unverified |
 | OpenCode         | —       | `candidate` | Documented discovery path only; installation and workflow unverified |

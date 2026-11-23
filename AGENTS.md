@@ -19,6 +19,8 @@ Before researching a setup, pinning, policy, or other durable maintainer concern
 
 The authoritative local verification command list is in [README.md `## For Maintainers / Contributors` → `### Verify`](README.md#verify). Hooks, CI workflows, and `scripts/stage_manifest.py` enforce automated gates; do not maintain divergent command copies in docs. When a command or gate changes, update the owning implementation and the README Verify section in the same change.
 
+When a change materially affects `SKILL.md`, reference routing, eval cases/fixtures/prompts/graders, or runtime/evidence claims, run a docs-drift and evidence-boundary review before closeout: update `README.md`, `docs/portability-contract.md`, `docs/behavior-evaluation-effort.md`, and any affected diagrams/authoritative-detail links for stale accuracy; do not preserve stale `workflow_verified`/baseline claims after a contract change without new recorded evidence. If validators encode doc/evidence boundaries, update them in the same change.
+
 GitHub repository settings are the operational source of truth for branch protection, required checks, collaborator access, and security features. Before changing CI, hooks, release automation, or their documentation, inspect live settings and keep documentation aligned. For sensitive-evidence handling, follow the runtime canonical procedure in `references/security-and-gitignore.md` (mirrored in the shipped payload) and the repository trust boundary in `SECURITY.md`; do not restate secret-handling rules in multiple maintainer docs.
 
 A previous audit found documentation claiming stale-review dismissal was enabled
