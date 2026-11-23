@@ -21,10 +21,7 @@ Install the toolchain first with `uv sync --locked`. Ruff is pinned in
 `uv.lock` rather than in a workflow variable, so local and CI runs lint with
 the same version; Dependabot updates that pin.
 
-Run the complete command list in the README's **Verify** section. The live
-Codex and Hermes runners are intentionally optional because they require local
-client access and may consume a subscription. Their `--self-test` modes are
-deterministic and remain part of normal validation.
+Run the authoritative local verification command list in [README.md `## For Maintainers / Contributors` → `### Verify`](README.md#verify). That section is the canonical human-readable command source; hooks, CI, and `scripts/stage_manifest.py` enforce the corresponding automated gates. The live Codex and Hermes runners are intentionally optional because they require local client access and may consume a subscription. Their `--self-test` modes are deterministic and remain part of normal validation.
 
 Live runners delete temporary fixtures by default; pass `--retain-fixtures`
 only when debugging. The Hermes runner also refuses to start unless the payload

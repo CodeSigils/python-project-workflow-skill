@@ -61,6 +61,61 @@ def main() -> int:
     ]:
         raise AssertionError("extract_backtick_refs missed a reference path")
 
+    routing = (
+        "## Reference Routing\n\n"
+        "| Task | Reference |\n"
+        "| --- | --- |\n"
+        "| A | `references/a.md` |\n"
+        "| B | `references/b.md` |\n"
+    )
+    if module.extract_routing_table_refs(routing) != [
+        "references/a.md",
+        "references/b.md",
+    ]:
+        raise AssertionError("extract_routing_table_refs did not parse routing rows")
+
+    original_skill = module.SKILL
+    original_ref_dir = module.REF_DIR
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp = Path(tmpdir)
+        skill_dir = tmp / "skills" / "python-project-workflow"
+        refs = skill_dir / "references"
+        refs.mkdir(parents=True)
+        skill = skill_dir / "SKILL.md"
+        skill.write_text(
+            "---\nname: python-project-workflow\ndescription: test\n---\n\n"
+            + routing,
+            encoding="utf-8",
+        )
+        (refs / "a.md").write_text("a\n", encoding="utf-8")
+        (refs / "b.md").write_text("b\n", encoding="utf-8")
+        setattr(module, "SKILL", skill)
+        setattr(module, "REF_DIR", refs)
+        try:
+            module.check_reference_routing()
+            (refs / "orphan.md").write_text("x\n", encoding="utf-8")
+            try:
+                module.check_reference_routing()
+            except SystemExit:
+                pass
+            else:
+                raise AssertionError("check_reference_routing accepted an orphaned ref")
+            (refs / "orphan.md").unlink()
+            skill.write_text(
+                skill.read_text(encoding="utf-8")
+                + "| C | `references/missing.md` |\n",
+                encoding="utf-8",
+            )
+            try:
+                module.check_reference_routing()
+            except SystemExit:
+                pass
+            else:
+                raise AssertionError("check_reference_routing accepted a missing routed ref")
+        finally:
+            setattr(module, "SKILL", original_skill)
+            setattr(module, "REF_DIR", original_ref_dir)
+
     # A payload file with an unregistered URL must be rejected end-to-end.
     mutated = dict(texts)
     mutated["skills/python-project-workflow/SKILL.md"] = "See https://example.invalid/new."

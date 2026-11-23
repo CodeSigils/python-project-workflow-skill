@@ -38,9 +38,7 @@ latest tag on every run, so the gap is visible without being an error.
    local version is ahead of the latest tag the check reports
    `RELEASE PENDING` and passes, precisely so this step and the tag can be
    separate commits. Only a local version *behind* the tag is an error.
-4. Run every command in the README's **Verify** section. Run live behavioral
-   evaluation only for clients available to the maintainer, and retain redacted
-   summaries outside the repository until the results are recorded.
+4. Run the authoritative local verification command list in [README.md `## For Maintainers / Contributors` → `### Verify`](../README.md#verify). Run live behavioral evaluation only for clients available to the maintainer, and retain redacted summaries outside the repository until the results are recorded.
 5. Commit the release preparation, then create an annotated tag:
 
    ```bash

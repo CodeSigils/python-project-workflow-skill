@@ -5,12 +5,16 @@ from __future__ import annotations
 
 import importlib.util
 import re
+import sys
 import tempfile
 from pathlib import Path
 from types import ModuleType
 
 ROOT = Path(__file__).resolve().parents[1]
-VALIDATOR = ROOT / "scripts/validate-ci.py"
+SCRIPTS = ROOT / "scripts"
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
+VALIDATOR = SCRIPTS / "validate-ci.py"
 WORKFLOW = ROOT / ".github/workflows/ci.yml"
 RELEASE_WORKFLOW = ROOT / ".github/workflows/release.yml"
 
@@ -184,11 +188,11 @@ def main() -> int:
         module,
         workflow.replace(
             "      - name: Test CI policy validation\n"
-            "        run: python3 scripts/test-validate-ci.py\n",
-            "      - name: Test CI policy validation\n"
-            "        run: python3 scripts/test-validate-ci.py\n\n"
+            "        run: python3 tests/test_validate_ci.py\n",
             "      - name: Duplicate type check\n"
-            "        run: uv run --locked ty check scripts .github/scripts\n",
+            "        run: uv run --locked ty check scripts .github/scripts\n\n"
+            "      - name: Test CI policy validation\n"
+            "        run: python3 tests/test_validate_ci.py\n",
             1,
         ),
         "a toolchain check that runs in two jobs",

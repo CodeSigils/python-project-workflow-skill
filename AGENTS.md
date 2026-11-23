@@ -11,23 +11,15 @@ Before changing this repository, read this file, then the root `README.md`,
 canonical file under `references/` before editing it; do not rely on a past
 session summary when the repository or GitHub settings can provide the fact.
 
-## Decisions
+## Decisions and evidence
 
-Before researching a setup, pinning, policy, or other durable maintainer
-concern, consult `docs/decisions.md`, then search `docs/evidence-urls.json` by
-`domain_tag`, then read `docs/research/index.md`. Reuse a current, applicable
-finding; otherwise research official guidance first, append a dated finding,
-then record the resulting durable decision. Each decision has a stable `D#` ID,
-links to registered sources and a recheck trigger, and is enabled by an `R-###`
-finding. `scripts/validate.py` rejects incomplete, unregistered, duplicated, or
-unlinked records.
+Before researching a setup, pinning, policy, or other durable maintainer concern, consult `docs/decisions.md`, then search `docs/evidence-urls.json` by `domain_tag`, then read `docs/research/index.md`. Reuse a current, applicable finding; otherwise research official guidance first, append a dated finding, then record the resulting durable decision. `scripts/validate.py` enforces record completeness/registration/linkage. Keep this workflow in docs/decisions+research; do not duplicate it in runtime skill files.
 
-## CI and Git policy
+## Verification and CI policy
 
-GitHub repository settings are the operational source of truth for branch
-protection, required checks, collaborator access, and security features. Before
-changing CI, hooks, release automation, or their documentation, inspect the
-live settings and keep the documentation aligned with them.
+The authoritative local verification command list is in [README.md `## For Maintainers / Contributors` → `### Verify`](README.md#verify). Hooks, CI workflows, and `scripts/stage_manifest.py` enforce automated gates; do not maintain divergent command copies in docs. When a command or gate changes, update the owning implementation and the README Verify section in the same change.
+
+GitHub repository settings are the operational source of truth for branch protection, required checks, collaborator access, and security features. Before changing CI, hooks, release automation, or their documentation, inspect live settings and keep documentation aligned. For sensitive-evidence handling, follow the runtime canonical procedure in `references/security-and-gitignore.md` (mirrored in the shipped payload) and the repository trust boundary in `SECURITY.md`; do not restate secret-handling rules in multiple maintainer docs.
 
 A previous audit found documentation claiming stale-review dismissal was enabled
 when the live protection rule had it disabled. Do not copy policy values from

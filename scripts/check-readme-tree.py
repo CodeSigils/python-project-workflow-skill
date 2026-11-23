@@ -11,10 +11,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 README = ROOT / "README.md"
 
-TREE_SECTION_RE = re.compile(
-    r"^## Repo Layout\n+```text\n(?P<tree>.*?)\n```",
-    re.MULTILINE | re.DOTALL,
-)
+REPO_LAYOUT_HEADING = "## Repo Layout"
+TREE_FENCE = "```text"
 
 # Tree entry: optional indent (groups of 4 chars: '│   ' or '    '), a branch
 # marker '├── ' or '└── ', the entry name, and an optional '# comment'.
@@ -72,15 +70,17 @@ def parse_tree_paths(tree_text: str) -> set[str]:
                 dir_stack[depth] = dir_name
                 dir_stack = dir_stack[: depth + 1]
         else:
-            # File entry — skip wildcards like *.md
+            if name.strip() == "...":
+                continue
             if "*" in name:
                 # Generate matching files from the filesystem
                 dir_path = "/".join(dir_stack) + ("/" if dir_stack else "")
                 match_path = ROOT / dir_path
                 if match_path.exists():
                     for f in sorted(match_path.glob(name)):
-                        rel = f.relative_to(ROOT).as_posix()
-                        paths.add(rel)
+                        if f.is_file():
+                            rel = f.relative_to(ROOT).as_posix()
+                            paths.add(rel)
                 continue
             full_path = "/".join(dir_stack) + ("/" if dir_stack else "") + name
             paths.add(full_path)
@@ -95,13 +95,23 @@ def main() -> int:
 
     readme_text = README.read_text(encoding="utf-8")
 
-    m = TREE_SECTION_RE.search(readme_text)
-    if not m:
-        print("FAIL: could not find ## Repo Layout section with ```text tree in README", file=sys.stderr)
+    start = readme_text.find(REPO_LAYOUT_HEADING)
+    if start == -1:
+        print("FAIL: could not find ## Repo Layout section in README", file=sys.stderr)
         return 1
+    fence_start = readme_text.find(TREE_FENCE, start)
+    if fence_start == -1:
+        print("FAIL: could not find ```text tree in ## Repo Layout section", file=sys.stderr)
+        return 1
+    fence_start += len(TREE_FENCE)
+    fence_end = readme_text.find("```", fence_start)
+    if fence_end == -1:
+        print("FAIL: unterminated ```text tree in ## Repo Layout section", file=sys.stderr)
+        return 1
+    tree_text = readme_text[fence_start:fence_end].strip("\n")
 
     tracked = get_tracked_files()
-    declared = parse_tree_paths(m.group("tree"))
+    declared = parse_tree_paths(tree_text)
 
     stale = declared - tracked
     omitted = tracked - declared
