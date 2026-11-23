@@ -42,6 +42,12 @@ The workflow guides the agent to:
 5. run the relevant lint, format, type, test, and build gates; and
 6. report exactly what was created, what passed, and any remaining decisions.
 
+For existing repositories with packaging/pyproject work, the skill applies a
+bounded PEP 621 inspection-first contract: inspect before claiming alignment and
+report `aligned`, `partial`, `missing`, `legacy-alternative`, `unknown`, or
+`N/A` with evidence. It preserves coherent legacy layouts unless migration is
+explicitly requested and does not act as a universal PEP 621 compliance scanner.
+
 A typical result looks like:
 
 ```text
@@ -119,8 +125,10 @@ cp -r skills/python-project-workflow "$HOME/.claude/skills/"
 <details>
 <summary><b>Codex</b></summary>
 
-Status: workflow verified with Codex CLI 0.133.0 under behavioral contract
-version 3. See [the portability contract](docs/portability-contract.md).
+Status: historical behavioral evidence from Codex CLI 0.133.0 (contract v3,
+2/2 cases, 2026-08-16) predates the current PEP 621 inspection-first contract
+and 4-case deterministic baseline; rerun required before claiming current
+`workflow_verified` status. See [the portability contract](docs/portability-contract.md).
 
 ```bash
 mkdir -p "$HOME/.agents/skills"
@@ -405,7 +413,7 @@ without duplication.
 
 | Reference | Purpose |
 | :--- | :--- |
-| `pyproject-template.md` | Modern baseline template with PEP 621 metadata |
+| `pyproject-template.md` | Modern baseline template with PEP 621 metadata and inspection-first caveats |
 | `lint-format-typing-testing.md` | Practical uv/Ruff/mypy/pytest commands and cross-platform tool guidance |
 | `core-footguns.md` | Common Python pitfalls with examples and patterns |
 | `safe-editing.md` | Safe edit workflow for backslash-heavy content |

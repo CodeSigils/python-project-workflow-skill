@@ -2,19 +2,40 @@
 
 Started: 2026-07-28T08:36:17Z
 
-## Current baseline — behavioral contract version 3
+## Current deterministic baseline — contract v3 + PEP 621 inspection-first (2026-11-23)
+
+The 2026-11-23 PEP 621 inspection-first change materially updated `SKILL.md`,
+`evals/codex/cases.json`, fixtures, graders, and runner support. Per
+`docs/portability-contract.md`, this starts a new evidence baseline.
+
+Current deterministic contract coverage is **4/4 self-test passing**:
+
+| Case | Selection | Intent | Deterministic result |
+|---|---|---|---|
+| `greenfield-scaffold` | Implicit | Greenfield PEP 621/src-layout scaffold | Pass (self-test) |
+| `mature-preservation` | Explicit | Inspect-only preservation of mature Poetry/Black/tox project | Pass (self-test) |
+| `pep621-partial-inspect` | Explicit | Inspect-only partial PEP 621 metadata / requires-python mismatch reporting | Pass (self-test) |
+| `pep621-legacy-setupcfg` | Explicit | Inspect-only legacy `setup.cfg/setup.py` reporting, no migration/invented compliance | Pass (self-test) |
+
+No live Codex/Hermes behavioral rerun has been recorded against this updated
+4-case contract. Do not claim current `workflow_verified` status from the
+historical 2-case runs below.
+
+## Historical behavioral baseline — Codex CLI 0.133.0, contract v3 (2026-08-16, pre-PEP 621 inspect-first)
 
 Contract version 3 verifies actual Git changes, requires and imports the CLI
 entry point, compiles generated Python, and hashes the exact Hermes payload.
-The fresh Codex CLI 0.133.0 run passed both strengthened cases. Hermes remains
-`install_verified`; its v0.20.1 behavioral attempt was blocked by provider HTTP
-429 and local preload resolution.
+The Codex CLI 0.133.0 run passed both strengthened cases that existed at the
+time. Hermes remained `install_verified`; its v0.20.1 behavioral attempt was
+blocked by provider HTTP 429 and local preload resolution. This run predates the
+2026-11-23 PEP 621 inspection-first contract and is retained as historical
+evidence only.
 
 | Case | Selection | Duration | Input | Cached input | Output | Result |
 |---|---|---:|---:|---:|---:|---|
 | Greenfield scaffold | Implicit | 111.078 s | 158,589 | 135,552 | 5,257 | Pass |
 | Mature preservation | Explicit | 36.741 s | 73,130 | 44,928 | 1,537 | Pass |
-| **Total** | — | **147.819 s** | **231,719** | **180,480** | **6,794** | **2/2 pass** |
+| **Total** | — | **147.819 s** | **231,719** | **180,480** | **6,794** | **2/2 pass (historical, pre-PEP 621 inspect-first)** |
 
 ## Prior contract version 2 baseline — 2026-08-16
 
