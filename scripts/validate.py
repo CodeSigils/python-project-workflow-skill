@@ -113,6 +113,15 @@ def check_skill() -> None:
     for section in sorted(REQUIRED_SECTIONS):
         if section not in body:
             fail(f"missing section in {rel(SKILL)}: {section}")
+    for required in (
+        "## PEP 621 Inspection-First Contract",
+        "bounded workflow contract, not a universal compliance scanner",
+        "`aligned`, `partial`, `missing`,",
+        "`legacy-alternative`, `unknown`, or `N/A`",
+        "treat `requires-python` as part of the Python Version Contract",
+    ):
+        if required not in body:
+            fail(f"{rel(SKILL)} missing PEP 621 inspection-first contract: {required}")
 
     if re.search(r"^\|\|", body, re.MULTILINE):
         fail(f"{rel(SKILL)} table still has accidental double-pipe rows")
@@ -248,6 +257,10 @@ def check_references() -> None:
         'requires-python = ">=3.11"',
         'target-version = "py311"',
         'python_version = "3.11"',
+        "Inspection-first caveat",
+        "https://packaging.python.org/en/latest/specifications/pyproject-toml/",
+        "https://peps.python.org/pep-0621/",
+        "https://packaging.python.org/en/latest/guides/writing-pyproject-toml/",
     ):
         if required not in pyproject:
             fail(f"pyproject template missing current packaging metadata: {required}")
@@ -630,6 +643,81 @@ def check_security() -> None:
             fail(f"SECURITY.md missing trust contract: {phrase}")
 
 
+PEP621_CANONICAL_URLS = (
+    "https://packaging.python.org/en/latest/specifications/pyproject-toml/",
+    "https://peps.python.org/pep-0621/",
+    "https://packaging.python.org/en/latest/specifications/core-metadata/",
+    "https://packaging.python.org/en/latest/guides/writing-pyproject-toml/",
+    "https://peps.python.org/pep-0639/",
+)
+
+
+def check_pep621_contract_parity() -> None:
+    """Keep PEP 621 contract, template, and evidence registry aligned."""
+    registered = load_registered_urls()
+    missing_registry = [
+        url for url in PEP621_CANONICAL_URLS if normalize_url(url) not in registered
+    ]
+    if missing_registry:
+        fail(
+            f"PEP 621 canonical sources missing from {rel(EVIDENCE_MANIFEST)}: {missing_registry}",
+            hint="Register canonical PEP 621/pyproject metadata sources with required_text.",
+        )
+
+    skill_text = read_text_checked(SKILL)
+    template_text = read_text_checked(REF_DIR / "pyproject-template.md")
+    for label, text in (
+        (rel(SKILL), skill_text),
+        (rel(REF_DIR / "pyproject-template.md"), template_text),
+    ):
+        for url in PEP621_CANONICAL_URLS:
+            if url not in text:
+                fail(
+                    f"{label} missing canonical PEP 621 source URL: {url}",
+                    hint="Keep runtime/template PEP 621 guidance anchored to registered canonical sources.",
+                )
+
+    for phrase in (
+        "bounded workflow contract, not a universal compliance scanner",
+        "`aligned`, `partial`, `missing`,",
+        "`legacy-alternative`, `unknown`, or `N/A`",
+        "treat `requires-python` as part of the Python Version Contract",
+    ):
+        if phrase not in skill_text:
+            fail(f"{rel(SKILL)} missing PEP 621 contract marker: {phrase}")
+
+    normalized_template = " ".join(template_text.replace(">", " ").split())
+    for phrase in (
+        "Inspection-first caveat:",
+        "not a target-repository compliance validator",
+        "Preserve coherent legacy packaging layouts unless the user explicitly requests migration.",
+    ):
+        if phrase not in normalized_template:
+            fail(
+                f"{rel(REF_DIR / 'pyproject-template.md')} missing PEP 621 boundary marker: {phrase}"
+            )
+
+    for forbidden in (
+        "universal compliance scanner",
+        "fully PEP 621 compliant",
+        "guarantees PEP 621 compliance",
+    ):
+        if forbidden.lower() in template_text.lower():
+            fail(
+                f"{rel(REF_DIR / 'pyproject-template.md')} overclaims PEP 621 compliance: {forbidden}",
+                hint="Keep the template as reference-only guidance with inspection-first caveats.",
+            )
+
+    research = read_text_checked(RESEARCH_INDEX)
+    decisions = read_text_checked(DECISIONS)
+    if "R-005" not in research:
+        fail(f"{rel(RESEARCH_INDEX)} missing PEP 621 inspection-first record: R-005")
+    if "D5" not in decisions:
+        fail(f"{rel(DECISIONS)} missing PEP 621 inspection-first record: D5")
+    if "Enables |" in research and "| D5 |" not in research:
+        fail(f"{rel(RESEARCH_INDEX)} R-005 must enable D5")
+
+
 def check_status_sources() -> None:
     removed_summary = ROOT / "IMPLEMENTATION_SUMMARY.md"
     if removed_summary.exists():
@@ -648,6 +736,7 @@ def main() -> int:
     check_research()
     check_readme()
     check_evidence_docs()
+    check_pep621_contract_parity()
     check_security()
     check_status_sources()
     print("OK: portable skill source checks are valid")

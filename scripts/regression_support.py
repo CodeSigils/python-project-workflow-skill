@@ -44,6 +44,55 @@ def write_mature_preservation_fixture(root: Path) -> None:
     (root / "tox.ini").write_text("[tox]\nenvlist = py310\n", encoding="utf-8")
 
 
+def write_pep621_partial_inspect_fixture(root: Path) -> None:
+    """Write a partial PEP 621 project with a requires-python/tool-target mismatch."""
+    (root / "src" / "sample_pkg").mkdir(parents=True)
+    (root / "tests").mkdir()
+    (root / "src" / "sample_pkg" / "__init__.py").write_text('__version__ = "0.1.0"\n', encoding="utf-8")
+    (root / "tests" / "test_basic.py").write_text("def test_basic():\n    assert True\n", encoding="utf-8")
+    (root / "pyproject.toml").write_text(
+        "[build-system]\n"
+        'requires = ["setuptools>=77.0.3", "wheel"]\n'
+        'build-backend = "setuptools.build_meta"\n\n'
+        "[project]\n"
+        'name = "sample-pkg"\n'
+        'version = "0.1.0"\n'
+        'requires-python = ">=3.11"\n'
+        "# description/readme intentionally missing for partial PEP 621 inspection\n\n"
+        "[tool.ruff]\n"
+        'target-version = "py310"\n\n'
+        "[tool.mypy]\n"
+        'python_version = "3.10"\n',
+        encoding="utf-8",
+    )
+    (root / ".github" / "workflows").mkdir(parents=True)
+    (root / ".github" / "workflows" / "ci.yml").write_text(
+        "name: CI\non: [push]\njobs:\n  test:\n    runs-on: ubuntu-latest\n"
+        "    strategy:\n      matrix:\n        python-version: ['3.10', '3.11']\n"
+        "    steps:\n      - uses: actions/checkout@v4\n",
+        encoding="utf-8",
+    )
+
+
+def write_pep621_legacy_setupcfg_fixture(root: Path) -> None:
+    """Write a legacy setuptools/setup.cfg project without PEP 621 [project] metadata."""
+    (root / "legacy_pkg").mkdir()
+    (root / "tests").mkdir()
+    (root / "legacy_pkg" / "__init__.py").write_text("__version__ = '0.1.0'\n", encoding="utf-8")
+    (root / "tests" / "test_basic.py").write_text("def test_basic():\n    assert True\n", encoding="utf-8")
+    (root / "setup.cfg").write_text(
+        "[metadata]\n"
+        "name = legacy-pkg\n"
+        "version = 0.1.0\n"
+        "description = Legacy package\n\n"
+        "[options]\n"
+        "packages = find:\n"
+        "python_requires = >=3.9\n",
+        encoding="utf-8",
+    )
+    (root / "setup.py").write_text("from setuptools import setup\n\nsetup()\n", encoding="utf-8")
+
+
 def init_fixture_repo(root: Path, author: str, email: str, *, allow_empty: bool) -> None:
     """Create a committed git repository the agent under test can inspect."""
     checked(["git", "init", "-b", "main"], root)
