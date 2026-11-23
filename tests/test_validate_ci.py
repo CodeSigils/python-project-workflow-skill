@@ -5,12 +5,16 @@ from __future__ import annotations
 
 import importlib.util
 import re
+import sys
 import tempfile
 from pathlib import Path
 from types import ModuleType
 
 ROOT = Path(__file__).resolve().parents[1]
-VALIDATOR = ROOT / "scripts/validate-ci.py"
+SCRIPTS = ROOT / "scripts"
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
+VALIDATOR = SCRIPTS / "validate-ci.py"
 WORKFLOW = ROOT / ".github/workflows/ci.yml"
 RELEASE_WORKFLOW = ROOT / ".github/workflows/release.yml"
 
