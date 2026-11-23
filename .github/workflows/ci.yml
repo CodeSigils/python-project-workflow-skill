@@ -70,13 +70,13 @@ jobs:
         run: python3 scripts/validate.py
 
       - name: Test CI policy validation
-        run: python3 scripts/test-validate-ci.py
+        run: python3 tests/test_validate_ci.py
 
       - name: Test skill source validation
-        run: python3 scripts/test-validate.py
+        run: python3 tests/test_validate.py
 
       - name: Test payload sync behavior
-        run: python3 scripts/test-sync-payload.py
+        run: python3 tests/test_sync_payload.py
 
       - name: Test behavioral regression fixtures
         run: python3 scripts/run-codex-regression.py --self-test

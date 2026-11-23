@@ -218,7 +218,15 @@ runtime status.
 
 ---
 
-## Verify
+## For Users
+
+Install and load `skills/python-project-workflow/` as described above. The runtime payload is Markdown-only (`SKILL.md` + `references/`); it contains no runtime scripts, config files, or dependencies. Use it for repository-wide Python setup, tooling, CI, packaging, compatibility, or project-native verification work. For pure code review, use `py-review-skill`.
+
+## For Maintainers / Contributors
+
+This repository's authoritative local verification command list is the **Verify** block below. `CONTRIBUTING.md`, hooks, and CI policy should point to this section rather than carrying divergent copies.
+
+### Verify
 
 ```bash
 python3 .github/scripts/check-portability.py
@@ -231,11 +239,11 @@ python3 scripts/check-hook-integrity.py
 python3 scripts/check-hook-integrity.py --self-test
 python3 scripts/validate-ci.py
 python3 scripts/validate.py
-python3 scripts/test-validate-ci.py
-python3 scripts/test-validate.py
+python3 tests/test_validate_ci.py
+python3 tests/test_validate.py
 python3 scripts/verify-urls.py
 python3 scripts/verify-urls.py --self-test
-python3 scripts/test-sync-payload.py
+python3 tests/test_sync_payload.py
 python3 scripts/run-codex-regression.py --self-test
 python3 scripts/run-hermes-regression.py --self-test
 python3 scripts/grade-codex-regression.py --self-test
@@ -248,6 +256,8 @@ shellcheck scripts/*.sh .githooks/*
 ---
 
 ## Repo Layout
+
+Maintainer/repo infrastructure map (not runtime payload):
 
 ```text
 python-project-workflow/
@@ -301,9 +311,7 @@ python-project-workflow/
 │   ├── check-expiry.py                   # Checks freshness markers for expired evidence
 │   ├── check-repo-hygiene.py            # Reports stacked, unreviewed, and stale work; skips auto-merge-queued PRs
 │   ├── check-hook-integrity.py           # Fails when hooks lose stages or tracked files leak markers
-│   ├── test-validate-ci.py                # Regression tests for CI policy enforcement
-│   ├── test-validate.py                   # Regression tests for skill source checks
-│   ├── test-sync-payload.py              # Regression tests for payload drift behavior
+│   ├── ...                               # Repository maintenance and validation tools
 │   ├── regression_support.py             # Shared fixtures and helpers for the behavior runners
 │   ├── run-codex-regression.py           # Optional isolated agent behavior runner
 │   ├── run-hermes-regression.py          # Optional isolated Hermes behavior runner
@@ -311,11 +319,15 @@ python-project-workflow/
 │   ├── validate-ci.py                    # Enforces CI routing, required gates, toolchain policy, and action pins
 │   ├── validate.py                       # Checks skill structure, metadata, and references
 │   └── verify-urls.py                    # Checks documented external links on a schedule
+├── tests/                               # Deterministic Python tests for maintainer scripts
+│   ├── test_sync_payload.py              # Payload sync/drift behavior tests
+│   ├── test_validate.py                  # Skill source validator tests
+│   └── test_validate_ci.py               # CI policy validation tests
 └── skills/
     └── python-project-workflow/
         ├── SKILL.md                      # Runtime instructions and orientation checklist
         └── references/                   # Shipped mirrors of the canonical references
-            └── *.md                      # Same eight guides listed under references/
+            └── *.md                      # Runtime reference guides (see References table)
 ```
 
 Shipping boundary: `skills/python-project-workflow/` is the runtime payload.
@@ -396,8 +408,8 @@ without duplication.
 | `core-footguns.md` | Common Python pitfalls with examples and patterns |
 | `safe-editing.md` | Safe edit workflow for backslash-heavy content |
 | `mature-repo-preservation.md` | Preservation-first workflow for established repos |
-| `eval-benchmark-hardening.md` | Benchmark and eval hardening guidance |
-| `drift-classes.md` | Payload drift and installed-mirror staleness detection and remediation |
+| `drift-classes.md` | Thin runtime summary of payload/installed-copy drift symptoms and fixes; detailed maintainer procedure in `docs/drift-classes.md` |
+| `eval-benchmark-hardening.md` | Thin runtime checklist for eval/benchmark runner integrity; detailed maintainer guidance in `docs/eval-benchmark-hardening.md` |
 | `security-and-gitignore.md` | Secret-safe `.gitignore`, tracked-file, scanner, and commit-metadata procedures |
 
 The Orientation Checklist is now inlined in SKILL.md § Orientation Checklist.

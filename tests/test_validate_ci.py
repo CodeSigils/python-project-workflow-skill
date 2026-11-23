@@ -184,11 +184,11 @@ def main() -> int:
         module,
         workflow.replace(
             "      - name: Test CI policy validation\n"
-            "        run: python3 scripts/test-validate-ci.py\n",
-            "      - name: Test CI policy validation\n"
-            "        run: python3 scripts/test-validate-ci.py\n\n"
+            "        run: python3 tests/test_validate_ci.py\n",
             "      - name: Duplicate type check\n"
-            "        run: uv run --locked ty check scripts .github/scripts\n",
+            "        run: uv run --locked ty check scripts .github/scripts\n\n"
+            "      - name: Test CI policy validation\n"
+            "        run: python3 tests/test_validate_ci.py\n",
             1,
         ),
         "a toolchain check that runs in two jobs",
