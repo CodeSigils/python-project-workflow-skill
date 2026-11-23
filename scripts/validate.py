@@ -145,13 +145,15 @@ def check_skill() -> None:
                 fail(f"{rel(path)} contains unsafe security probe: {label}")
 
     security_directives = [
-        "Never commit credentials, access tokens, private keys, or populated secret files.",
+        "Preserve before editing:",
+        "Never expose or commit secrets:",
+        "Tracked/history exposure:",
+        "Load detailed procedure:",
         "`!.env.example`",
-        "`.gitignore` does not protect files that Git already tracks.",
+        "`.gitignore` does not protect tracked files.",
         "recommend revocation or rotation",
-        "Never include credentials, access tokens, private keys, sensitive values, or secret-bearing URLs in commit subjects or bodies.",
-        "Do not print raw commit bodies.",
-        "Report existence or location only.",
+        "report existence/location only",
+        "Do not claim a repository is secret-free",
         "`references/security-and-gitignore.md`",
     ]
     for directive in security_directives:
@@ -185,6 +187,36 @@ def check_skill() -> None:
         fail(f"{rel(SKILL)} exceeds 500-line runtime budget")
 
 
+def check_reference_routing() -> None:
+    """Bidirectional discoverability: routing table <-> reference files."""
+    skill_text = read_text_checked(SKILL)
+    routed = extract_routing_table_refs(skill_text)
+    if not routed:
+        fail(
+            f"{rel(SKILL)} Reference Routing table has no reference rows",
+            hint="Add a `| Task | Reference |` row for each runtime reference.",
+        )
+
+    duplicates = sorted({ref for ref in routed if routed.count(ref) > 1})
+    if duplicates:
+        fail(f"{rel(SKILL)} Reference Routing table repeats references: {duplicates}")
+
+    routed_names = {Path(ref).name for ref in routed}
+    found_names = {path.name for path in REF_DIR.glob("*.md") if path.is_file()}
+    missing_files = sorted(routed_names - found_names)
+    orphaned_files = sorted(found_names - routed_names)
+    if missing_files:
+        fail(
+            f"{rel(SKILL)} Reference Routing table names missing reference files: {missing_files}",
+            hint="Create the missing file under references/ or remove the stale routing row.",
+        )
+    if orphaned_files:
+        fail(
+            f"runtime references not discoverable from {rel(SKILL)} Reference Routing table: {orphaned_files}",
+            hint="Add a routing row or remove the orphaned reference; do not rely on prose-only reachability.",
+        )
+
+
 def check_references() -> None:
     if not REF_DIR.exists():
         fail(f"runtime reference directory is missing: {rel(REF_DIR)}")
@@ -195,6 +227,7 @@ def check_references() -> None:
         fail(f"missing reference files: {sorted(missing)}")
     if extra:
         fail(f"unexpected reference files: {sorted(extra)}")
+    check_reference_routing()
     for name in REQUIRED_REFS:
         path = REF_DIR / name
         size = path.stat().st_size
@@ -240,10 +273,8 @@ def check_references() -> None:
     drift = read_text_checked(REF_DIR / "drift-classes.md")
     if "Edit source (root `SKILL.md`" in drift:
         fail("drift guide points to nonexistent root SKILL.md")
-    if "Its `SKILL.md` is authored in place" not in drift:
-        fail("drift guide does not describe mixed payload ownership")
-    if "flags payload symlinks and orphans" not in drift:
-        fail("drift guide does not describe regular-file payload enforcement")
+    if "docs/drift-classes.md" not in drift:
+        fail("runtime drift summary must point to maintainer drift doc")
 
     safe_editing = read_text_checked(REF_DIR / "safe-editing.md")
     for platform_marker in ('terminal("cat")', "write_file", "sed -i 's/"):
@@ -265,6 +296,10 @@ def check_references() -> None:
 
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 BACKTICK_REF_RE = re.compile(r"`(references/[A-Za-z0-9._/-]+\.md)`")
+ROUTING_TABLE_ROW_RE = re.compile(
+    r"^\|\s*(?P<task>[^|]+?)\s*\|\s*`(?P<ref>references/[A-Za-z0-9._/-]+\.md)`[^|]*\|$",
+    re.MULTILINE,
+)
 EXTERNAL_URL_RE = re.compile(r"https?://[^\s)>\]`'\"]+")
 
 
@@ -300,6 +335,11 @@ def extract_relative_links(text: str) -> list[str]:
 def extract_backtick_refs(text: str) -> list[str]:
     """Inline ``references/*.md`` paths named in backticks."""
     return BACKTICK_REF_RE.findall(text)
+
+
+def extract_routing_table_refs(text: str) -> list[str]:
+    """Reference paths named in the SKILL.md Reference Routing table."""
+    return [match.group("ref") for match in ROUTING_TABLE_ROW_RE.finditer(text)]
 
 
 def load_registered_urls() -> set[str]:

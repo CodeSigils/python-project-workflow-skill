@@ -70,13 +70,13 @@ jobs:
         run: python3 scripts/validate.py
 
       - name: Test CI policy validation
-        run: python3 scripts/test-validate-ci.py
+        run: python3 tests/test_validate_ci.py
 
       - name: Test skill source validation
-        run: python3 scripts/test-validate.py
+        run: python3 tests/test_validate.py
 
       - name: Test payload sync behavior
-        run: python3 scripts/test-sync-payload.py
+        run: python3 tests/test_sync_payload.py
 
       - name: Test behavioral regression fixtures
         run: python3 scripts/run-codex-regression.py --self-test
@@ -105,7 +105,7 @@ jobs:
           python-version: "3.14"
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
