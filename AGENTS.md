@@ -36,9 +36,12 @@ smallest job-level permissions; never add a personal access token to CI.
 
 ## Post-delivery hygiene
 
-After an authorized merge or confirmed remote PR acceptance, refresh remote
-state (`git fetch --prune`), fast-forward the local default branch to its
-configured upstream when the working tree is clean and the update is
-unambiguous, and remove the local topic branch only when it is confirmed merged
-or its tip is an ancestor of the updated default branch. If local state prevents
-a safe sync, preserve it and report the blocker instead of guessing.
+After an authorized merge or confirmed remote PR acceptance, reconcile local VCS
+state safely using primary Git/GitHub behavior: refresh remote-tracking state
+(`git fetch --prune`), identify the actual default branch and configured
+upstream (do not assume names), fast-forward the local default branch only when
+the working tree is clean and the update is unambiguous, and remove the local
+topic branch only when it is confirmed merged or its tip is an ancestor of the
+updated default branch. If local state prevents a safe sync, preserve it and
+report the blocker instead of guessing. Host automatic branch deletion does not
+reconcile local clones.
