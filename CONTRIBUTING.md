@@ -40,6 +40,21 @@ runtime evidence that was reset, added, or intentionally left unverified. Keep
 generated evaluation artifacts out of Git; record only redacted summaries in
 maintainer documentation.
 
+## After merge
+
+After a PR is merged or accepted remotely, refresh local state and keep the
+default branch aligned:
+
+```bash
+git fetch --prune origin
+git switch main
+git pull --ff-only origin main
+```
+
+Delete the local topic branch only when it is confirmed merged or its tip is an
+ancestor of the updated default branch. If local work or divergence prevents a
+safe fast-forward, preserve the local state and resolve it explicitly.
+
 ## Local hooks
 
 This repository ships two POSIX shell hooks in `.githooks/`. Activate them
