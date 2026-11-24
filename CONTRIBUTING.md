@@ -42,18 +42,15 @@ maintainer documentation.
 
 ## After merge
 
-After a PR is merged or accepted remotely, refresh local state and keep the
-default branch aligned:
-
-```bash
-git fetch --prune origin
-git switch main
-git pull --ff-only origin main
-```
-
-Delete the local topic branch only when it is confirmed merged or its tip is an
-ancestor of the updated default branch. If local work or divergence prevents a
-safe fast-forward, preserve the local state and resolve it explicitly.
+After a PR is merged or accepted remotely, reconcile local VCS state safely
+using primary Git/GitHub behavior. Refresh remote-tracking state (`git fetch
+--prune`), identify the actual default branch and configured upstream (do not
+assume names), fast-forward the local default branch only when the working tree
+is clean and the update is unambiguous, and delete the local topic branch only
+when it is confirmed merged or its tip is an ancestor of the updated default
+branch. If local work or divergence prevents a safe fast-forward, preserve the
+local state and resolve it explicitly. Host automatic branch deletion does not
+reconcile local clones.
 
 ## Local hooks
 
