@@ -24,7 +24,7 @@ TREE_ENTRY_RE = re.compile(
 def get_documented_files() -> set[str]:
     try:
         result = subprocess.run(
-            ["git", "ls-files", "--cached", "--others", "--exclude-standard"],
+            ["git", "ls-files", "--cached"],
             capture_output=True,
             text=True,
             check=True,
