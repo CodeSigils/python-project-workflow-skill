@@ -2,6 +2,12 @@
 
 Started: 2026-07-28T08:36:17Z
 
+Current runtime-support states are canonical in
+[`portability-contract.md`](portability-contract.md#current-runtime-support-canonical).
+This document records the deterministic baseline and historical behavioral
+evidence that supports that status; it does not independently assign support
+states.
+
 ## Current deterministic baseline — contract v3 + PEP 621 inspection-first (2026-11-23)
 
 The 2026-11-23 PEP 621 inspection-first change materially updated `SKILL.md`,

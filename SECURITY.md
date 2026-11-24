@@ -76,4 +76,10 @@ summarizes the trust boundary; it does not replace those runtime instructions.
   from heuristic or filename checks.
 - [x] The shipped payload contains no destructive reset, forced-push, or secret-file dumping commands.
 
-Last reviewed: 2026-07-17.
+**Security review scope:** the trust checklist above, shipped-payload safety
+claims, and CI privilege assertions.
+
+**Last reviewed:** 2026-11-24 against `skills/python-project-workflow/`,
+`references/security-and-gitignore.md`, `.github/workflows/`, and the
+deterministic portability and CI-policy checks. Re-review when any of those
+surfaces, payload contents, or CI permissions change.
