@@ -36,14 +36,15 @@ repository or generated projects are free of vulnerabilities.
 
 ### Workflow permissions
 
-Every workflow starts with `permissions: contents: read`. The release workflow
-first verifies a pushed `vX.Y.Z` tag with read-only access: it must match
-`CITATION.cff` and resolve to a commit reachable from `main`. Only its dependent
-release job receives `contents: write`, because `gh release create` cannot
-create a GitHub release with a read-only token. Nothing else in CI or in
-`scripts/` holds write access, and no workflow in this repository persists
-credentials. Every checkout sets `persist-credentials: false`, and
-`scripts/validate-ci.py` fails a push that reintroduces one without it.
+CI workflows default to `permissions: contents: read`. The Dependabot
+auto-merge workflow is a narrow exception: its bot-gated job receives
+`contents: write` and `pull-requests: write` to request auto-merge for patch
+and minor GitHub Action updates. The release workflow starts with read-only
+access, then verifies a pushed `vX.Y.Z` tag against `CITATION.cff` and `main`
+ancestry before its dependent release job receives `contents: write`, which
+`gh release create` requires. No repository script holds write access, and no
+workflow persists credentials. Every checkout sets `persist-credentials: false`,
+and `scripts/validate-ci.py` fails a push that reintroduces one without it.
 
 ## Shipped Skill Trust Guarantees
 
