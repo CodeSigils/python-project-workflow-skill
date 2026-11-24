@@ -33,3 +33,12 @@ Use SSH for maintainer Git transport when it is configured. Do not add an SSH
 private key to Actions for this public repository. GitHub Actions uses its
 ephemeral `github.token` only where GitHub API access is required, with the
 smallest job-level permissions; never add a personal access token to CI.
+
+## Post-delivery hygiene
+
+After an authorized merge or confirmed remote PR acceptance, refresh remote
+state (`git fetch --prune`), fast-forward the local default branch to its
+configured upstream when the working tree is clean and the update is
+unambiguous, and remove the local topic branch only when it is confirmed merged
+or its tip is an ancestor of the updated default branch. If local state prevents
+a safe sync, preserve it and report the blocker instead of guessing.
