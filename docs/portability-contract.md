@@ -51,7 +51,7 @@ Do not extrapolate a result to untested runtimes or later versions. A material
 change to `SKILL.md`, the behavioral contract, prompt, or grader starts a new
 evidence baseline.
 
-## Current status
+## Current runtime support (canonical)
 
 The canonical payload passes:
 - Deterministic format, frontmatter, section, and reference validation (`validate.py`)
@@ -74,8 +74,10 @@ no live Codex/Hermes rerun has been recorded against that updated contract.
 | Gemini CLI       | —       | `candidate` | Documented discovery path only; installation and workflow unverified |
 | OpenCode         | —       | `candidate` | Documented discovery path only; installation and workflow unverified |
 
-Current and historical behavioral evidence, including client diagnostics and
-limitations, is recorded in `docs/behavior-evaluation-effort.md`.
+This is the only current runtime-support record. The README contains client
+installation instructions only; `docs/behavior-evaluation-effort.md` records
+the deterministic baseline and historical execution evidence that supports this
+matrix.
 
 ## Adding runtime evidence
 

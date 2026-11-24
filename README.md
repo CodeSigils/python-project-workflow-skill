@@ -88,11 +88,12 @@ risky in this Python code?”
 
 Make the skill discoverable by your agent.
 
+The [portability contract](docs/portability-contract.md#current-runtime-support-canonical)
+is the canonical current-support record for every client below. Installation
+instructions remain here; do not infer runtime behavior from a documented path.
+
 <details>
 <summary><b>Hermes Agent</b></summary>
-
-Status: installation verified with Hermes Agent 0.20.1; workflow behavior is
-not verified. See [the portability contract](docs/portability-contract.md).
 
 **Install directly from GitHub:**
 ```bash
@@ -113,9 +114,6 @@ Every commit is immediately reflected without reinstalling.
 <details>
 <summary><b> Code</b></summary>
 
-Status: documented discovery path; installation and workflow behavior have not
-been independently verified for this project.
-
 ```bash
 mkdir -p "$HOME/.claude/skills"
 cp -r skills/python-project-workflow "$HOME/.claude/skills/"
@@ -124,11 +122,6 @@ cp -r skills/python-project-workflow "$HOME/.claude/skills/"
 
 <details>
 <summary><b>Codex</b></summary>
-
-Status: historical behavioral evidence from Codex CLI 0.133.0 (contract v3,
-2/2 cases, 2026-08-16) predates the current PEP 621 inspection-first contract
-and 4-case deterministic baseline; rerun required before claiming current
-`workflow_verified` status. See [the portability contract](docs/portability-contract.md).
 
 ```bash
 mkdir -p "$HOME/.agents/skills"
@@ -139,9 +132,6 @@ cp -r skills/python-project-workflow "$HOME/.agents/skills/"
 <details>
 <summary><b>Gemini CLI / .agents/ path</b></summary>
 
-Status: documented discovery path; installation and workflow behavior have not
-been independently verified for this project.
-
 ```bash
 mkdir -p .agents/skills
 cp -r skills/python-project-workflow .agents/skills/
@@ -150,9 +140,6 @@ cp -r skills/python-project-workflow .agents/skills/
 
 <details>
 <summary><b>OpenCode</b></summary>
-
-Status: documented discovery path; installation and workflow behavior have not
-been independently verified for this project.
 
 ```bash
 mkdir -p .opencode/skills
@@ -247,11 +234,9 @@ python3 scripts/check-hook-integrity.py
 python3 scripts/check-hook-integrity.py --self-test
 python3 scripts/validate-ci.py
 python3 scripts/validate.py
-python3 tests/test_validate_ci.py
-python3 tests/test_validate.py
+uv run --locked pytest
 python3 scripts/verify-urls.py
 python3 scripts/verify-urls.py --self-test
-python3 tests/test_sync_payload.py
 python3 scripts/run-codex-regression.py --self-test
 python3 scripts/run-hermes-regression.py --self-test
 python3 scripts/grade-codex-regression.py --self-test
@@ -278,6 +263,7 @@ python-project-workflow/
 ├── docs/
 │   ├── behavior-evaluation-effort.md    # Prospective transfer effort and result ledger
 │   ├── decisions.md                     # Durable decisions with sources and recheck triggers
+│   ├── documentation-boundaries.md       # Canonical owners and validation for maintained docs
 │   ├── drift-classes.md                 # Maintainer detail for payload/install drift handling
 │   ├── eval-benchmark-hardening.md      # Maintainer detail for eval/benchmark integrity
 │   ├── evidence-urls.json               # External evidence URL verification manifest

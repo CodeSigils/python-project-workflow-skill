@@ -49,9 +49,8 @@ run "shell script lint" shellcheck scripts/*.sh .githooks/*
 run "hook integrity" python3 scripts/check-hook-integrity.py
 run "hook integrity self-test" python3 scripts/check-hook-integrity.py --self-test
 run "CI policy" python3 scripts/validate-ci.py
-run "CI policy tests" python3 tests/test_validate_ci.py
+run "pytest regression suite" uv run --locked pytest
 run "skill structure" python3 scripts/validate.py
-run "skill source tests" python3 tests/test_validate.py
 run "cross-agent portability" python3 .github/scripts/check-portability.py
 run "cross-agent portability self-test" python3 .github/scripts/check-portability.py --self-test
 run "README tree" python3 scripts/check-readme-tree.py
@@ -59,7 +58,6 @@ run "version consistency" python3 scripts/check-version-consistency.py
 run "freshness markers" python3 scripts/check-expiry.py
 run "URL verifier self-test" python3 scripts/verify-urls.py --self-test
 run "repo hygiene self-test" python3 scripts/check-repo-hygiene.py --self-test
-run "payload sync tests" python3 tests/test_sync_payload.py
 run "payload drift" bash scripts/sync-payload.sh --ci
 run "behavioral regression fixtures" python3 scripts/run-codex-regression.py --self-test
 run "Hermes regression fixtures" python3 scripts/run-hermes-regression.py --self-test

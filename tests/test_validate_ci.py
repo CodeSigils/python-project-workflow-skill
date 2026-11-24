@@ -143,11 +143,17 @@ def main() -> int:
         invalid_ty_lock,
         "a ty version that is not an exact three-part release",
     )
+    lint = module.section_body(workflow, "lint")
+    assert lint is not None, "lint job block not found"
     assert_rejected(
         module,
         workflow.replace(
-            f"run: {module.RUFF_INSTALL_COMMAND}",
-            "run: python -m pip install --upgrade pip",
+            lint,
+            lint.replace(
+                f"run: {module.RUFF_INSTALL_COMMAND}",
+                "run: python -m pip install --upgrade pip",
+                1,
+            ),
             1,
         ),
         "unpinned latest pip installation",
@@ -187,12 +193,12 @@ def main() -> int:
     assert_rejected(
         module,
         workflow.replace(
-            "      - name: Test CI policy validation\n"
-            "        run: python3 tests/test_validate_ci.py\n",
+            "      - name: Run pytest regression suite\n"
+            "        run: uv run --locked pytest\n",
             "      - name: Duplicate type check\n"
             "        run: uv run --locked ty check scripts .github/scripts\n\n"
-            "      - name: Test CI policy validation\n"
-            "        run: python3 tests/test_validate_ci.py\n",
+            "      - name: Run pytest regression suite\n"
+            "        run: uv run --locked pytest\n",
             1,
         ),
         "a toolchain check that runs in two jobs",
@@ -297,6 +303,10 @@ def main() -> int:
 
     print("PASS: CI policy validator rejects missing gates, drift, and mutable pins")
     return 0
+
+
+def test_ci_policy_validator_regressions() -> None:
+    assert main() == 0
 
 
 if __name__ == "__main__":

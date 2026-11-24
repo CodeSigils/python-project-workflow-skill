@@ -576,7 +576,7 @@ def check_readme() -> None:
         "reference-routing table",
         "Shipping boundary: `skills/python-project-workflow/` is the runtime payload",
         "hermes skills install CodeSigils/python-project-workflow-skill/skills/python-project-workflow",
-        "installation verified with Hermes Agent 0.20.1",
+        "canonical current-support record",
     ]
     for phrase in required:
         if not contains_markdown_phrase(readme, phrase):
@@ -587,15 +587,6 @@ def check_readme() -> None:
         fail("README.md references the removed task classification table")
     if "entirely cross-agent compatible" in readme.lower():
         fail("README.md overstates runtime compatibility")
-    for runtime in (" Code", "Gemini CLI", "OpenCode"):
-        if not re.search(
-            rf"<summary><b>{re.escape(runtime)}(?: / \.agents/ path)?</b></summary>.*?"
-            r"installation and workflow behavior have not\s+been independently verified",
-            readme,
-            re.DOTALL,
-        ):
-            fail(f"README.md must bound unverified {runtime} claims")
-
     contributing = read_text_checked(ROOT / "CONTRIBUTING.md")
     if not contains_markdown_phrase(
         contributing, "payload under the active `HERMES_HOME` exactly matches"

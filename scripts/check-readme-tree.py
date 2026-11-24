@@ -21,18 +21,17 @@ TREE_ENTRY_RE = re.compile(
 )
 
 
-def get_tracked_files() -> set[str]:
-    """Return the set of all tracked file paths, relative to repo root."""
+def get_documented_files() -> set[str]:
     try:
         result = subprocess.run(
-            ["git", "ls-files"],
+            ["git", "ls-files", "--cached"],
             capture_output=True,
             text=True,
             check=True,
             cwd=ROOT,
         )
     except (OSError, subprocess.CalledProcessError) as exc:
-        print(f"FAIL: could not list git files: {exc}", file=sys.stderr)
+        print(f"FAIL: could not list repository files: {exc}", file=sys.stderr)
         sys.exit(1)
     return {line for line in result.stdout.splitlines() if line}
 
@@ -110,11 +109,11 @@ def main() -> int:
         return 1
     tree_text = readme_text[fence_start:fence_end].strip("\n")
 
-    tracked = get_tracked_files()
+    documented = get_documented_files()
     declared = parse_tree_paths(tree_text)
 
-    stale = declared - tracked
-    omitted = tracked - declared
+    stale = declared - documented
+    omitted = documented - declared
 
     if stale:
         for f in sorted(stale):
